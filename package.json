@@ -1,0 +1,41 @@
+{
+  "name": "code-outline-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for code outline tools using tree-sitter",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "clean": "pnpm -r clean",
+    "test": "pnpm -r test",
+    "prepare": "pnpm build",
+    "website:dev": "pnpm --filter @code-outline/website dev",
+    "website:build": "pnpm --filter @code-outline/website build",
+    "website:preview": "pnpm --filter @code-outline/website preview"
+  },
+  "keywords": [
+    "tree-sitter",
+    "parser",
+    "typescript",
+    "javascript",
+    "cli",
+    "ast",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sammons-software-llc/glance-with-tree-sitter.git"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

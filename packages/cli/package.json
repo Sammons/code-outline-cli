@@ -1,0 +1,38 @@
+{
+  "name": "@code-outline/cli",
+  "version": "1.0.0",
+  "description": "CLI tool to parse and provide concise output for JavaScript/TypeScript files",
+  "main": "dist/index.js",
+  "bin": {
+    "code-outline": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "node --test dist/**/*.test.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "cli",
+    "tree-sitter",
+    "parser",
+    "typescript",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@code-outline/parser": "workspace:*",
+    "@code-outline/formatter": "workspace:*",
+    "fast-glob": "^3.3.3",
+    "glob": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  }
+}

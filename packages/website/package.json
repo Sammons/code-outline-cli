@@ -1,0 +1,22 @@
+{
+  "name": "@code-outline/website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Documentation website for Code Outline tools",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "documentation",
+    "website",
+    "static-site"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/parser" },
+    { "path": "./packages/formatter" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/website" }
+  ]
+}
