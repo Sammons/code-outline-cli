@@ -28,27 +28,29 @@ export class CLIArgumentError extends Error {
 export class CLIArgumentParser {
   // Type guard to safely extract unknown values from parseArgs result
   private safeExtractValue<T>(value: unknown, defaultValue: T): T {
-    // For boolean values, we know parseArgs returns boolean | undefined
-    if (typeof defaultValue === 'boolean' && typeof value === 'boolean') {
-      return value as T;
+    // Use proper type narrowing instead of type assertions
+    if (typeof defaultValue === 'boolean') {
+      return typeof value === 'boolean' ? (value as T) : defaultValue;
     }
-    // For string values, we know parseArgs returns string | undefined
-    if (typeof defaultValue === 'string' && typeof value === 'string') {
-      return value as T;
+    if (typeof defaultValue === 'string') {
+      return typeof value === 'string' ? (value as T) : defaultValue;
     }
-    // Return default if value is undefined or wrong type
+    // Return default for all other cases
     return defaultValue;
   }
 
-  // Safe validation helper
+  // Safe validation helper using proper type narrowing
   private validateAndThrow<T>(
     validation: { success: boolean; value?: T; error?: string },
     errorPrefix: string
   ): T {
-    if (!validation.success) {
-      throw new CLIArgumentError(`${errorPrefix}: ${validation.error}`);
+    if (!validation.success || validation.value === undefined) {
+      throw new CLIArgumentError(
+        `${errorPrefix}: ${validation.error ?? 'validation failed'}`
+      );
     }
-    return validation.value!;
+    // TypeScript now knows validation.value is T (not T | undefined)
+    return validation.value;
   }
 
   public printHelp(): void {

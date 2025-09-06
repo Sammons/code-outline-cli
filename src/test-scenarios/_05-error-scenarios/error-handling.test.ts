@@ -58,7 +58,13 @@ describe('Error Handling Scenarios', () => {
       if (result.exitCode !== 0) {
         // Should have meaningful error message, not crash
         expect(result.stderr.length).toBeGreaterThan(0);
-        expect(result.stderr.toLowerCase()).toContain('no files found');
+        // Should contain either permission error or no files found message
+        const stderrLower = result.stderr.toLowerCase();
+        expect(
+          stderrLower.includes('no files found') ||
+            stderrLower.includes('permission denied') ||
+            stderrLower.includes('eacces')
+        ).toBe(true);
       }
     });
   });

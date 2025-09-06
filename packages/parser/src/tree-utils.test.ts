@@ -215,7 +215,7 @@ describe('TreeUtils', () => {
       const visited: string[] = [];
 
       const visitor: TreeVisitor<string> = (node) => {
-        const result = `${node.type}:${node.name || 'unnamed'}`;
+        const result = `${node.type}:${node.name ?? 'unnamed'}`;
         visited.push(result);
         return result;
       };
@@ -583,8 +583,8 @@ describe('TreeUtils', () => {
       const result = TreeUtils.mapTree(tree, mapper);
 
       expect(result.type).toBe('PROGRAM');
-      expect((result as any).mapped).toBe(true);
-      expect((result as any).children).toBeDefined();
+      expect(result).toHaveProperty('mapped', true);
+      expect(result).toHaveProperty('children');
     });
 
     it('should preserve tree structure when mapping to similar objects', () => {
@@ -597,9 +597,11 @@ describe('TreeUtils', () => {
 
       const result = TreeUtils.mapTree(tree, mapper);
 
-      expect((result as any).children).toHaveLength(3);
-      expect((result as any).children[0].transformed).toBe(true);
-      expect((result as any).children[1].children).toHaveLength(2);
+      expect(result).toHaveProperty('children');
+      expect(result.children).toHaveLength(3);
+      expect(result.children[0]).toHaveProperty('transformed', true);
+      expect(result.children[1]).toHaveProperty('children');
+      expect(result.children[1].children).toHaveLength(2);
     });
 
     it('should handle non-object return values', () => {

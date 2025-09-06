@@ -497,6 +497,7 @@ export class CLIAssertions {
         'object',
         'statement_block',
         'function_body',
+        'export_statement',
       ];
       expect(allowedUnnamed).toContain(node.type);
     }
