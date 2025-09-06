@@ -96,6 +96,7 @@ module.exports = {
     '*.d.ts',
     '.husky/**',
     'test/**',
+    'src/test-scenarios/**',
     'vitest.config.ts',
   ],
   overrides: [

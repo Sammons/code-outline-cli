@@ -4,7 +4,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/**/*.{test,spec}.{ts,js}'],
+    include: [
+      'packages/**/*.{test,spec}.{ts,js}',
+      'src/test-scenarios/**/*.test.{ts,js}',
+    ],
     exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
     testTimeout: 30000, // Increase timeout for CLI tests
     coverage: {
@@ -23,6 +26,7 @@ export default defineConfig({
         '**/*.config.ts',
         '**/*.d.ts',
         'packages/website/**',
+        'src/test-scenarios/**',
       ],
       thresholds: {
         global: {

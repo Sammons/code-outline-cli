@@ -37,3 +37,6 @@ Thumbs.db
 # Temporary files
 .tmp/
 temp/
+
+# Test assets (intentionally contain syntax errors or formatting issues)
+src/test-scenarios/*/assets/
