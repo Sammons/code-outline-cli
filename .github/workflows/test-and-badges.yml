@@ -64,7 +64,7 @@ jobs:
           BUILD_STATUS: ${{ env.BUILD_STATUS }}
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage/lcov.info
           flags: unittests
