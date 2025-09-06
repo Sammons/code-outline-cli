@@ -53,23 +53,46 @@ export class CLIArgumentParser {
 
   public printHelp(): void {
     console.log(`
-glance-with-tree-sitter - Parse and analyze JavaScript/TypeScript files
+🌳 Code Outline CLI - Parse and analyze JavaScript/TypeScript files
 
 Usage:
-  glance-with-tree-sitter <glob-pattern> [options]
+  code-outline <pattern> [options]
+
+Arguments:
+  <pattern>        Glob pattern to match files (e.g., "src/**/*.ts", "*.js")
 
 Options:
-  --format <type>  Output format: json, yaml, or ascii (default: ascii)
-  --depth <n>      Maximum depth to traverse the AST (default: Infinity)
-  --named-only     Show only named entities (default: true)
-  --all            Show all nodes, not just named ones
-  --help           Show this help message
-  --version        Show version number
+  -f, --format <type>    Output format: ascii, json, or yaml (default: ascii)
+  -d, --depth <n>        Maximum AST depth to traverse (default: Infinity)
+  -a, --all              Show all nodes, including unnamed ones
+      --named-only       Show only named entities (default: true)
+  -h, --help             Show this help message
+  -v, --version          Show version number
+
+Output Formats:
+  ascii    Tree-like visualization with color-coded syntax (default)
+  json     Structured JSON output for programmatic processing
+  yaml     Human-readable YAML format
 
 Examples:
-  glance-with-tree-sitter "src/**/*.ts"
-  glance-with-tree-sitter "*.js" --format json
-  glance-with-tree-sitter "src/**/*.tsx" --depth 2 --format yaml
+  # Parse all TypeScript files in src directory
+  code-outline "src/**/*.ts"
+
+  # Output JSON with depth limit
+  code-outline "*.js" --format json --depth 3
+
+  # Parse React components with all nodes
+  code-outline "src/components/**/*.tsx" --all
+
+  # Generate YAML report
+  code-outline "src/**/*.ts" --format yaml --depth 2
+
+Supported Files:
+  .js      JavaScript files
+  .ts      TypeScript files  
+  .tsx     TypeScript JSX files
+
+For more information, visit: https://github.com/sammons-software-llc/glance-with-tree-sitter
 `);
   }
 
