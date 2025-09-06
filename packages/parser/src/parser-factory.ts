@@ -53,7 +53,7 @@ export class ParserFactory {
         return this.jsParser;
       default:
         // TypeScript will catch this, but adding runtime check for robustness
-        throw new Error(`Unsupported file type: ${fileType}`);
+        throw new Error(`Unsupported file type: ${fileType as string}`);
     }
   }
 
@@ -63,7 +63,10 @@ export class ParserFactory {
    * @param fileType - Type of the source file
    * @returns Parsed tree
    */
-  parseSource(source: string, fileType: SupportedFileType): TreeSitterParser.Tree {
+  parseSource(
+    source: string,
+    fileType: SupportedFileType
+  ): TreeSitterParser.Tree {
     const parser = this.getParser(fileType);
     return parser.parse(source);
   }

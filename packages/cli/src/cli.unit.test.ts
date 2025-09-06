@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseArgs } from 'node:util';
 import fg from 'fast-glob';
 import { resolve } from 'node:path';
-import { Parser, validateFormat, validateDepthValue } from '@code-outline/parser';
+import {
+  Parser,
+  validateFormat,
+  validateDepthValue,
+} from '@code-outline/parser';
 import { Formatter } from '@code-outline/formatter';
 import type { ProcessedFile } from './file-processor';
 
@@ -32,15 +36,15 @@ import { CLIOutputHandler } from './cli-output-handler.js';
 
 describe('CLIArgumentParser', () => {
   let parser: CLIArgumentParser;
-  
+
   beforeEach(() => {
     parser = new CLIArgumentParser();
     vi.clearAllMocks();
-    
+
     // Mock console methods freshly each time
     mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
     mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     // Mock process.exit to prevent actual exits during tests
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
   });
@@ -64,7 +68,10 @@ describe('CLIArgumentParser', () => {
       });
 
       // Mock validation functions to return successful results
-      mockValidateFormat.mockReturnValue({ success: true, value: 'json' as any });
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'json' as any,
+      });
       mockValidateDepthValue.mockReturnValue({ success: true, value: 5 });
 
       const result = parser.parse();
@@ -106,12 +113,21 @@ describe('CLIArgumentParser', () => {
       });
 
       // Mock validation functions even though they won't be called due to early exit
-      mockValidateFormat.mockReturnValue({ success: true, value: 'ascii' as any });
-      mockValidateDepthValue.mockReturnValue({ success: true, value: Infinity });
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'ascii' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
 
       parser.parse();
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('glance-with-tree-sitter'));
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('glance-with-tree-sitter')
+      );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(process.exit).toHaveBeenCalledWith(0);
     });
 
@@ -129,12 +145,19 @@ describe('CLIArgumentParser', () => {
       });
 
       // Mock validation functions even though they won't be called due to early exit
-      mockValidateFormat.mockReturnValue({ success: true, value: 'ascii' as any });
-      mockValidateDepthValue.mockReturnValue({ success: true, value: Infinity });
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'ascii' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
 
       parser.parse();
 
       expect(mockConsoleLog).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(process.exit).toHaveBeenCalledWith(0);
     });
 
@@ -152,8 +175,14 @@ describe('CLIArgumentParser', () => {
       });
 
       // Mock validation to return error
-      mockValidateFormat.mockReturnValue({ success: false, error: 'Invalid format type' });
-      mockValidateDepthValue.mockReturnValue({ success: true, value: Infinity });
+      mockValidateFormat.mockReturnValue({
+        success: false,
+        error: 'Invalid format type',
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
 
       expect(() => parser.parse()).toThrow(CLIArgumentError);
       expect(() => parser.parse()).toThrow('Invalid format');
@@ -173,8 +202,14 @@ describe('CLIArgumentParser', () => {
       });
 
       // Mock validation to return error
-      mockValidateFormat.mockReturnValue({ success: true, value: 'json' as any });
-      mockValidateDepthValue.mockReturnValue({ success: false, error: 'Depth must be >= 1' });
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'json' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: false,
+        error: 'Depth must be >= 1',
+      });
 
       expect(() => parser.parse()).toThrow(CLIArgumentError);
       expect(() => parser.parse()).toThrow('Invalid depth');
@@ -193,8 +228,14 @@ describe('CLIArgumentParser', () => {
         positionals: ['test.js'],
       });
 
-      mockValidateFormat.mockReturnValue({ success: true, value: 'json' as any });
-      mockValidateDepthValue.mockReturnValue({ success: true, value: Infinity });
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'json' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
 
       const result = parser.parse();
 
@@ -232,10 +273,10 @@ describe('FileProcessor', () => {
       parseFile: vi.fn(),
     };
     mockParser.mockImplementation(() => mockParserInstance as any);
-    
+
     processor = new FileProcessor();
     vi.clearAllMocks();
-    
+
     // Mock console methods freshly each time
     mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
     mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -271,7 +312,7 @@ describe('FileProcessor', () => {
     it('should process multiple files successfully', async () => {
       const files = ['/path/file1.js', '/path/file2.js'];
       const mockOutline = { type: 'program', children: [] };
-      
+
       mockParserInstance.parseFile.mockResolvedValue(mockOutline);
       mockResolve.mockImplementation((path) => `/resolved${path}`);
 
@@ -291,11 +332,11 @@ describe('FileProcessor', () => {
 
     it('should handle parsing errors gracefully', async () => {
       const files = ['/path/file1.js', '/path/file2.js'];
-      
+
       mockParserInstance.parseFile
         .mockResolvedValueOnce({ type: 'program', children: [] })
         .mockRejectedValueOnce(new Error('Parse error'));
-      
+
       mockResolve.mockImplementation((path) => `/resolved${path}`);
 
       const result = await processor.processFiles(files, 5, true);
@@ -313,7 +354,7 @@ describe('FileProcessor', () => {
       const files = ['/path/file1.js'];
       const depth = 3;
       const namedOnly = false;
-      
+
       mockParserInstance.parseFile.mockResolvedValue({ type: 'program' });
       mockResolve.mockReturnValue('/resolved/path/file1.js');
 
@@ -339,10 +380,10 @@ describe('CLIOutputHandler', () => {
       format: vi.fn(),
     };
     mockFormatter.mockImplementation(() => mockFormatterInstance as any);
-    
+
     handler = new CLIOutputHandler('json' as any);
     vi.clearAllMocks();
-    
+
     // Mock console methods freshly each time
     mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
     mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -359,25 +400,25 @@ describe('CLIOutputHandler', () => {
   describe('formatAndOutput', () => {
     it('should format results and output to console', () => {
       const results: ProcessedFile[] = [
-        { 
-          file: '/path/file1.js', 
-          outline: { 
+        {
+          file: '/path/file1.js',
+          outline: {
             type: 'program',
             start: { row: 0, column: 0 },
-            end: { row: 10, column: 0 }
-          }
+            end: { row: 10, column: 0 },
+          },
         },
-        { 
-          file: '/path/file2.js', 
-          outline: { 
+        {
+          file: '/path/file2.js',
+          outline: {
             type: 'program',
             start: { row: 0, column: 0 },
-            end: { row: 20, column: 0 }
-          }
+            end: { row: 20, column: 0 },
+          },
         },
       ];
       const formattedOutput = '{"formatted": "output"}';
-      
+
       mockFormatterInstance.format.mockReturnValue(formattedOutput);
 
       handler.formatAndOutput(results);
@@ -389,7 +430,7 @@ describe('CLIOutputHandler', () => {
     it('should handle empty results', () => {
       const results: ProcessedFile[] = [];
       const formattedOutput = '[]';
-      
+
       mockFormatterInstance.format.mockReturnValue(formattedOutput);
 
       handler.formatAndOutput(results);

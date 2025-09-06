@@ -216,10 +216,10 @@ jobs:
           # Check each package that should be publishable
           cd packages/cli
           pnpm pack --dry-run
-          
+
           cd ../parser
           pnpm pack --dry-run
-          
+
           cd ../formatter
           pnpm pack --dry-run
 

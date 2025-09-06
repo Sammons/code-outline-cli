@@ -2,113 +2,113 @@ version: 2
 
 updates:
   # Enable version updates for npm dependencies in root
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 10
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
 
   # Enable version updates for npm dependencies in CLI package
-  - package-ecosystem: "npm"
-    directory: "/packages/cli"
+  - package-ecosystem: 'npm'
+    directory: '/packages/cli'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "dependencies"
-      - "cli"
-      - "automated"
+      - 'dependencies'
+      - 'cli'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
 
   # Enable version updates for npm dependencies in Parser package
-  - package-ecosystem: "npm"
-    directory: "/packages/parser"
+  - package-ecosystem: 'npm'
+    directory: '/packages/parser'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "dependencies"
-      - "parser"
-      - "automated"
+      - 'dependencies'
+      - 'parser'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
 
   # Enable version updates for npm dependencies in Formatter package
-  - package-ecosystem: "npm"
-    directory: "/packages/formatter"
+  - package-ecosystem: 'npm'
+    directory: '/packages/formatter'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "dependencies"
-      - "formatter"
-      - "automated"
+      - 'dependencies'
+      - 'formatter'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
 
   # Enable version updates for npm dependencies in Website package
-  - package-ecosystem: "npm"
-    directory: "/packages/website"
+  - package-ecosystem: 'npm'
+    directory: '/packages/website'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "dependencies"
-      - "website"
-      - "automated"
+      - 'dependencies'
+      - 'website'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'
 
   # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - "@sammons-software-llc"
+      - '@sammons-software-llc'
     labels:
-      - "github-actions"
-      - "automated"
+      - 'github-actions'
+      - 'automated'
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
+      prefix: 'chore'
+      prefix-development: 'chore'
+      include: 'scope'

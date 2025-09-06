@@ -28,7 +28,7 @@ export class FileReader {
    */
   getFileType(filePath: string): SupportedFileType {
     const ext = extname(filePath).toLowerCase();
-    
+
     switch (ext) {
       case '.tsx':
         return 'tsx';

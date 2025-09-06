@@ -29,7 +29,6 @@ export class CLIOrchestrator {
       // Format and output results
       const outputHandler = new CLIOutputHandler(options.format);
       outputHandler.formatAndOutput(results);
-
     } catch (error) {
       if (error instanceof CLIArgumentError) {
         console.error(`Error: ${error.message}`);

@@ -146,10 +146,18 @@ describe('Parser', () => {
       );
 
       // Parse with namedOnly = true (default)
-      const namedOnlyResult = await parser.parseFile(fixturePath, Infinity, true);
+      const namedOnlyResult = await parser.parseFile(
+        fixturePath,
+        Infinity,
+        true
+      );
 
       // Parse with namedOnly = false
-      const allNodesResult = await parser.parseFile(fixturePath, Infinity, false);
+      const allNodesResult = await parser.parseFile(
+        fixturePath,
+        Infinity,
+        false
+      );
 
       expect(namedOnlyResult).toBeTruthy();
       expect(allNodesResult).toBeTruthy();
@@ -456,10 +464,20 @@ describe('Parser', () => {
       `;
 
       // Parse with namedOnly = true (default)
-      const namedOnlyResult = parser.parseSource(source, 'javascript', Infinity, true);
+      const namedOnlyResult = parser.parseSource(
+        source,
+        'javascript',
+        Infinity,
+        true
+      );
 
       // Parse with namedOnly = false
-      const allNodesResult = parser.parseSource(source, 'javascript', Infinity, false);
+      const allNodesResult = parser.parseSource(
+        source,
+        'javascript',
+        Infinity,
+        false
+      );
 
       expect(namedOnlyResult).toBeTruthy();
       expect(allNodesResult).toBeTruthy();
@@ -508,7 +526,7 @@ describe('Parser', () => {
 
       expect(Array.isArray(extensions)).toBe(true);
       expect(extensions.length).toBeGreaterThan(0);
-      
+
       // Should include common JavaScript and TypeScript extensions
       expect(extensions).toContain('.js');
       expect(extensions).toContain('.jsx');
@@ -519,7 +537,7 @@ describe('Parser', () => {
     it('should return extensions in a consistent format', () => {
       const extensions = parser.getSupportedExtensions();
 
-      extensions.forEach(ext => {
+      extensions.forEach((ext) => {
         expect(ext).toMatch(/^\.[a-zA-Z]+$/); // Should start with . and contain only letters
       });
     });

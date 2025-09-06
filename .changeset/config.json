@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "sammons/code-outline-cli" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "sammons/code-outline-cli" }
+  ],
   "commit": false,
   "fixed": [["@code-outline/*"]],
   "linked": [],

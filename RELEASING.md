@@ -19,6 +19,7 @@ pnpm changeset
 ```
 
 This will prompt you to:
+
 1. Select which packages have changed
 2. Choose the version bump type (major/minor/patch)
 3. Write a summary of the changes
@@ -88,6 +89,7 @@ The CLI package is published to NPM as `@sammons/code-outline-cli`.
 ### Package Configuration
 
 The CLI package is configured with:
+
 - Public access for the `@sammons` scope
 - Automatic version syncing across monorepo packages
 - GitHub releases with changelogs

@@ -7,24 +7,24 @@ import {
   isStructuralType,
   isInsignificantType,
   isValidOutputFormat,
-  
+
   // Validation functions
   validateDepth,
   validateFormat,
   validateDepthValue,
-  
+
   // Error classes
   ParserError,
   FileReaderError,
   UnsupportedFileTypeError,
-  
+
   // Constants
   NODE_TYPES,
   CONTAINER_TYPES,
   STRUCTURAL_TYPES,
   INSIGNIFICANT_TYPES,
   OUTPUT_FORMATS,
-  
+
   // Types and interfaces
   type NodeInfo,
   type OutputFormat,
@@ -39,11 +39,11 @@ describe('types.ts', () => {
           type: 'function_declaration',
           name: 'myFunction',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
+          end: { row: 5, column: 1 },
         };
-        
+
         expect(isNamedNode(namedNode)).toBe(true);
-        
+
         // Type assertion should work
         if (isNamedNode(namedNode)) {
           expect(namedNode.name).toBe('myFunction');
@@ -55,9 +55,9 @@ describe('types.ts', () => {
           type: 'variable_declarator',
           name: '',
           start: { row: 0, column: 0 },
-          end: { row: 0, column: 10 }
+          end: { row: 0, column: 10 },
         };
-        
+
         expect(isNamedNode(nodeWithEmptyName)).toBe(true);
       });
 
@@ -65,9 +65,9 @@ describe('types.ts', () => {
         const unnamedNode: NodeInfo = {
           type: 'statement_block',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
+          end: { row: 5, column: 1 },
         };
-        
+
         expect(isNamedNode(unnamedNode)).toBe(false);
       });
 
@@ -76,9 +76,9 @@ describe('types.ts', () => {
           type: 'object',
           name: undefined,
           start: { row: 0, column: 0 },
-          end: { row: 3, column: 1 }
+          end: { row: 3, column: 1 },
         };
-        
+
         expect(isNamedNode(nodeWithUndefinedName)).toBe(false);
       });
     });
@@ -88,11 +88,11 @@ describe('types.ts', () => {
         const unnamedNode: NodeInfo = {
           type: 'statement_block',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
+          end: { row: 5, column: 1 },
         };
-        
+
         expect(isUnnamedNode(unnamedNode)).toBe(true);
-        
+
         // Type assertion should work
         if (isUnnamedNode(unnamedNode)) {
           expect(unnamedNode.name).toBeUndefined();
@@ -104,9 +104,9 @@ describe('types.ts', () => {
           type: 'object',
           name: undefined,
           start: { row: 0, column: 0 },
-          end: { row: 3, column: 1 }
+          end: { row: 3, column: 1 },
         };
-        
+
         expect(isUnnamedNode(nodeWithUndefinedName)).toBe(true);
       });
 
@@ -115,9 +115,9 @@ describe('types.ts', () => {
           type: 'function_declaration',
           name: 'myFunction',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
+          end: { row: 5, column: 1 },
         };
-        
+
         expect(isUnnamedNode(namedNode)).toBe(false);
       });
 
@@ -126,16 +126,16 @@ describe('types.ts', () => {
           type: 'variable_declarator',
           name: '',
           start: { row: 0, column: 0 },
-          end: { row: 0, column: 10 }
+          end: { row: 0, column: 10 },
         };
-        
+
         expect(isUnnamedNode(nodeWithEmptyName)).toBe(false);
       });
     });
 
     describe('isContainerType', () => {
       it('should return true for valid container types', () => {
-        CONTAINER_TYPES.forEach(containerType => {
+        CONTAINER_TYPES.forEach((containerType) => {
           expect(isContainerType(containerType)).toBe(true);
         });
       });
@@ -148,10 +148,10 @@ describe('types.ts', () => {
           'boolean_literal',
           'null',
           'undefined',
-          'comment'
+          'comment',
         ];
-        
-        nonContainerTypes.forEach(type => {
+
+        nonContainerTypes.forEach((type) => {
           expect(isContainerType(type)).toBe(false);
         });
       });
@@ -169,7 +169,7 @@ describe('types.ts', () => {
 
     describe('isStructuralType', () => {
       it('should return true for valid structural types', () => {
-        STRUCTURAL_TYPES.forEach(structuralType => {
+        STRUCTURAL_TYPES.forEach((structuralType) => {
           expect(isStructuralType(structuralType)).toBe(true);
         });
       });
@@ -180,10 +180,10 @@ describe('types.ts', () => {
           'variable_declaration',
           'import_statement',
           'identifier',
-          'comment'
+          'comment',
         ];
-        
-        nonStructuralTypes.forEach(type => {
+
+        nonStructuralTypes.forEach((type) => {
           expect(isStructuralType(type)).toBe(false);
         });
       });
@@ -201,7 +201,7 @@ describe('types.ts', () => {
 
     describe('isInsignificantType', () => {
       it('should return true for valid insignificant types', () => {
-        INSIGNIFICANT_TYPES.forEach(insignificantType => {
+        INSIGNIFICANT_TYPES.forEach((insignificantType) => {
           expect(isInsignificantType(insignificantType)).toBe(true);
         });
       });
@@ -212,10 +212,10 @@ describe('types.ts', () => {
           'class_declaration',
           'variable_declaration',
           'program',
-          'identifier'
+          'identifier',
         ];
-        
-        significantTypes.forEach(type => {
+
+        significantTypes.forEach((type) => {
           expect(isInsignificantType(type)).toBe(false);
         });
       });
@@ -243,22 +243,15 @@ describe('types.ts', () => {
 
     describe('isValidOutputFormat', () => {
       it('should return true for valid output formats', () => {
-        OUTPUT_FORMATS.forEach(format => {
+        OUTPUT_FORMATS.forEach((format) => {
           expect(isValidOutputFormat(format)).toBe(true);
         });
       });
 
       it('should return false for invalid output formats', () => {
-        const invalidFormats = [
-          'xml',
-          'html',
-          'csv',
-          'txt',
-          'markdown',
-          ''
-        ];
-        
-        invalidFormats.forEach(format => {
+        const invalidFormats = ['xml', 'html', 'csv', 'txt', 'markdown', ''];
+
+        invalidFormats.forEach((format) => {
           expect(isValidOutputFormat(format)).toBe(false);
         });
       });
@@ -300,32 +293,52 @@ describe('types.ts', () => {
       });
 
       it('should throw error for zero', () => {
-        expect(() => validateDepth('0')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('0')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should throw error for negative numbers', () => {
-        expect(() => validateDepth('-1')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('-10')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('-999')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('-1')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('-10')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('-999')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should throw error for non-numeric strings', () => {
-        expect(() => validateDepth('abc')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('abc')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
         // parseInt('1abc', 10) returns 1, so this should actually work
         expect(validateDepth('1abc')).toBe(1);
-        expect(() => validateDepth('abc1')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('abc1')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
         // parseInt('1.5', 10) returns 1, so this should actually work
         expect(validateDepth('1.5')).toBe(1);
       });
 
       it('should throw error for empty string', () => {
-        expect(() => validateDepth('')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should throw error for whitespace strings', () => {
-        expect(() => validateDepth(' ')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('\n')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('\t')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth(' ')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('\n')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('\t')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should handle mixed valid/invalid strings (parseInt behavior)', () => {
@@ -337,15 +350,21 @@ describe('types.ts', () => {
       });
 
       it('should be case sensitive for Infinity', () => {
-        expect(() => validateDepth('infinity')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('INFINITY')).toThrow('Depth must be a positive number or "Infinity"');
-        expect(() => validateDepth('InFiNiTy')).toThrow('Depth must be a positive number or "Infinity"');
+        expect(() => validateDepth('infinity')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('INFINITY')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
+        expect(() => validateDepth('InFiNiTy')).toThrow(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
     });
 
     describe('validateFormat', () => {
       it('should return success result for valid formats', () => {
-        OUTPUT_FORMATS.forEach(format => {
+        OUTPUT_FORMATS.forEach((format) => {
           const result = validateFormat(format);
           expect(result.success).toBe(true);
           expect(result.value).toBe(format);
@@ -362,10 +381,10 @@ describe('types.ts', () => {
           false,
           {},
           [],
-          Symbol('test')
+          Symbol('test'),
         ];
-        
-        nonStringInputs.forEach(input => {
+
+        nonStringInputs.forEach((input) => {
           const result = validateFormat(input);
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
@@ -384,14 +403,16 @@ describe('types.ts', () => {
           'JSON',
           'Json',
           'YAML',
-          'Yaml'
+          'Yaml',
         ];
-        
-        invalidFormats.forEach(format => {
+
+        invalidFormats.forEach((format) => {
           const result = validateFormat(format);
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
-          expect(result.error).toBe(`Invalid format "${format}". Must be one of: json, yaml, ascii`);
+          expect(result.error).toBe(
+            `Invalid format "${format}". Must be one of: json, yaml, ascii`
+          );
         });
       });
 
@@ -401,14 +422,16 @@ describe('types.ts', () => {
           'json ',
           ' json ',
           'json\n',
-          '\tjson'
+          '\tjson',
         ];
-        
-        whitespaceFormats.forEach(format => {
+
+        whitespaceFormats.forEach((format) => {
           const result = validateFormat(format);
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
-          expect(result.error).toBe(`Invalid format "${format}". Must be one of: json, yaml, ascii`);
+          expect(result.error).toBe(
+            `Invalid format "${format}". Must be one of: json, yaml, ascii`
+          );
         });
       });
     });
@@ -416,13 +439,13 @@ describe('types.ts', () => {
     describe('validateDepthValue', () => {
       it('should return success result for valid depth strings', () => {
         const validDepths = ['1', '5', '10', '999', 'Infinity'];
-        
-        validDepths.forEach(depth => {
+
+        validDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
           expect(result.success).toBe(true);
           expect(result.value).toBeDefined();
           expect(result.error).toBeUndefined();
-          
+
           if (depth === 'Infinity') {
             expect(result.value).toBe(Infinity);
           } else {
@@ -440,10 +463,10 @@ describe('types.ts', () => {
           false,
           {},
           [],
-          Symbol('test')
+          Symbol('test'),
         ];
-        
-        nonStringInputs.forEach(input => {
+
+        nonStringInputs.forEach((input) => {
           const result = validateDepthValue(input);
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
@@ -463,28 +486,23 @@ describe('types.ts', () => {
           '\n',
           '\t',
           'infinity',
-          'INFINITY'
+          'INFINITY',
         ];
-        
-        invalidDepths.forEach(depth => {
+
+        invalidDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
-          expect(result.error).toBe('Depth must be a positive number or "Infinity"');
+          expect(result.error).toBe(
+            'Depth must be a positive number or "Infinity"'
+          );
         });
       });
 
       it('should return success result for strings that parseInt can parse', () => {
-        const parseableDepths = [
-          '1abc',
-          '1.5',
-          '5 ',
-          ' 5',
-          '5\n',
-          '123abc'
-        ];
-        
-        parseableDepths.forEach(depth => {
+        const parseableDepths = ['1abc', '1.5', '5 ', ' 5', '5\n', '123abc'];
+
+        parseableDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
           expect(result.success).toBe(true);
           expect(result.value).toBeDefined();
@@ -496,7 +514,9 @@ describe('types.ts', () => {
         // Test that it properly wraps validateDepth errors
         const result = validateDepthValue('0');
         expect(result.success).toBe(false);
-        expect(result.error).toBe('Depth must be a positive number or "Infinity"');
+        expect(result.error).toBe(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should handle non-Error exceptions (edge case)', () => {
@@ -504,7 +524,9 @@ describe('types.ts', () => {
         // We can't easily mock validateDepth to throw a non-Error, so this tests the code path
         const result = validateDepthValue('not-a-number');
         expect(result.success).toBe(false);
-        expect(result.error).toBe('Depth must be a positive number or "Infinity"');
+        expect(result.error).toBe(
+          'Depth must be a positive number or "Infinity"'
+        );
       });
     });
   });
@@ -514,7 +536,7 @@ describe('types.ts', () => {
       it('should create error with message only', () => {
         const message = 'Parse failed';
         const error = new ParserError(message);
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(error).toBeInstanceOf(ParserError);
         expect(error.name).toBe('ParserError');
@@ -526,7 +548,7 @@ describe('types.ts', () => {
         const message = 'Parse failed';
         const filePath = '/path/to/file.ts';
         const error = new ParserError(message, filePath);
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(error).toBeInstanceOf(ParserError);
         expect(error.name).toBe('ParserError');
@@ -537,11 +559,11 @@ describe('types.ts', () => {
       it('should be throwable and catchable', () => {
         const message = 'Test error';
         const filePath = '/test/path.ts';
-        
+
         expect(() => {
           throw new ParserError(message, filePath);
         }).toThrow(ParserError);
-        
+
         try {
           throw new ParserError(message, filePath);
         } catch (error) {
@@ -568,7 +590,7 @@ describe('types.ts', () => {
         const message = 'File not found';
         const filePath = '/path/to/missing.ts';
         const error = new FileReaderError(message, filePath);
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(error).toBeInstanceOf(FileReaderError);
         expect(error.name).toBe('FileReaderError');
@@ -579,11 +601,11 @@ describe('types.ts', () => {
       it('should be throwable and catchable', () => {
         const message = 'Permission denied';
         const filePath = '/restricted/file.ts';
-        
+
         expect(() => {
           throw new FileReaderError(message, filePath);
         }).toThrow(FileReaderError);
-        
+
         try {
           throw new FileReaderError(message, filePath);
         } catch (error) {
@@ -603,7 +625,7 @@ describe('types.ts', () => {
       it('should be distinguishable from other error types', () => {
         const fileError = new FileReaderError('File error', '/path');
         const parserError = new ParserError('Parser error');
-        
+
         expect(fileError).toBeInstanceOf(FileReaderError);
         expect(fileError).not.toBeInstanceOf(ParserError);
         expect(parserError).toBeInstanceOf(ParserError);
@@ -616,37 +638,43 @@ describe('types.ts', () => {
         const filePath = '/path/to/file.py';
         const supportedTypes = ['js', 'ts', 'jsx', 'tsx'];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
-        
+
         expect(error).toBeInstanceOf(Error);
         expect(error).toBeInstanceOf(UnsupportedFileTypeError);
         expect(error.name).toBe('UnsupportedFileTypeError');
-        expect(error.message).toBe('Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx');
+        expect(error.message).toBe(
+          'Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx'
+        );
       });
 
       it('should handle empty supported types array', () => {
         const filePath = '/path/to/file.unknown';
         const supportedTypes: string[] = [];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
-        
-        expect(error.message).toBe('Unsupported file type for /path/to/file.unknown. Supported types: ');
+
+        expect(error.message).toBe(
+          'Unsupported file type for /path/to/file.unknown. Supported types: '
+        );
       });
 
       it('should handle single supported type', () => {
         const filePath = '/path/to/file.py';
         const supportedTypes = ['js'];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
-        
-        expect(error.message).toBe('Unsupported file type for /path/to/file.py. Supported types: js');
+
+        expect(error.message).toBe(
+          'Unsupported file type for /path/to/file.py. Supported types: js'
+        );
       });
 
       it('should be throwable and catchable', () => {
         const filePath = '/path/to/file.rb';
         const supportedTypes = ['js', 'ts'];
-        
+
         expect(() => {
           throw new UnsupportedFileTypeError(filePath, supportedTypes);
         }).toThrow(UnsupportedFileTypeError);
-        
+
         try {
           throw new UnsupportedFileTypeError(filePath, supportedTypes);
         } catch (error) {
@@ -658,14 +686,16 @@ describe('types.ts', () => {
 
       it('should handle empty file path', () => {
         const error = new UnsupportedFileTypeError('', ['js']);
-        expect(error.message).toBe('Unsupported file type for . Supported types: js');
+        expect(error.message).toBe(
+          'Unsupported file type for . Supported types: js'
+        );
       });
 
       it('should be distinguishable from other error types', () => {
         const unsupportedError = new UnsupportedFileTypeError('/path', ['js']);
         const fileError = new FileReaderError('File error', '/path');
         const parserError = new ParserError('Parser error');
-        
+
         expect(unsupportedError).toBeInstanceOf(UnsupportedFileTypeError);
         expect(unsupportedError).not.toBeInstanceOf(FileReaderError);
         expect(unsupportedError).not.toBeInstanceOf(ParserError);
@@ -686,10 +716,10 @@ describe('types.ts', () => {
           'class_declaration',
           'interface_declaration',
           'variable_declaration',
-          'program'
+          'program',
         ];
-        
-        expectedTypes.forEach(type => {
+
+        expectedTypes.forEach((type) => {
           expect(NODE_TYPES).toContain(type as any);
         });
       });
@@ -700,7 +730,7 @@ describe('types.ts', () => {
       });
 
       it('should contain only string values', () => {
-        NODE_TYPES.forEach(type => {
+        NODE_TYPES.forEach((type) => {
           expect(typeof type).toBe('string');
           expect(type.length).toBeGreaterThan(0);
         });
@@ -718,10 +748,10 @@ describe('types.ts', () => {
           'program',
           'class_body',
           'function_declaration',
-          'object'
+          'object',
         ];
-        
-        expectedTypes.forEach(type => {
+
+        expectedTypes.forEach((type) => {
           expect(CONTAINER_TYPES).toContain(type as any);
         });
       });
@@ -732,7 +762,7 @@ describe('types.ts', () => {
       });
 
       it('should be a subset of NODE_TYPES', () => {
-        CONTAINER_TYPES.forEach(containerType => {
+        CONTAINER_TYPES.forEach((containerType) => {
           expect(NODE_TYPES).toContain(containerType as any);
         });
       });
@@ -751,10 +781,10 @@ describe('types.ts', () => {
           'interface_body',
           'enum_body',
           'object',
-          'statement_block'
+          'statement_block',
         ];
-        
-        expectedTypes.forEach(type => {
+
+        expectedTypes.forEach((type) => {
           expect(STRUCTURAL_TYPES).toContain(type as any);
         });
       });
@@ -765,7 +795,7 @@ describe('types.ts', () => {
       });
 
       it('should be a subset of CONTAINER_TYPES', () => {
-        STRUCTURAL_TYPES.forEach(structuralType => {
+        STRUCTURAL_TYPES.forEach((structuralType) => {
           expect(CONTAINER_TYPES).toContain(structuralType as any);
         });
       });
@@ -788,10 +818,10 @@ describe('types.ts', () => {
           ')',
           '[',
           ']',
-          'ERROR'
+          'ERROR',
         ];
-        
-        expectedTypes.forEach(type => {
+
+        expectedTypes.forEach((type) => {
           expect(INSIGNIFICANT_TYPES).toContain(type as any);
         });
       });
@@ -803,10 +833,10 @@ describe('types.ts', () => {
 
       it('should contain punctuation and special types', () => {
         const punctuationTypes = [',', ';', '{', '}', '(', ')', '[', ']'];
-        punctuationTypes.forEach(type => {
+        punctuationTypes.forEach((type) => {
           expect(INSIGNIFICANT_TYPES).toContain(type as any);
         });
-        
+
         expect(INSIGNIFICANT_TYPES).toContain('comment' as any);
         expect(INSIGNIFICANT_TYPES).toContain('ERROR' as any);
       });
@@ -828,7 +858,7 @@ describe('types.ts', () => {
       });
 
       it('should contain only string values', () => {
-        OUTPUT_FORMATS.forEach(format => {
+        OUTPUT_FORMATS.forEach((format) => {
           expect(typeof format).toBe('string');
           expect(format.length).toBeGreaterThan(0);
         });
@@ -843,18 +873,18 @@ describe('types.ts', () => {
           type: 'function_declaration',
           name: 'myFunction',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
+          end: { row: 5, column: 1 },
         },
         {
           type: 'statement_block',
           start: { row: 0, column: 0 },
-          end: { row: 5, column: 1 }
-        }
+          end: { row: 5, column: 1 },
+        },
       ];
-      
+
       const namedNodes = nodes.filter(isNamedNode);
       const unnamedNodes = nodes.filter(isUnnamedNode);
-      
+
       expect(namedNodes).toHaveLength(1);
       expect(unnamedNodes).toHaveLength(1);
       expect(namedNodes[0].name).toBe('myFunction');
@@ -864,12 +894,12 @@ describe('types.ts', () => {
     it('should handle validation result success vs error cases', () => {
       const validFormat = validateFormat('json');
       const invalidFormat = validateFormat('xml');
-      
+
       if (validFormat.success) {
         expect(validFormat.value).toBe('json');
         expect(validFormat.error).toBeUndefined();
       }
-      
+
       if (!invalidFormat.success) {
         expect(invalidFormat.value).toBeUndefined();
         expect(invalidFormat.error).toContain('Invalid format');
@@ -881,7 +911,7 @@ describe('types.ts', () => {
     it('should handle extremely large depth values', () => {
       const largeDepth = '999999999';
       expect(validateDepth(largeDepth)).toBe(999999999);
-      
+
       const result = validateDepthValue(largeDepth);
       expect(result.success).toBe(true);
       expect(result.value).toBe(999999999);
@@ -891,9 +921,9 @@ describe('types.ts', () => {
       const minimalNode: NodeInfo = {
         type: 'program',
         start: { row: 0, column: 0 },
-        end: { row: 100, column: 0 }
+        end: { row: 100, column: 0 },
       };
-      
+
       expect(isUnnamedNode(minimalNode)).toBe(true);
       expect(isNamedNode(minimalNode)).toBe(false);
     });
@@ -909,11 +939,11 @@ describe('types.ts', () => {
             type: 'method_definition',
             name: 'myMethod',
             start: { row: 1, column: 2 },
-            end: { row: 3, column: 3 }
-          }
-        ]
+            end: { row: 3, column: 3 },
+          },
+        ],
       };
-      
+
       expect(isNamedNode(nodeWithChildren)).toBe(true);
       expect(nodeWithChildren.children).toHaveLength(1);
     });
@@ -922,9 +952,9 @@ describe('types.ts', () => {
       const nodeAtOrigin: NodeInfo = {
         type: 'program',
         start: { row: 0, column: 0 },
-        end: { row: 0, column: 0 }
+        end: { row: 0, column: 0 },
       };
-      
+
       expect(nodeAtOrigin.start.row).toBe(0);
       expect(nodeAtOrigin.start.column).toBe(0);
       expect(nodeAtOrigin.end.row).toBe(0);

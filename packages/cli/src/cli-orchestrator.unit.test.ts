@@ -20,7 +20,9 @@ vi.mock('./cli-output-handler.js', () => ({
 }));
 
 // Mock console methods
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+const mockConsoleError = vi
+  .spyOn(console, 'error')
+  .mockImplementation(() => {});
 
 // Import after mocking
 import { CLIOrchestrator } from './cli-orchestrator.js';
@@ -57,13 +59,17 @@ describe('CLIOrchestrator', () => {
     };
 
     // Mock the constructors to return our mocked instances
-    vi.mocked(CLIArgumentParser).mockImplementation(() => mockArgumentParser as any);
+    vi.mocked(CLIArgumentParser).mockImplementation(
+      () => mockArgumentParser as any
+    );
     vi.mocked(FileProcessor).mockImplementation(() => mockFileProcessor as any);
-    vi.mocked(CLIOutputHandler).mockImplementation(() => mockOutputHandler as any);
+    vi.mocked(CLIOutputHandler).mockImplementation(
+      () => mockOutputHandler as any
+    );
 
     orchestrator = new CLIOrchestrator();
     vi.clearAllMocks();
-    
+
     // Mock process.exit
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
   });
@@ -101,7 +107,9 @@ describe('CLIOrchestrator', () => {
         mockOptions.namedOnly
       );
       expect(CLIOutputHandler).toHaveBeenCalledWith(mockOptions.format);
-      expect(mockOutputHandler.formatAndOutput).toHaveBeenCalledWith(mockResults);
+      expect(mockOutputHandler.formatAndOutput).toHaveBeenCalledWith(
+        mockResults
+      );
     });
 
     it('should handle CLIArgumentError', async () => {
@@ -113,6 +121,7 @@ describe('CLIOrchestrator', () => {
 
       expect(mockConsoleError).toHaveBeenCalledWith('Error: Invalid arguments');
       expect(mockArgumentParser.printHelp).toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -135,12 +144,13 @@ describe('CLIOrchestrator', () => {
       await orchestrator.run();
 
       expect(mockConsoleError).toHaveBeenCalledWith('No files found');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
     it('should re-throw unexpected errors', async () => {
       const unexpectedError = new Error('Unexpected error');
-      
+
       mockArgumentParser.parse.mockImplementation(() => {
         throw unexpectedError;
       });
@@ -159,7 +169,7 @@ describe('CLIOrchestrator', () => {
         },
         pattern: 'src/**/*.js',
       });
-      
+
       mockFileProcessor.findFiles.mockResolvedValue(['/path/file1.js']);
       mockFileProcessor.processFiles.mockImplementation(() => {
         throw new FileProcessorError('Processing failed');
@@ -168,6 +178,7 @@ describe('CLIOrchestrator', () => {
       await orchestrator.run();
 
       expect(mockConsoleError).toHaveBeenCalledWith('Processing failed');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(process.exit).toHaveBeenCalledWith(1);
     });
   });

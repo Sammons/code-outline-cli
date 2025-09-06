@@ -219,7 +219,7 @@ describe('Formatter', () => {
             type: 'statement_block',
             start: { row: 2, column: 0 },
             end: { row: 4, column: 1 },
-          }
+          },
         ],
       };
 
@@ -297,7 +297,7 @@ describe('Formatter', () => {
       const formatter = new Formatter('json');
       const cwd = process.cwd();
       const absolutePath = `${cwd}/src/test.js`;
-      
+
       const results = [
         {
           file: absolutePath,
@@ -316,14 +316,14 @@ describe('Formatter', () => {
           },
         },
       ];
-      
+
       const result = formatter.format(results);
       const parsed = JSON.parse(result);
-      
+
       expect(parsed[0].file).toBe('src/test.js');
       expect(parsed[0].absolutePath).toBe(absolutePath);
     });
-    
+
     it('should add file references to named nodes', () => {
       const formatter = new Formatter('json');
       const results = [
@@ -349,16 +349,16 @@ describe('Formatter', () => {
           },
         },
       ];
-      
+
       const result = formatter.format(results);
       const parsed = JSON.parse(result);
-      
+
       // Named node should have file reference
       expect(parsed[0].outline.children[0].file).toBeTruthy();
       // Unnamed node should not have file reference
       expect(parsed[0].outline.children[1].file).toBeUndefined();
     });
-    
+
     it('should show line numbers in ASCII output for navigation', () => {
       const formatter = new Formatter('ascii');
       const results = [
@@ -379,9 +379,9 @@ describe('Formatter', () => {
           },
         },
       ];
-      
+
       const result = formatter.format(results);
-      
+
       // Should contain line number format (:line) for navigation (line is 1-indexed, so row 5 becomes line 6)
       expect(result).toContain(':6');
       // Should contain the file name as the root

@@ -41,17 +41,17 @@ export class Parser {
 
       // Read file content
       const content = await this.fileReader.readFile(filePath);
-      
+
       // Determine file type and get appropriate parser
       const fileType = this.fileReader.getFileType(filePath);
       const tree = this.parserFactory.parseSource(content, fileType);
-      
+
       // Configure traversal options
       const options: TraversalOptions = {
         maxDepth,
         namedOnly,
       };
-      
+
       // Extract node information using AST traverser
       return this.astTraverser.extractNodeInfo(tree.rootNode, content, options);
     } catch (error) {
@@ -80,12 +80,12 @@ export class Parser {
   ): NodeInfo | null {
     try {
       const tree = this.parserFactory.parseSource(source, fileType);
-      
+
       const options: TraversalOptions = {
         maxDepth,
         namedOnly,
       };
-      
+
       return this.astTraverser.extractNodeInfo(tree.rootNode, source, options);
     } catch (error) {
       throw new Error(
@@ -112,5 +112,4 @@ export class Parser {
   isFileSupported(filePath: string): boolean {
     return this.fileReader.isSupported(filePath);
   }
-
 }

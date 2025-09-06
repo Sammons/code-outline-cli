@@ -29,7 +29,9 @@ export class FileProcessor {
     });
 
     if (files.length === 0) {
-      throw new FileProcessorError(`No files found matching pattern: ${pattern}`);
+      throw new FileProcessorError(
+        `No files found matching pattern: ${pattern}`
+      );
     }
 
     return files;

@@ -7,12 +7,20 @@ import type { NodeInfo } from './types';
 /**
  * Visitor function type for tree traversal
  */
-export type TreeVisitor<T = void> = (node: NodeInfo, depth: number, parent?: NodeInfo) => T;
+export type TreeVisitor<T = void> = (
+  node: NodeInfo,
+  depth: number,
+  parent?: NodeInfo
+) => T;
 
 /**
  * Predicate function type for filtering nodes
  */
-export type NodePredicate = (node: NodeInfo, depth: number, parent?: NodeInfo) => boolean;
+export type NodePredicate = (
+  node: NodeInfo,
+  depth: number,
+  parent?: NodeInfo
+) => boolean;
 
 /**
  * TreeUtils provides shared utilities for traversing and analyzing NodeInfo trees
@@ -24,7 +32,10 @@ export class TreeUtils {
   static countNodes(node: NodeInfo): number {
     let count = 1;
     if (node.children) {
-      count += node.children.reduce((sum, child) => sum + TreeUtils.countNodes(child), 0);
+      count += node.children.reduce(
+        (sum, child) => sum + TreeUtils.countNodes(child),
+        0
+      );
     }
     return count;
   }
@@ -34,17 +45,17 @@ export class TreeUtils {
    */
   static findNodesByType(node: NodeInfo, type: string): NodeInfo[] {
     const results: NodeInfo[] = [];
-    
+
     if (node.type === type) {
       results.push(node);
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
         results.push(...TreeUtils.findNodesByType(child, type));
       }
     }
-    
+
     return results;
   }
 
@@ -53,17 +64,17 @@ export class TreeUtils {
    */
   static findNodesByName(node: NodeInfo, name: string): NodeInfo[] {
     const results: NodeInfo[] = [];
-    
+
     if (node.name === name) {
       results.push(node);
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
         results.push(...TreeUtils.findNodesByName(child, name));
       }
     }
-    
+
     return results;
   }
 
@@ -71,23 +82,25 @@ export class TreeUtils {
    * Filter nodes by a predicate function
    */
   static filterNodes(
-    node: NodeInfo, 
-    predicate: NodePredicate, 
+    node: NodeInfo,
+    predicate: NodePredicate,
     currentDepth: number = 0,
     parent?: NodeInfo
   ): NodeInfo[] {
     const results: NodeInfo[] = [];
-    
+
     if (predicate(node, currentDepth, parent)) {
       results.push(node);
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
-        results.push(...TreeUtils.filterNodes(child, predicate, currentDepth + 1, node));
+        results.push(
+          ...TreeUtils.filterNodes(child, predicate, currentDepth + 1, node)
+        );
       }
     }
-    
+
     return results;
   }
 
@@ -101,18 +114,20 @@ export class TreeUtils {
     parent?: NodeInfo
   ): T[] {
     const results: T[] = [];
-    
+
     const result = visitor(node, currentDepth, parent);
     if (result !== undefined) {
       results.push(result);
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
-        results.push(...TreeUtils.traverseTree(child, visitor, currentDepth + 1, node));
+        results.push(
+          ...TreeUtils.traverseTree(child, visitor, currentDepth + 1, node)
+        );
       }
     }
-    
+
     return results;
   }
 
@@ -124,7 +139,7 @@ export class TreeUtils {
       if (node === targetNode) {
         return depth;
       }
-      
+
       if (node.children) {
         for (const child of node.children) {
           const childDepth = findDepth(child, depth + 1);
@@ -133,7 +148,7 @@ export class TreeUtils {
           }
         }
       }
-      
+
       return null;
     };
 
@@ -145,7 +160,7 @@ export class TreeUtils {
    */
   static getAllLeaves(node: NodeInfo): NodeInfo[] {
     const leaves: NodeInfo[] = [];
-    
+
     if (!node.children || node.children.length === 0) {
       leaves.push(node);
     } else {
@@ -153,7 +168,7 @@ export class TreeUtils {
         leaves.push(...TreeUtils.getAllLeaves(child));
       }
     }
-    
+
     return leaves;
   }
 
@@ -162,32 +177,38 @@ export class TreeUtils {
    */
   static getMaxDepth(node: NodeInfo): number {
     let maxDepth = 0;
-    
+
     if (node.children) {
       for (const child of node.children) {
         maxDepth = Math.max(maxDepth, TreeUtils.getMaxDepth(child));
       }
     }
-    
+
     return maxDepth + 1;
   }
 
   /**
    * Get all nodes at a specific depth level
    */
-  static getNodesAtDepth(node: NodeInfo, targetDepth: number, currentDepth: number = 0): NodeInfo[] {
+  static getNodesAtDepth(
+    node: NodeInfo,
+    targetDepth: number,
+    currentDepth: number = 0
+  ): NodeInfo[] {
     if (currentDepth === targetDepth) {
       return [node];
     }
-    
+
     if (currentDepth < targetDepth && node.children) {
       const results: NodeInfo[] = [];
       for (const child of node.children) {
-        results.push(...TreeUtils.getNodesAtDepth(child, targetDepth, currentDepth + 1));
+        results.push(
+          ...TreeUtils.getNodesAtDepth(child, targetDepth, currentDepth + 1)
+        );
       }
       return results;
     }
-    
+
     return [];
   }
 
@@ -208,20 +229,30 @@ export class TreeUtils {
   /**
    * Get the first node matching a predicate using depth-first search
    */
-  static findFirst(node: NodeInfo, predicate: NodePredicate, currentDepth: number = 0, parent?: NodeInfo): NodeInfo | null {
+  static findFirst(
+    node: NodeInfo,
+    predicate: NodePredicate,
+    currentDepth: number = 0,
+    parent?: NodeInfo
+  ): NodeInfo | null {
     if (predicate(node, currentDepth, parent)) {
       return node;
     }
-    
+
     if (node.children) {
       for (const child of node.children) {
-        const found = TreeUtils.findFirst(child, predicate, currentDepth + 1, node);
+        const found = TreeUtils.findFirst(
+          child,
+          predicate,
+          currentDepth + 1,
+          node
+        );
         if (found) {
           return found;
         }
       }
     }
-    
+
     return null;
   }
 
@@ -231,11 +262,11 @@ export class TreeUtils {
   static getPath(rootNode: NodeInfo, targetNode: NodeInfo): NodeInfo[] | null {
     const findPath = (node: NodeInfo, path: NodeInfo[]): NodeInfo[] | null => {
       const currentPath = [...path, node];
-      
+
       if (node === targetNode) {
         return currentPath;
       }
-      
+
       if (node.children) {
         for (const child of node.children) {
           const childPath = findPath(child, currentPath);
@@ -244,7 +275,7 @@ export class TreeUtils {
           }
         }
       }
-      
+
       return null;
     };
 
@@ -254,16 +285,27 @@ export class TreeUtils {
   /**
    * Map over all nodes in the tree, applying a transformation function
    */
-  static mapTree<T>(node: NodeInfo, mapper: (node: NodeInfo, depth: number, parent?: NodeInfo) => T, currentDepth: number = 0, parent?: NodeInfo): T {
+  static mapTree<T>(
+    node: NodeInfo,
+    mapper: (node: NodeInfo, depth: number, parent?: NodeInfo) => T,
+    currentDepth: number = 0,
+    parent?: NodeInfo
+  ): T {
     const mappedNode = mapper(node, currentDepth, parent);
-    
+
     // If the mapper returns a NodeInfo-like structure and has children, map them too
-    if (typeof mappedNode === 'object' && mappedNode !== null && 'children' in mappedNode && node.children) {
-      (mappedNode as any).children = node.children.map(child => 
+    if (
+      typeof mappedNode === 'object' &&
+      mappedNode !== null &&
+      'children' in mappedNode &&
+      node.children
+    ) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (mappedNode as any).children = node.children.map((child) =>
         TreeUtils.mapTree(child, mapper, currentDepth + 1, node)
       );
     }
-    
+
     return mappedNode;
   }
 
@@ -274,7 +316,7 @@ export class TreeUtils {
     const cloned: NodeInfo = {
       type: node.type,
       start: { ...node.start },
-      end: { ...node.end }
+      end: { ...node.end },
     };
 
     if (node.name !== undefined) {
@@ -282,7 +324,9 @@ export class TreeUtils {
     }
 
     if (node.children) {
-      cloned.children = node.children.map(child => TreeUtils.cloneTree(child));
+      cloned.children = node.children.map((child) =>
+        TreeUtils.cloneTree(child)
+      );
     }
 
     return cloned;
