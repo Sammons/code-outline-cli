@@ -77,7 +77,7 @@ module.exports = {
     'object-shorthand': 'error',
     'prefer-template': 'error',
     eqeqeq: ['error', 'always', { null: 'ignore' }],
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
     curly: ['error', 'all'],
     'no-eval': 'error',
     'no-implied-eval': 'error',

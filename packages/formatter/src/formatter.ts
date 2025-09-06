@@ -9,10 +9,10 @@ export class Formatter {
   format(results: Array<{ file: string; outline: NodeInfo | null }>): string {
     // Convert absolute paths to relative paths
     const cwd = process.cwd();
-    const resultsWithRelativePaths = results.map(result => ({
+    const resultsWithRelativePaths = results.map((result) => ({
       ...result,
       file: this.getRelativePath(result.file, cwd),
-      absolutePath: result.file
+      absolutePath: result.file,
     }));
 
     switch (this.outputFormat) {
@@ -36,51 +36,66 @@ export class Formatter {
   }
 
   private formatJSON(
-    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+    results: Array<{
+      file: string;
+      outline: NodeInfo | null;
+      absolutePath?: string;
+    }>
   ): string {
     const filtered = results.filter((r) => r.outline !== null);
     // Add file path to each node for easier reference
-    const enhanced = filtered.map(result => ({
+    const enhanced = filtered.map((result) => ({
       file: result.file,
       absolutePath: result.absolutePath,
-      outline: this.addFileToNodes(result.outline!, result.file)
+      outline: this.addFileToNodes(result.outline!, result.file),
     }));
     return JSON.stringify(enhanced, null, 2);
   }
 
   private formatYAML(
-    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+    results: Array<{
+      file: string;
+      outline: NodeInfo | null;
+      absolutePath?: string;
+    }>
   ): string {
     const filtered = results.filter((r) => r.outline !== null);
     // Add file path to each node for easier reference
-    const enhanced = filtered.map(result => ({
+    const enhanced = filtered.map((result) => ({
       file: result.file,
       absolutePath: result.absolutePath,
-      outline: this.addFileToNodes(result.outline!, result.file)
+      outline: this.addFileToNodes(result.outline!, result.file),
     }));
     return YAML.stringify(enhanced);
   }
 
-  private addFileToNodes(node: NodeInfo, filePath: string): NodeInfo & { file?: string } {
+  private addFileToNodes(
+    node: NodeInfo,
+    filePath: string
+  ): NodeInfo & { file?: string } {
     const enhancedNode: NodeInfo & { file?: string } = { ...node };
-    
+
     // Add file path to named nodes for easy reference
     if (node.name) {
       enhancedNode.file = filePath;
     }
-    
+
     // Recursively add to children
     if (node.children) {
-      enhancedNode.children = node.children.map(child => 
+      enhancedNode.children = node.children.map((child) =>
         this.addFileToNodes(child, filePath)
       );
     }
-    
+
     return enhancedNode;
   }
 
   private formatASCII(
-    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+    results: Array<{
+      file: string;
+      outline: NodeInfo | null;
+      absolutePath?: string;
+    }>
   ): string {
     const output: string[] = [];
 
@@ -105,10 +120,15 @@ export class Formatter {
     return output.join('\n');
   }
 
-  private formatNodeASCII(node: NodeInfo, indent: number, filePath?: string, customPrefix?: string): string {
+  private formatNodeASCII(
+    node: NodeInfo,
+    indent: number,
+    filePath?: string,
+    customPrefix?: string
+  ): string {
     const lines: string[] = [];
     const indentStr = '  '.repeat(indent);
-    const prefix = customPrefix || (indent === 0 ? '' : '├─ ');
+    const prefix = customPrefix ?? (indent === 0 ? '' : '├─ ');
 
     let nodeStr = `${indentStr}${prefix}`;
 
@@ -133,16 +153,14 @@ export class Formatter {
     }
 
     // Add line:column information
-    nodeStr += pc.gray(
-      ` [${node.start.row + 1}:${node.start.column}]`
-    );
-    
+    nodeStr += pc.gray(` [${node.start.row + 1}:${node.start.column}]`);
+
     // For ASCII format, we don't need the file path on every node since it's in the header
     // Only add line number for easy navigation
     if (node.name) {
       nodeStr += pc.dim(` :${node.start.row + 1}`);
     }
-    
+
     lines.push(nodeStr);
 
     if (node.children) {
@@ -150,7 +168,9 @@ export class Formatter {
         const child = node.children[i];
         const isLast = i === node.children.length - 1;
         const childPrefix = isLast ? '└─ ' : '├─ ';
-        lines.push(this.formatNodeASCII(child, indent + 1, filePath, childPrefix));
+        lines.push(
+          this.formatNodeASCII(child, indent + 1, filePath, childPrefix)
+        );
       }
     }
 
