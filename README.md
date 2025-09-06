@@ -319,5 +319,5 @@ Found a bug or have a feature request? Please check our [issue tracker](https://
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/sammons-software-llc">Sammons Software LLC</a>
+  Made with ❤️ by <a href="https://github.com/sammons">Sammons</a> | This is a <a href="https://github.com/sammons-software-llc">Sammons Software LLC</a> Production
 </p>
