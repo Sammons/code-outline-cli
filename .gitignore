@@ -32,3 +32,6 @@ pnpm-debug.log*
 # Test coverage
 coverage/
 .nyc_output/
+
+# Test temp files
+test/temp/

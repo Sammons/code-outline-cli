@@ -11,7 +11,7 @@ type UserRole = 'admin' | 'user' | 'guest';
 enum Status {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 class UserService {
@@ -19,8 +19,8 @@ class UserService {
 
   constructor(private readonly apiUrl: string) {}
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.find(user => user.id === id);
+  getUser(id: number): User | undefined {
+    return this.users.find((user) => user.id === id);
   }
 
   addUser(user: User): void {
@@ -41,7 +41,7 @@ const createUser = (name: string, email: string): User => {
   return {
     id: Date.now(),
     name,
-    email
+    email,
   };
 };
 

@@ -1,7 +1,11 @@
 {
-  "name": "@code-outline/cli",
+  "name": "@sammons/code-outline-cli",
   "version": "1.0.0",
   "description": "CLI tool to parse and provide concise output for JavaScript/TypeScript files",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "dist/index.js",
   "bin": {
     "code-outline": "./dist/cli.js"
@@ -9,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
-    "test": "node --test dist/**/*.test.js",
+    "test": "vitest run --config ../../vitest.config.ts src",
+    "test:watch": "vitest --config ../../vitest.config.ts src",
     "clean": "rm -rf dist"
   },
   "keywords": [

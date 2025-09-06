@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run --config ../../vitest.config.ts src",
+    "test:watch": "vitest --config ../../vitest.config.ts src"
   },
   "keywords": [
     "tree-sitter",

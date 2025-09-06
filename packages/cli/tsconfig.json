@@ -5,8 +5,5 @@
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../parser" },
-    { "path": "../formatter" }
-  ]
+  "references": [{ "path": "../parser" }, { "path": "../formatter" }]
 }

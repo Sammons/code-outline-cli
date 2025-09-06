@@ -1,79 +1,156 @@
 import * as YAML from 'yaml';
 import pc from 'picocolors';
-import { NodeInfo } from './parser';
+import { relative } from 'node:path';
+import type { NodeInfo } from '@code-outline/parser';
 
 export class Formatter {
   constructor(private outputFormat: 'json' | 'yaml' | 'ascii') {}
 
   format(results: Array<{ file: string; outline: NodeInfo | null }>): string {
+    // Convert absolute paths to relative paths
+    const cwd = process.cwd();
+    const resultsWithRelativePaths = results.map(result => ({
+      ...result,
+      file: this.getRelativePath(result.file, cwd),
+      absolutePath: result.file
+    }));
+
     switch (this.outputFormat) {
       case 'json':
-        return this.formatJSON(results);
+        return this.formatJSON(resultsWithRelativePaths);
       case 'yaml':
-        return this.formatYAML(results);
+        return this.formatYAML(resultsWithRelativePaths);
       case 'ascii':
-        return this.formatASCII(results);
-      default:
-        throw new Error(`Unknown format: ${this.outputFormat}`);
+        return this.formatASCII(resultsWithRelativePaths);
+      default: {
+        const exhaustiveCheck: never = this.outputFormat;
+        throw new Error(`Unknown format: ${String(exhaustiveCheck)}`);
+      }
     }
   }
 
-  private formatJSON(results: Array<{ file: string; outline: NodeInfo | null }>): string {
-    const filtered = results.filter(r => r.outline !== null);
-    return JSON.stringify(filtered, null, 2);
+  private getRelativePath(filePath: string, cwd: string): string {
+    const relativePath = relative(cwd, filePath);
+    // If the file is outside the current directory, use the absolute path
+    return relativePath.startsWith('..') ? filePath : relativePath;
   }
 
-  private formatYAML(results: Array<{ file: string; outline: NodeInfo | null }>): string {
-    const filtered = results.filter(r => r.outline !== null);
-    return YAML.stringify(filtered);
+  private formatJSON(
+    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+  ): string {
+    const filtered = results.filter((r) => r.outline !== null);
+    // Add file path to each node for easier reference
+    const enhanced = filtered.map(result => ({
+      file: result.file,
+      absolutePath: result.absolutePath,
+      outline: this.addFileToNodes(result.outline!, result.file)
+    }));
+    return JSON.stringify(enhanced, null, 2);
   }
 
-  private formatASCII(results: Array<{ file: string; outline: NodeInfo | null }>): string {
+  private formatYAML(
+    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+  ): string {
+    const filtered = results.filter((r) => r.outline !== null);
+    // Add file path to each node for easier reference
+    const enhanced = filtered.map(result => ({
+      file: result.file,
+      absolutePath: result.absolutePath,
+      outline: this.addFileToNodes(result.outline!, result.file)
+    }));
+    return YAML.stringify(enhanced);
+  }
+
+  private addFileToNodes(node: NodeInfo, filePath: string): NodeInfo & { file?: string } {
+    const enhancedNode: NodeInfo & { file?: string } = { ...node };
+    
+    // Add file path to named nodes for easy reference
+    if (node.name) {
+      enhancedNode.file = filePath;
+    }
+    
+    // Recursively add to children
+    if (node.children) {
+      enhancedNode.children = node.children.map(child => 
+        this.addFileToNodes(child, filePath)
+      );
+    }
+    
+    return enhancedNode;
+  }
+
+  private formatASCII(
+    results: Array<{ file: string; outline: NodeInfo | null; absolutePath?: string }>
+  ): string {
     const output: string[] = [];
 
     for (const { file, outline } of results) {
-      if (!outline) continue;
-      output.push(pc.bold(pc.cyan(`\n📁 ${file}`)));
-      output.push(pc.gray('─'.repeat(80)));
-      output.push(this.formatNodeASCII(outline, 0));
+      if (!outline) {
+        continue;
+      }
+      // Show the file as part of the tree structure
+      output.push(`\n📁 ${pc.bold(pc.cyan(file))}`);
+      if (outline.children && outline.children.length > 0) {
+        // Format children with the file as the root
+        outline.children.forEach((child, index) => {
+          const isLast = index === outline.children!.length - 1;
+          const prefix = isLast ? '└─ ' : '├─ ';
+          output.push(this.formatNodeASCII(child, 0, file, prefix));
+        });
+      } else {
+        output.push('  (no parseable content)');
+      }
     }
 
     return output.join('\n');
   }
 
-  private formatNodeASCII(node: NodeInfo, indent: number): string {
+  private formatNodeASCII(node: NodeInfo, indent: number, filePath?: string, customPrefix?: string): string {
     const lines: string[] = [];
     const indentStr = '  '.repeat(indent);
-    const prefix = indent === 0 ? '' : '├─ ';
-    
+    const prefix = customPrefix || (indent === 0 ? '' : '├─ ');
+
     let nodeStr = `${indentStr}${prefix}`;
-    
+
     const typeColors: Record<string, (str: string) => string> = {
-      'function_declaration': pc.blue,
-      'class_declaration': pc.green,
-      'method_definition': pc.yellow,
-      'interface_declaration': pc.magenta,
-      'type_alias_declaration': pc.cyan,
-      'enum_declaration': pc.red,
-      'variable_declarator': pc.white,
-      'import_statement': pc.gray,
-      'export_statement': pc.gray,
+      function_declaration: pc.blue,
+      class_declaration: pc.green,
+      method_definition: pc.yellow,
+      interface_declaration: pc.magenta,
+      type_alias_declaration: pc.cyan,
+      enum_declaration: pc.red,
+      variable_declarator: pc.white,
+      import_statement: pc.gray,
+      export_statement: pc.gray,
     };
 
     const colorFn = typeColors[node.type] || pc.white;
-    
+
     if (node.name) {
       nodeStr += colorFn(`${node.type}: ${pc.bold(node.name)}`);
     } else {
       nodeStr += colorFn(node.type);
     }
 
-    nodeStr += pc.gray(` [${node.start.row}:${node.start.column} - ${node.end.row}:${node.end.column}]`);
+    // Add line:column information
+    nodeStr += pc.gray(
+      ` [${node.start.row + 1}:${node.start.column}]`
+    );
+    
+    // For ASCII format, we don't need the file path on every node since it's in the header
+    // Only add line number for easy navigation
+    if (node.name) {
+      nodeStr += pc.dim(` :${node.start.row + 1}`);
+    }
+    
     lines.push(nodeStr);
 
     if (node.children) {
-      for (const child of node.children) {
-        lines.push(this.formatNodeASCII(child, indent + 1));
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const isLast = i === node.children.length - 1;
+        const childPrefix = isLast ? '└─ ' : '├─ ';
+        lines.push(this.formatNodeASCII(child, indent + 1, filePath, childPrefix));
       }
     }
 

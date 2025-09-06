@@ -1,11 +1,17 @@
 # glance-with-tree-sitter
 
+![Build Status](./badges/build.svg)
+![Test Status](./badges/tests.svg)
+![Coverage](./badges/coverage.svg)
+![Version](./badges/version.svg)
+![License](./badges/license.svg)
+
 A CLI tool that uses tree-sitter to parse JavaScript and TypeScript files and provide structured output in multiple formats.
 
 ## Installation
 
 ```bash
-npm install -g @sammons/glance-with-tree-sitter
+npm install -g @sammons/code-outline-cli
 ```
 
 ## Usage
@@ -26,21 +32,25 @@ glance-with-tree-sitter <glob-pattern> [options]
 ### Examples
 
 Parse all TypeScript files in src directory:
+
 ```bash
 glance-with-tree-sitter "src/**/*.ts"
 ```
 
 Output as JSON with depth limit:
+
 ```bash
 glance-with-tree-sitter "*.js" --format json --depth 2
 ```
 
 Parse TSX files and output as YAML:
+
 ```bash
 glance-with-tree-sitter "src/**/*.tsx" --format yaml
 ```
 
 Show all nodes including unnamed ones:
+
 ```bash
 glance-with-tree-sitter "src/**/*.ts" --all
 ```
@@ -48,23 +58,28 @@ glance-with-tree-sitter "src/**/*.ts" --all
 ## Output Formats
 
 ### ASCII (default)
+
 Provides a tree-like visualization with color-coded node types:
+
 - Functions: blue
-- Classes: green  
+- Classes: green
 - Methods: yellow
 - Interfaces: magenta
 - Type aliases: cyan
 - Enums: red
 
 ### JSON
+
 Outputs a structured JSON representation of the AST with file paths and node information.
 
 ### YAML
+
 Outputs a YAML representation of the parsed structure.
 
 ## Node Information
 
 Each node in the output contains:
+
 - `type` - The AST node type (e.g., `function_declaration`, `class_declaration`)
 - `name` - The identifier name (when applicable)
 - `start` - Starting position (row and column)
