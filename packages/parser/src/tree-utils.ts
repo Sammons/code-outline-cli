@@ -4,6 +4,9 @@
 
 import type { NodeInfo } from './types';
 
+// Re-export NodeInfo for convenience
+export type { NodeInfo } from './types';
+
 /**
  * Visitor function type for tree traversal
  */
