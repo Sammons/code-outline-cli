@@ -346,7 +346,7 @@ describe('FileProcessor', () => {
       expect(result[1].outline).toBeNull();
       expect(mockConsoleError).toHaveBeenCalledWith(
         expect.stringContaining('Error parsing'),
-        expect.any(Error)
+        expect.stringMatching(/Parse error|Unknown error occurred/)
       );
     });
 

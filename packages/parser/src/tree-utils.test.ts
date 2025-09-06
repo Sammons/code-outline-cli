@@ -598,10 +598,21 @@ describe('TreeUtils', () => {
       const result = TreeUtils.mapTree(tree, mapper);
 
       expect(result).toHaveProperty('children');
-      expect(result.children).toHaveLength(3);
-      expect(result.children[0]).toHaveProperty('transformed', true);
-      expect(result.children[1]).toHaveProperty('children');
-      expect(result.children[1].children).toHaveLength(2);
+      // Type guard to ensure children exists and is an array
+      if ('children' in result && Array.isArray(result.children)) {
+        expect(result.children).toHaveLength(3);
+        expect(result.children[0]).toHaveProperty('transformed', true);
+        expect(result.children[1]).toHaveProperty('children');
+        // Additional type guard for nested children
+        const secondChild = result.children[1];
+        if ('children' in secondChild && Array.isArray(secondChild.children)) {
+          expect(secondChild.children).toHaveLength(2);
+        } else {
+          expect.fail('Second child should have children array');
+        }
+      } else {
+        expect.fail('Result should have children array');
+      }
     });
 
     it('should handle non-object return values', () => {

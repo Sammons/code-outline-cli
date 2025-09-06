@@ -54,7 +54,7 @@ export class Parser {
 
       // Extract node information using AST traverser
       return this.astTraverser.extractNodeInfo(tree.rootNode, content, options);
-    } catch (error) {
+    } catch (error: unknown) {
       // Re-throw with more context
       throw new Error(
         `Failed to parse file ${filePath}: ${
@@ -87,7 +87,7 @@ export class Parser {
       };
 
       return this.astTraverser.extractNodeInfo(tree.rootNode, source, options);
-    } catch (error) {
+    } catch (error: unknown) {
       throw new Error(
         `Failed to parse source code: ${
           error instanceof Error ? error.message : 'Unknown error'

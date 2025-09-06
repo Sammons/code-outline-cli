@@ -301,12 +301,15 @@ export class TreeUtils {
       typeof mappedNode === 'object' &&
       mappedNode !== null &&
       'children' in mappedNode &&
-      node.children
+      node.children &&
+      // Type guard to ensure we can safely assign to children property
+      (mappedNode as Record<string, unknown>).children !== undefined
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (mappedNode as any).children = node.children.map((child) =>
+      // Create proper type-safe assignment by checking the structure
+      const nodeInfoLike = mappedNode as NodeInfo & Record<string, unknown>;
+      nodeInfoLike.children = node.children.map((child) =>
         TreeUtils.mapTree(child, mapper, currentDepth + 1, node)
-      );
+      ) as NodeInfo[];
     }
 
     return mappedNode;

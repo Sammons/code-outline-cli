@@ -48,8 +48,10 @@ export class FileProcessor {
         file: resolve(file),
         outline,
       };
-    } catch (error) {
-      console.error(`Error parsing ${file}:`, error);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error(`Error parsing ${file}:`, errorMessage);
       return {
         file: resolve(file),
         outline: null,

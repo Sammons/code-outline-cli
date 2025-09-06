@@ -677,10 +677,12 @@ describe('types.ts', () => {
 
         try {
           throw new UnsupportedFileTypeError(filePath, supportedTypes);
-        } catch (error) {
+        } catch (error: unknown) {
           expect(error).toBeInstanceOf(UnsupportedFileTypeError);
-          expect(error.message).toContain(filePath);
-          expect(error.message).toContain('js, ts');
+          if (error instanceof UnsupportedFileTypeError) {
+            expect(error.message).toContain(filePath);
+            expect(error.message).toContain('js, ts');
+          }
         }
       });
 

@@ -7,7 +7,9 @@ async function main(): Promise<void> {
   await orchestrator.run();
 }
 
-main().catch((error) => {
-  console.error('Fatal error:', error);
+main().catch((error: unknown) => {
+  const errorMessage =
+    error instanceof Error ? error.message : 'Unknown fatal error';
+  console.error('Fatal error:', errorMessage);
   process.exit(1);
 });
