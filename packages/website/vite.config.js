@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: 'src',
-  base: '/glance-with-tree-sitter/', // GitHub Pages base path
+  base: '/code-outline-cli/', // GitHub Pages base path
   build: {
     outDir: '../dist',
     emptyOutDir: true,
