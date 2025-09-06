@@ -1,4 +1,4 @@
-import TreeSitterParser from 'tree-sitter';
+import type TreeSitterParser from 'tree-sitter';
 import { ExtractorRegistry } from './extractors/extractor-registry';
 
 /**
@@ -24,5 +24,4 @@ export class NameExtractor {
     const extractor = this.registry.getExtractor(node.type);
     return extractor ? extractor.extractName(node, source) : undefined;
   }
-
 }

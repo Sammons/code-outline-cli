@@ -386,7 +386,7 @@ describe('Glob Pattern Matching', () => {
       );
       const variables = CLIAssertions.findNodesByType(
         fileResult.outline!,
-        'variable_declaration'
+        'lexical_declaration' // Modern TypeScript uses lexical_declaration for const/let
       );
 
       expect(functions.length).toBeGreaterThan(0);

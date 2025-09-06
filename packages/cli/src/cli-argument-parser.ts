@@ -1,4 +1,6 @@
 import { parseArgs } from 'node:util';
+import { isAbsolute } from 'node:path';
+import { existsSync } from 'node:fs';
 import type { OutputFormat } from '@code-outline/parser';
 import { validateFormat, validateDepthValue } from '@code-outline/parser';
 import { version } from '../package.json';
@@ -135,22 +137,45 @@ Examples:
       : this.safeExtractValue(values['named-only'], true);
 
     const pattern = positionals[0];
-    
-    // Log the received pattern for debugging
-    console.error(`Received pattern: "${pattern}"`);
-    
+
     // Warn if the pattern doesn't contain glob characters but looks like it should
-    if (!pattern.includes('*') && !pattern.includes('?') && !pattern.includes('[')) {
+    if (
+      !pattern.includes('*') &&
+      !pattern.includes('?') &&
+      !pattern.includes('[')
+    ) {
       // Check if it's likely intended to be a glob pattern (directory-like structure)
-      const pathSegments = pattern.split('/').filter(segment => segment !== ''); // Remove empty segments from leading/trailing slashes
+      const pathSegments = pattern
+        .split('/')
+        .filter((segment) => segment !== ''); // Remove empty segments from leading/trailing slashes
       const hasMultipleSegments = pathSegments.length >= 3; // At least 3 meaningful segments (like packages/cli/src/file.ts)
       const endsWithCommonExtension = /\.(ts|js|tsx|jsx)$/.test(pattern);
-      
-      if (hasMultipleSegments && endsWithCommonExtension) {
-        console.error(`⚠️  Warning: Pattern "${pattern}" doesn't contain glob characters (* ? []).`);
-        console.error('   If you intended to match multiple files, consider using:');
-        console.error(`   "${pattern.replace(/\.(ts|js|tsx|jsx)$/, '/**/*.$1')}"`);
-        console.error('   Remember to quote glob patterns to prevent shell expansion!');
+
+      // Only warn if it's not an absolute path AND not an existing file
+      // (relative paths with many segments are likely intended as globs, but existing files should not warn)
+      const isAbsolutePath = isAbsolute(pattern);
+      const fileExists = existsSync(pattern);
+
+      // Debug: Show the evaluation
+      const shouldWarn =
+        hasMultipleSegments &&
+        endsWithCommonExtension &&
+        !isAbsolutePath &&
+        !fileExists;
+
+      if (shouldWarn) {
+        console.error(
+          `⚠️  Warning: Pattern "${pattern}" doesn't contain glob characters (* ? []).`
+        );
+        console.error(
+          '   If you intended to match multiple files, consider using:'
+        );
+        console.error(
+          `   "${pattern.replace(/\.(ts|js|tsx|jsx)$/, '/**/*.$1')}"`
+        );
+        console.error(
+          '   Remember to quote glob patterns to prevent shell expansion!'
+        );
       }
     }
 

@@ -1,4 +1,4 @@
-import { BaseExtractor } from './base-extractor';
+import type { BaseExtractor } from './base-extractor';
 import { FunctionExtractor } from './function-extractor';
 import { ClassExtractor } from './class-extractor';
 import { VariableExtractor } from './variable-extractor';

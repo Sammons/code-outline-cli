@@ -1,4 +1,4 @@
-import TreeSitterParser from 'tree-sitter';
+import type TreeSitterParser from 'tree-sitter';
 
 /**
  * Base interface for all name extractors
@@ -10,7 +10,10 @@ export interface BaseExtractor {
    * @param source - The source code string
    * @returns The extracted name or undefined if no name found
    */
-  extractName(node: TreeSitterParser.SyntaxNode, source: string): string | undefined;
+  extractName(
+    node: TreeSitterParser.SyntaxNode,
+    source: string
+  ): string | undefined;
 
   /**
    * Get the node types that this extractor can handle
@@ -26,7 +29,10 @@ export class NodeUtils {
   /**
    * Extract text from a node
    */
-  static getNodeText(node: TreeSitterParser.SyntaxNode, source: string): string {
+  static getNodeText(
+    node: TreeSitterParser.SyntaxNode,
+    source: string
+  ): string {
     return source.substring(node.startIndex, node.endIndex);
   }
 
@@ -38,7 +44,7 @@ export class NodeUtils {
     types: string | string[]
   ): TreeSitterParser.SyntaxNode | undefined {
     const typeArray = Array.isArray(types) ? types : [types];
-    
+
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && typeArray.includes(child.type)) {
@@ -57,7 +63,7 @@ export class NodeUtils {
   ): TreeSitterParser.SyntaxNode[] {
     const typeArray = Array.isArray(types) ? types : [types];
     const children: TreeSitterParser.SyntaxNode[] = [];
-    
+
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && typeArray.includes(child.type)) {
@@ -73,7 +79,11 @@ export class NodeUtils {
   static extractIdentifier(
     node: TreeSitterParser.SyntaxNode,
     source: string,
-    identifierTypes: string[] = ['identifier', 'type_identifier', 'property_identifier']
+    identifierTypes: string[] = [
+      'identifier',
+      'type_identifier',
+      'property_identifier',
+    ]
   ): string | undefined {
     const identifier = this.findChildByType(node, identifierTypes);
     return identifier ? this.getNodeText(identifier, source) : undefined;
@@ -91,13 +101,18 @@ export class NodeUtils {
    */
   static forEachChild(
     node: TreeSitterParser.SyntaxNode,
-    callback: (child: TreeSitterParser.SyntaxNode, index: number) => boolean | void
+    callback: (
+      child: TreeSitterParser.SyntaxNode,
+      index: number
+    ) => boolean | void
   ): void {
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child) {
         const result = callback(child, i);
-        if (result === false) break; // Allow early termination
+        if (result === false) {
+          break;
+        } // Allow early termination
       }
     }
   }
