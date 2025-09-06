@@ -43,7 +43,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sammons-software-llc/glance-with-tree-sitter.git"
+    "url": "git+https://github.com/sammons2/code-outline-cli.git"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
