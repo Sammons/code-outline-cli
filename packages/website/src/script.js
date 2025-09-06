@@ -1,3 +1,6 @@
+// Import styles for Vite to process
+import './styles.css';
+
 // Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', function (e) {
