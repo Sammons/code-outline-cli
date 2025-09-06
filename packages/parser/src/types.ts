@@ -29,6 +29,8 @@ export const NODE_TYPES = [
   // Module and namespace types
   'namespace_declaration',
   'module_declaration',
+  'internal_module',
+  'module',
 
   // Variable declarations
   'variable_declaration',
@@ -82,6 +84,8 @@ export const CONTAINER_TYPES = [
   'enum_body',
   'namespace_declaration',
   'module_declaration',
+  'internal_module',
+  'module',
   'export_statement',
   'export_specifier',
   'import_statement',
@@ -106,6 +110,7 @@ export const STRUCTURAL_TYPES = [
   'enum_body',
   'object',
   'statement_block',
+  'export_statement',
 ] as const;
 
 export type StructuralType = (typeof STRUCTURAL_TYPES)[number];
@@ -207,14 +212,20 @@ export interface ParserConfig {
 
 // Error types for better error handling
 export class ParserError extends Error {
-  constructor(message: string, public readonly filePath?: string) {
+  constructor(
+    message: string,
+    public readonly filePath?: string
+  ) {
     super(message);
     this.name = 'ParserError';
   }
 }
 
 export class FileReaderError extends Error {
-  constructor(message: string, public readonly filePath: string) {
+  constructor(
+    message: string,
+    public readonly filePath: string
+  ) {
     super(message);
     this.name = 'FileReaderError';
   }
@@ -222,7 +233,9 @@ export class FileReaderError extends Error {
 
 export class UnsupportedFileTypeError extends Error {
   constructor(filePath: string, supportedTypes: string[]) {
-    super(`Unsupported file type for ${filePath}. Supported types: ${supportedTypes.join(', ')}`);
+    super(
+      `Unsupported file type for ${filePath}. Supported types: ${supportedTypes.join(', ')}`
+    );
     this.name = 'UnsupportedFileTypeError';
   }
 }

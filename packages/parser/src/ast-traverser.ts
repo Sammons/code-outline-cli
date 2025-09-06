@@ -1,6 +1,10 @@
-import TreeSitterParser from 'tree-sitter';
+import type TreeSitterParser from 'tree-sitter';
 import type { NodeInfo } from './types';
-import { isContainerType, isStructuralType, isInsignificantType } from './types';
+import {
+  isContainerType,
+  isStructuralType,
+  isInsignificantType,
+} from './types';
 import { NameExtractor } from './name-extractor';
 import { TreeUtils } from './tree-utils';
 
@@ -21,7 +25,7 @@ export class ASTTraverser {
   private nameExtractor: NameExtractor;
 
   constructor(nameExtractor?: NameExtractor) {
-    this.nameExtractor = nameExtractor || new NameExtractor();
+    this.nameExtractor = nameExtractor ?? new NameExtractor();
   }
 
   /**
@@ -39,7 +43,7 @@ export class ASTTraverser {
     currentDepth: number = 0
   ): NodeInfo | null {
     const info = this.createNodeInfo(node, source);
-    
+
     if (!this.shouldIncludeNode(info, options)) {
       return this.handleSpecialCases(node, source, options, currentDepth, info);
     }
@@ -52,7 +56,10 @@ export class ASTTraverser {
    * Create basic node info structure from a syntax node
    * @private
    */
-  private createNodeInfo(node: TreeSitterParser.SyntaxNode, source: string): NodeInfo {
+  private createNodeInfo(
+    node: TreeSitterParser.SyntaxNode,
+    source: string
+  ): NodeInfo {
     const info: NodeInfo = {
       type: node.type,
       start: {
@@ -77,20 +84,23 @@ export class ASTTraverser {
    * Determine if a node should be included in the output
    * @private
    */
-  private shouldIncludeNode(info: NodeInfo, options: TraversalOptions): boolean {
+  private shouldIncludeNode(
+    info: NodeInfo,
+    options: TraversalOptions
+  ): boolean {
     const hasName = Boolean(info.name);
     const isStructural = isStructuralType(info.type);
-    
+
     // Always include nodes with names
     if (hasName) {
       return true;
     }
-    
+
     // In named-only mode, only include structural types without names
     if (options.namedOnly) {
       return isStructural;
     }
-    
+
     // In non-named mode, include all non-insignificant nodes
     return true;
   }
@@ -107,7 +117,12 @@ export class ASTTraverser {
     currentDepth: number
   ): void {
     if (this.canHaveChildren(node, currentDepth, options.maxDepth)) {
-      const children = this.extractChildren(node, source, options, currentDepth);
+      const children = this.extractChildren(
+        node,
+        source,
+        options,
+        currentDepth
+      );
       if (children.length > 0) {
         info.children = children;
       }
@@ -132,10 +147,15 @@ export class ASTTraverser {
 
     // Try to find named children
     if (this.canHaveChildren(node, currentDepth, options.maxDepth)) {
-      const children = this.extractChildren(node, source, options, currentDepth);
+      const children = this.extractChildren(
+        node,
+        source,
+        options,
+        currentDepth
+      );
       return this.handleNamedOnlyResult(children, info);
     }
-    
+
     return null;
   }
 
@@ -143,7 +163,10 @@ export class ASTTraverser {
    * Check if node should be processed in named-only mode
    * @private
    */
-  private shouldProcessForNamedOnly(info: NodeInfo, options: TraversalOptions): boolean {
+  private shouldProcessForNamedOnly(
+    info: NodeInfo,
+    options: TraversalOptions
+  ): boolean {
     return options.namedOnly && !info.name && !isStructuralType(info.type);
   }
 
@@ -151,7 +174,11 @@ export class ASTTraverser {
    * Check if node can have children based on depth and type
    * @private
    */
-  private canHaveChildren(node: TreeSitterParser.SyntaxNode, currentDepth: number, maxDepth: number): boolean {
+  private canHaveChildren(
+    node: TreeSitterParser.SyntaxNode,
+    currentDepth: number,
+    maxDepth: number
+  ): boolean {
     return currentDepth < maxDepth && isContainerType(node.type);
   }
 
@@ -159,15 +186,18 @@ export class ASTTraverser {
    * Handle the result of named-only traversal
    * @private
    */
-  private handleNamedOnlyResult(children: NodeInfo[], info: NodeInfo): NodeInfo | null {
+  private handleNamedOnlyResult(
+    children: NodeInfo[],
+    info: NodeInfo
+  ): NodeInfo | null {
     if (children.length === 0) {
       return null;
     }
-    
+
     if (children.length === 1) {
       return children[0];
     }
-    
+
     // Multiple children - wrap them in the parent node
     return { ...info, children };
   }
@@ -183,21 +213,24 @@ export class ASTTraverser {
     currentDepth: number
   ): NodeInfo[] {
     const children: NodeInfo[] = [];
-    
+
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (!this.shouldIncludeChild(child)) {
         continue;
       }
-      
-      const nextDepth = this.calculateNextDepth(currentDepth, options.namedOnly);
-      const childInfo = this.extractNodeInfo(child!, source, options, nextDepth);
-      
+
+      const nextDepth = this.calculateNextDepth(
+        currentDepth,
+        options.namedOnly
+      );
+      const childInfo = this.extractNodeInfo(child, source, options, nextDepth);
+
       if (childInfo) {
         children.push(childInfo);
       }
     }
-    
+
     return children;
   }
 
@@ -205,15 +238,23 @@ export class ASTTraverser {
    * Calculate the next depth for child traversal
    * @private
    */
-  private calculateNextDepth(currentDepth: number, namedOnly: boolean): number {
-    return namedOnly ? currentDepth : currentDepth + 1;
+  private calculateNextDepth(
+    currentDepth: number,
+    _namedOnly: boolean
+  ): number {
+    // Always increment depth for consistent depth limiting
+    // Previously, named-only mode didn't increment depth for structural nodes,
+    // but this caused inconsistent behavior in depth limiting
+    return currentDepth + 1;
   }
 
   /**
    * Determine if a child node should be included in traversal
    * @private
    */
-  private shouldIncludeChild(child: TreeSitterParser.SyntaxNode | null): child is TreeSitterParser.SyntaxNode {
+  private shouldIncludeChild(
+    child: TreeSitterParser.SyntaxNode | null
+  ): child is TreeSitterParser.SyntaxNode {
     return (
       child !== null &&
       !isInsignificantType(child.type) &&
@@ -245,7 +286,10 @@ export class ASTTraverser {
   /**
    * Filter nodes by predicate function
    */
-  filterNodes(node: NodeInfo, predicate: (node: NodeInfo, depth?: number, parent?: NodeInfo) => boolean): NodeInfo[] {
+  filterNodes(
+    node: NodeInfo,
+    predicate: (node: NodeInfo, depth?: number, parent?: NodeInfo) => boolean
+  ): NodeInfo[] {
     return TreeUtils.filterNodes(node, predicate);
   }
 }
