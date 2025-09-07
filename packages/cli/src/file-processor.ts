@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import fg from 'fast-glob';
-import type { NodeInfo } from '@code-outline/parser';
-import { Parser } from '@code-outline/parser';
+import type { NodeInfo } from '@sammons/code-outline-parser';
+import { Parser } from '@sammons/code-outline-parser';
 
 export interface ProcessedFile {
   file: string;

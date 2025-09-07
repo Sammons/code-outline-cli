@@ -68,10 +68,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@code-outline/formatter':
+      '@sammons/code-outline-formatter':
         specifier: workspace:*
         version: link:../formatter
-      '@code-outline/parser':
+      '@sammons/code-outline-parser':
         specifier: workspace:*
         version: link:../parser
       fast-glob:
@@ -93,7 +93,7 @@ importers:
 
   packages/formatter:
     dependencies:
-      '@code-outline/parser':
+      '@sammons/code-outline-parser':
         specifier: workspace:*
         version: link:../parser
       picocolors:

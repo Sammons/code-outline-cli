@@ -1,5 +1,5 @@
-import type { OutputFormat } from '@code-outline/parser';
-import { Formatter } from '@code-outline/formatter';
+import type { OutputFormat } from '@sammons/code-outline-parser';
+import { Formatter } from '@sammons/code-outline-formatter';
 import type { ProcessedFile } from './file-processor.js';
 
 export class CLIOutputHandler {

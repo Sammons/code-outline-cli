@@ -1,7 +1,7 @@
 import * as YAML from 'yaml';
 import pc from 'picocolors';
 import { relative } from 'node:path';
-import type { NodeInfo } from '@code-outline/parser';
+import type { NodeInfo } from '@sammons/code-outline-parser';
 
 export class Formatter {
   constructor(private outputFormat: 'json' | 'yaml' | 'ascii') {}

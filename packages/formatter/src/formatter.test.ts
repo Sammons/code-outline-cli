@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Formatter } from './formatter';
-import type { NodeInfo } from '@code-outline/parser';
+import type { NodeInfo } from '@sammons/code-outline-parser';
 
 // Helper function to strip ANSI color codes for test assertions
 function stripAnsi(str: string): string {

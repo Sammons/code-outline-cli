@@ -30,8 +30,8 @@
     "dist"
   ],
   "dependencies": {
-    "@code-outline/parser": "workspace:*",
-    "@code-outline/formatter": "workspace:*",
+    "@sammons/code-outline-parser": "workspace:*",
+    "@sammons/code-outline-formatter": "workspace:*",
     "fast-glob": "3.3.3",
     "glob": "11.0.3"
   },

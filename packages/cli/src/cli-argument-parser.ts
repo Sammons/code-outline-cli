@@ -1,8 +1,11 @@
 import { parseArgs } from 'node:util';
 import { isAbsolute } from 'node:path';
 import { existsSync } from 'node:fs';
-import type { OutputFormat } from '@code-outline/parser';
-import { validateFormat, validateDepthValue } from '@code-outline/parser';
+import type { OutputFormat } from '@sammons/code-outline-parser';
+import {
+  validateFormat,
+  validateDepthValue,
+} from '@sammons/code-outline-parser';
 import { version } from '../package.json';
 
 export interface CliOptions {

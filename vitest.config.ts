@@ -53,9 +53,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@code-outline/parser': './packages/parser/src',
-      '@code-outline/formatter': './packages/formatter/src',
-      '@code-outline/cli': './packages/cli/src',
+      '@sammons/code-outline-parser': './packages/parser/src',
+      '@sammons/code-outline-formatter': './packages/formatter/src',
+      '@sammons/code-outline-cli': './packages/cli/src',
     },
   },
 });

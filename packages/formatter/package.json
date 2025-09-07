@@ -1,5 +1,5 @@
 {
-  "name": "@code-outline/formatter",
+  "name": "@sammons/code-outline-formatter",
   "version": "2.0.0",
   "description": "Formatting utilities for code outline output",
   "main": "dist/index.js",
@@ -22,7 +22,7 @@
     "dist"
   ],
   "dependencies": {
-    "@code-outline/parser": "workspace:*",
+    "@sammons/code-outline-parser": "workspace:*",
     "picocolors": "1.1.1",
     "yaml": "2.8.1"
   },

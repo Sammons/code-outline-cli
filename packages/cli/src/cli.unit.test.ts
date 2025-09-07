@@ -6,16 +6,16 @@ import {
   Parser,
   validateFormat,
   validateDepthValue,
-} from '@code-outline/parser';
-import { Formatter } from '@code-outline/formatter';
+} from '@sammons/code-outline-parser';
+import { Formatter } from '@sammons/code-outline-formatter';
 import type { ProcessedFile } from './file-processor';
 
 // Mock external dependencies
 vi.mock('node:util');
 vi.mock('fast-glob');
 vi.mock('node:path');
-vi.mock('@code-outline/parser');
-vi.mock('@code-outline/formatter');
+vi.mock('@sammons/code-outline-parser');
+vi.mock('@sammons/code-outline-formatter');
 
 const mockParseArgs = vi.mocked(parseArgs);
 const mockFg = vi.mocked(fg);
