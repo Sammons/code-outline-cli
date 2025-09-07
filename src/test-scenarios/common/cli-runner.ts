@@ -66,7 +66,8 @@ export class CLIRunner {
       this.cliPath =
         possiblePaths.find((p) => require('fs').existsSync(p)) || defaultPath;
 
-      // Log for debugging in CI
+      // Log for debugging in CI (disabled for now - CLI is being found successfully)
+      /*
       if (
         process.env.GITHUB_ACTIONS &&
         !require('fs').existsSync(this.cliPath)
@@ -80,6 +81,7 @@ export class CLIRunner {
         console.error('__dirname:', __dirname);
         console.error('process.cwd():', process.cwd());
       }
+      */
     }
 
     this.defaultTimeout = defaultTimeout;
@@ -138,36 +140,18 @@ export class CLIRunner {
 
           const duration = Date.now() - startTime;
 
-          // Debug output for failures when running in GitHub Actions
+          // Debug output for failures when running in GitHub Actions (disabled for now)
+          // Uncomment for debugging test failures in CI
+          /*
           if (code !== 0 && (process.env.CI || process.env.GITHUB_ACTIONS)) {
             console.error('=== CLI FAILURE DEBUG ===');
             console.error('Exit code:', code);
             console.error('CLI path:', this.cliPath);
-            console.error(
-              'CLI exists:',
-              require('fs').existsSync(this.cliPath)
-            );
-            console.error('Working dir:', process.cwd());
-            console.error('Args:', JSON.stringify(args));
-            if (args[0] && !args[0].startsWith('-')) {
-              const argPath = args[0];
-              console.error('First arg path:', argPath);
-              console.error(
-                'First arg exists:',
-                require('fs').existsSync(argPath)
-              );
-              // Check if it's looking in the right place
-              const fromCwd = require('path').resolve(process.cwd(), argPath);
-              console.error('Resolved from cwd:', fromCwd);
-              console.error(
-                'Exists from cwd:',
-                require('fs').existsSync(fromCwd)
-              );
-            }
             console.error('Stdout:', stdout || '(empty)');
             console.error('Stderr:', stderr || '(empty)');
             console.error('=========================');
           }
+          */
 
           resolve({
             stdout,
@@ -272,22 +256,15 @@ export class CLIRunner {
     try {
       // Check if CLI file exists first
       if (!require('fs').existsSync(this.cliPath)) {
-        console.error(`CLI not found at: ${this.cliPath}`);
-        console.error(`Current working directory: ${process.cwd()}`);
-        console.error(`__dirname: ${__dirname}`);
+        // Silently fail - the path finding logic in constructor should have handled this
         return false;
       }
 
       const result = await this.run(['--version'], { timeout: 5000 });
-      if (result.exitCode !== 0) {
-        console.error('CLI --version failed with exit code:', result.exitCode);
-        console.error('CLI path:', this.cliPath);
-        console.error('Stdout:', result.stdout);
-        console.error('Stderr:', result.stderr);
-      }
+      // No need to log failures - tests will handle and report appropriately
       return result.exitCode === 0;
-    } catch (error) {
-      console.error('testAccess error:', error);
+    } catch {
+      // Silently fail
       return false;
     }
   }
