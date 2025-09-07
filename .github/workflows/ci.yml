@@ -92,8 +92,8 @@ jobs:
       - name: Build all packages
         run: |
           # Build packages in dependency order
-          pnpm --filter @code-outline/parser build
-          pnpm --filter @code-outline/formatter build
+          pnpm --filter @sammons/code-outline-parser build
+          pnpm --filter @sammons/code-outline-formatter build
           pnpm --filter @sammons/code-outline-cli build
           pnpm --filter @code-outline/website build
 
