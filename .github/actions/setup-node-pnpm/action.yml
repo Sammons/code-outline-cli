@@ -10,17 +10,15 @@ inputs:
     required: false
     default: 'true'
   pnpm-version:
-    description: 'pnpm version'
+    description: 'pnpm version (optional - uses package.json if not specified)'
     required: false
-    default: '10'
 
 runs:
   using: 'composite'
   steps:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: ${{ inputs.pnpm-version }}
+      # No version specified - will use package.json packageManager field
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
