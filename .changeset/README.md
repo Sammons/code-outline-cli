@@ -10,3 +10,5 @@ We have a quick list of common questions to get you started engaging with this p
 # Triggering release workflow
 
 # Trigger after enterprise settings update
+
+# Trigger after org settings update
