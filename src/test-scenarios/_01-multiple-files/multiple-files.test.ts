@@ -51,24 +51,6 @@ describe('Multiple Files Processing', () => {
     it('should process a single TypeScript file with complex structures', async () => {
       const result = await cliRunner.run([programFile, '--format', 'json']);
 
-      // Debug CI failures - throw error with details to see in test output
-      if (
-        result.exitCode !== 0 &&
-        (process.env.CI || process.env.GITHUB_ACTIONS)
-      ) {
-        const debugInfo = {
-          exitCode: result.exitCode,
-          file: programFile,
-          fileExists: require('fs').existsSync(programFile),
-          stdout: result.stdout?.slice(0, 300) || '(empty)',
-          stderr: result.stderr?.slice(0, 300) || '(empty)',
-        };
-        // This will appear in test failure output
-        throw new Error(
-          `CLI failed in CI: ${JSON.stringify(debugInfo, null, 2)}`
-        );
-      }
-
       CLIAssertions.expectSuccess(result);
       const parsed = CLIAssertions.expectValidJson(result);
       CLIAssertions.expectFilesProcessed(parsed, 1);
