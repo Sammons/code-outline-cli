@@ -49,14 +49,36 @@ export class CLIRunner {
     // Default to the built CLI path
     // In tests, __dirname might be in dist folder, so we need to resolve from project root
     const defaultPath = resolve(__dirname, '../../../packages/cli/dist/cli.js');
-    this.cliPath = cliPath || defaultPath;
 
-    // Ensure the CLI exists
-    if (!cliPath && !require('fs').existsSync(this.cliPath)) {
-      // Try alternative path if we're running from dist folder
-      const altPath = resolve(process.cwd(), 'packages/cli/dist/cli.js');
-      if (require('fs').existsSync(altPath)) {
-        this.cliPath = altPath;
+    // Try multiple possible locations for the CLI
+    const possiblePaths = [
+      defaultPath,
+      resolve(process.cwd(), 'packages/cli/dist/cli.js'),
+      resolve(process.cwd(), '../../../packages/cli/dist/cli.js'),
+      resolve(__dirname, '../../../../packages/cli/dist/cli.js'),
+      resolve(__dirname, '../../packages/cli/dist/cli.js'),
+    ];
+
+    if (cliPath) {
+      this.cliPath = cliPath;
+    } else {
+      // Find the first existing path
+      this.cliPath =
+        possiblePaths.find((p) => require('fs').existsSync(p)) || defaultPath;
+
+      // Log for debugging in CI
+      if (
+        process.env.GITHUB_ACTIONS &&
+        !require('fs').existsSync(this.cliPath)
+      ) {
+        console.error('CLI not found. Searched paths:');
+        possiblePaths.forEach((p) => {
+          console.error(
+            `  ${p}: ${require('fs').existsSync(p) ? 'EXISTS' : 'NOT FOUND'}`
+          );
+        });
+        console.error('__dirname:', __dirname);
+        console.error('process.cwd():', process.cwd());
       }
     }
 
