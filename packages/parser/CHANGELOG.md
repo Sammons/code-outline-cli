@@ -1,5 +1,15 @@
 # @code-outline/parser
 
+## 2.0.1
+
+### Patch Changes
+
+- Fix package scopes for npm publishing
+  - Renamed @code-outline/parser to @sammons/code-outline-parser
+  - Renamed @code-outline/formatter to @sammons/code-outline-formatter
+  - Updated all imports and dependencies to use new package names
+  - This allows all packages to be published under the @sammons scope
+
 ## 2.0.0
 
 ### Major Changes
