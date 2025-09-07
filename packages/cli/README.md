@@ -209,6 +209,53 @@ code-outline "**/*.ts" | jq '[.[] | .outline.children[] | select(.type == "funct
 - Node.js >= 20.0.0
 - npm or pnpm
 
+## 📚 Programmatic Usage
+
+You can also use this package programmatically in your Node.js applications:
+
+```javascript
+const { parseFiles } = require('@sammons/code-outline-cli');
+
+// Parse files and get results as a string
+const result = await parseFiles('src/**/*.ts', {
+  format: 'json',
+  depth: 3,
+  namedOnly: true,
+});
+
+console.log(result);
+
+// Save to file
+await parseFiles('src/**/*.ts', {
+  format: 'yaml',
+  output: 'codebase-outline.yaml',
+});
+```
+
+### TypeScript
+
+```typescript
+import {
+  parseFiles,
+  FileProcessor,
+  CLIOutputHandler,
+} from '@sammons/code-outline-cli';
+
+// Simple usage
+const outline = await parseFiles(['src/index.ts', 'src/utils.ts'], {
+  format: 'ascii',
+  depth: 2,
+});
+
+// Advanced usage with individual components
+const processor = new FileProcessor();
+const files = await processor.findFiles('src/**/*.ts');
+const results = await processor.processFiles(files, 3, true);
+
+const outputHandler = new CLIOutputHandler('json');
+outputHandler.formatAndOutput(results);
+```
+
 ## 📚 Related Packages
 
 - [`@sammons/code-outline-parser`](https://www.npmjs.com/package/@sammons/code-outline-parser) - Core parsing functionality
