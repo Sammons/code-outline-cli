@@ -1,5 +1,13 @@
 # @sammons/code-outline-cli
 
+## 2.0.2
+
+### Patch Changes
+
+- Add comprehensive README for npm package
+
+  Added a detailed README with usage examples, installation instructions, and comprehensive documentation to improve the npm package presentation.
+
 ## 2.0.1
 
 ### Patch Changes
