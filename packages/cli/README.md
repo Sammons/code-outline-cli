@@ -1,15 +1,15 @@
 # @sammons/code-outline-cli
 
-A powerful CLI tool that parses JavaScript/TypeScript files using tree-sitter and provides a concise outline of the code structure. Perfect for understanding codebases quickly and generating LLM-friendly code summaries.
+A CLI tool that parses JavaScript/TypeScript files using tree-sitter and provides an outline of the code structure. For understanding codebases and generating LLM-friendly code summaries.
 
 ## ✨ Features
 
-- 🚀 **Fast parsing** using tree-sitter for JavaScript, TypeScript, and TSX files
+- 🚀 **Tree-sitter parsing** for JavaScript, TypeScript, and TSX files
 - 📊 **Multiple output formats**: JSON, YAML, and ASCII tree
 - 🎯 **Configurable depth** limiting for AST traversal
 - 🔍 **Named-only mode** to show only named entities (functions, classes, etc.)
 - ⚡ **Parallel processing** for multiple files
-- 🎨 **Colored output** for better readability in ASCII mode
+- 🎨 **Colored output** in ASCII mode
 - 📁 **Glob pattern support** for file selection
 
 ## 📦 Installation
@@ -169,7 +169,7 @@ code-outline example.ts --format json
 
 ## 🤖 LLM Integration
 
-This tool is perfect for providing code context to Large Language Models:
+This tool can provide code context to Large Language Models:
 
 ```bash
 # Generate a code outline and pipe to your LLM tool

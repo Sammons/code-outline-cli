@@ -1,5 +1,11 @@
 # @sammons/code-outline-cli
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated README to remove marketing language
+
 ## 2.0.2
 
 ### Patch Changes
