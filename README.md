@@ -187,7 +187,7 @@ Each parsed node contains:
 
 ```bash
 # Clone the repository
-git clone https://github.com/sammons-software-llc/glance-with-tree-sitter.git
+git clone https://github.com/sammons2/code-outline-cli.git
 cd glance-with-tree-sitter
 
 # Install dependencies
@@ -304,11 +304,11 @@ code-outline "src/**/*.ts" --format yaml | grep -E "(class_declaration|function_
 
 ## 📄 License
 
-MIT © [Sammons Software LLC](https://github.com/sammons-software-llc)
+MIT © [Sammons Software LLC](https://github.com/sammons2)
 
 ## 🐛 Issues & Support
 
-Found a bug or have a feature request? Please check our [issue tracker](https://github.com/sammons-software-llc/glance-with-tree-sitter/issues).
+Found a bug or have a feature request? Please check our [issue tracker](https://github.com/sammons2/code-outline-cli/issues).
 
 ## 🙏 Acknowledgments
 
@@ -319,5 +319,5 @@ Found a bug or have a feature request? Please check our [issue tracker](https://
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/sammons">Sammons</a> | This is a <a href="https://github.com/sammons-software-llc">Sammons Software LLC</a> Production
+  Made with ❤️ by <a href="https://github.com/sammons2">Sammons</a> | This is a <a href="https://github.com/sammons2">Sammons Software LLC</a> Production
 </p>

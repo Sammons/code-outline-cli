@@ -10,7 +10,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 10
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'dependencies'
       - 'automated'
@@ -28,7 +28,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'dependencies'
       - 'cli'
@@ -47,7 +47,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'dependencies'
       - 'parser'
@@ -66,7 +66,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'dependencies'
       - 'formatter'
@@ -85,7 +85,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'dependencies'
       - 'website'
@@ -104,7 +104,7 @@ updates:
       time: '09:00'
     open-pull-requests-limit: 5
     reviewers:
-      - '@sammons-software-llc'
+      - '@sammons2'
     labels:
       - 'github-actions'
       - 'automated'

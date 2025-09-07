@@ -97,7 +97,7 @@ Supported Files:
   .ts      TypeScript files  
   .tsx     TypeScript JSX files
 
-For more information, visit: https://github.com/sammons-software-llc/glance-with-tree-sitter
+For more information, visit: https://github.com/sammons2/code-outline-cli
 `);
   }
 
