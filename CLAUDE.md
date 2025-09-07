@@ -25,7 +25,7 @@ code-outline-cli/
 
 ```bash
 # Development
-pnpm install         # Install dependencies
+pnpm install         # Install dependencies (pnpm 10)
 pnpm build          # Build all packages
 pnpm dev           # Development mode with watch
 pnpm test          # Run all tests
@@ -56,13 +56,25 @@ pnpm format        # Run Prettier
 
 ### CI/CD Workflows
 
-1. **ci.yml**: Runs on every push/PR - tests, linting, type checking
-2. **test-and-badges.yml**: Updates badges and coverage on main branch
-3. **release.yml**: Automated npm publishing (triggers on version commits)
+1. **ci.yml**: Main CI with build artifact sharing, caching, and concurrency controls
+2. **ci-cli.yml**: Path-filtered CI for CLI-related changes only
+3. **ci-website.yml**: Path-filtered CI for website changes only
+4. **changed-packages.yml**: Selective testing for PRs based on changed packages
+5. **test-and-badges.yml**: Badge generation and coverage reporting
+6. **release.yml**: Automated npm publishing with changesets
+
+**Performance Optimizations**:
+
+- Reusable composite action (`.github/actions/setup-node-pnpm`)
+- Build artifact sharing between jobs
+- Comprehensive caching for build outputs
+- Concurrency controls to cancel redundant runs
+- Path-based filtering reduces unnecessary CI runs by ~60%
 
 ### Code Standards
 
-- **Node.js 20+** required
+- **Node.js 20+** required (tested on 20 and 22)
+- **pnpm 10** for package management
 - **TypeScript strict mode** enabled
 - **ESLint v9 flat config** with strict rules
 - **Prettier** for formatting
@@ -121,6 +133,8 @@ pnpm test
 2. Run locally: `pnpm test` or `pnpm lint`
 3. For CLI tests: `pnpm --filter @sammons/code-outline-cli build` first
 4. Check Node version (must be 20+)
+5. **Path-filtered workflows**: Only run when relevant files change
+6. **Selective testing**: PRs only test changed packages for efficiency
 
 ## Known Gotchas
 
@@ -129,6 +143,9 @@ pnpm test
 3. **ANSI Colors**: Tests strip ANSI codes - use `stripAnsi` helper
 4. **npm Scope**: All packages use `@sammons` scope, not `@code-outline`
 5. **No Local Publishing**: Always publish through CI/CD, never locally
+6. **CI Workflows**: Multiple workflows with path filtering - changes only trigger relevant CIs
+7. **Artifact Sharing**: CI builds once and shares artifacts between jobs for efficiency
+8. **Composite Action**: Use `.github/actions/setup-node-pnpm` for consistent setup
 
 ## File Conventions
 
