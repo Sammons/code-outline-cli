@@ -248,9 +248,24 @@ export class CLIRunner {
    */
   public async testAccess(): Promise<boolean> {
     try {
+      // Check if CLI file exists first
+      if (!require('fs').existsSync(this.cliPath)) {
+        console.error(`CLI not found at: ${this.cliPath}`);
+        console.error(`Current working directory: ${process.cwd()}`);
+        console.error(`__dirname: ${__dirname}`);
+        return false;
+      }
+
       const result = await this.run(['--version'], { timeout: 5000 });
+      if (result.exitCode !== 0) {
+        console.error('CLI --version failed with exit code:', result.exitCode);
+        console.error('CLI path:', this.cliPath);
+        console.error('Stdout:', result.stdout);
+        console.error('Stderr:', result.stderr);
+      }
       return result.exitCode === 0;
-    } catch {
+    } catch (error) {
+      console.error('testAccess error:', error);
       return false;
     }
   }
