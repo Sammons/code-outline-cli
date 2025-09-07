@@ -66,7 +66,12 @@ export class CLIRunner {
       const child = spawn('node', [this.cliPath, ...args], {
         stdio: 'pipe',
         cwd: options.cwd || process.cwd(),
-        env: { ...process.env, ...options.env },
+        env: {
+          ...process.env,
+          FORCE_COLOR: '0',
+          NO_COLOR: '1',
+          ...options.env,
+        },
       });
 
       let stdout = '';
