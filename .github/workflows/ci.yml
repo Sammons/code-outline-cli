@@ -204,13 +204,13 @@ jobs:
         run: |
           # Check each package that should be publishable
           cd packages/cli
-          pnpm pack --dry-run
+          pnpm pack
 
           cd ../parser
-          pnpm pack --dry-run
+          pnpm pack
 
           cd ../formatter
-          pnpm pack --dry-run
+          pnpm pack
 
       - name: Publish to npm (dry run)
         run: |

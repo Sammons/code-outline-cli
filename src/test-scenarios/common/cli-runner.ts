@@ -116,23 +116,35 @@ export class CLIRunner {
 
           const duration = Date.now() - startTime;
 
-          // Debug output for CI failures
-          if (code !== 0 && process.env.CI) {
-            console.error('CLI failed in CI with exit code:', code);
+          // Debug output for failures when running in GitHub Actions
+          if (code !== 0 && (process.env.CI || process.env.GITHUB_ACTIONS)) {
+            console.error('=== CLI FAILURE DEBUG ===');
+            console.error('Exit code:', code);
             console.error('CLI path:', this.cliPath);
             console.error(
               'CLI exists:',
               require('fs').existsSync(this.cliPath)
             );
-            console.error('Args:', args);
+            console.error('Working dir:', process.cwd());
+            console.error('Args:', JSON.stringify(args));
             if (args[0] && !args[0].startsWith('-')) {
+              const argPath = args[0];
+              console.error('First arg path:', argPath);
               console.error(
                 'First arg exists:',
-                require('fs').existsSync(args[0])
+                require('fs').existsSync(argPath)
+              );
+              // Check if it's looking in the right place
+              const fromCwd = require('path').resolve(process.cwd(), argPath);
+              console.error('Resolved from cwd:', fromCwd);
+              console.error(
+                'Exists from cwd:',
+                require('fs').existsSync(fromCwd)
               );
             }
-            console.error('Stdout:', stdout.slice(0, 500));
-            console.error('Stderr:', stderr.slice(0, 500));
+            console.error('Stdout:', stdout || '(empty)');
+            console.error('Stderr:', stderr || '(empty)');
+            console.error('=========================');
           }
 
           resolve({
