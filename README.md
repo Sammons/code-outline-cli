@@ -6,14 +6,14 @@
 ![Version](./badges/version.svg)
 ![License](./badges/license.svg)
 
-A powerful CLI tool that uses tree-sitter to parse JavaScript and TypeScript files, providing structured AST (Abstract Syntax Tree) output in multiple formats. Perfect for code analysis, documentation generation, and understanding project structure.
+A CLI tool that uses tree-sitter to parse JavaScript and TypeScript files, providing structured AST (Abstract Syntax Tree) output in multiple formats. For code analysis, documentation generation, and understanding project structure.
 
 ## ✨ Features
 
-- 🚀 **Fast parsing** using tree-sitter for JavaScript/TypeScript/TSX files
+- 🚀 **Tree-sitter parsing** for JavaScript/TypeScript/TSX files
 - 📊 **Multiple output formats**: ASCII tree view, JSON, and YAML
-- 🎯 **Flexible filtering**: Named-only or all nodes, with depth control
-- 🎨 **Color-coded output** for better readability
+- 🎯 **Filtering**: Named-only or all nodes, with depth control
+- 🎨 **Color-coded output** in terminal
 - 🔍 **Pattern matching** with glob support
 - ⚡ **Parallel processing** for multiple files
 - 🧪 **Comprehensive testing** with 100% coverage
@@ -114,7 +114,7 @@ Provides a hierarchical tree visualization with color-coded node types:
 
 ### JSON Format
 
-Structured JSON output perfect for programmatic processing:
+Structured JSON output for programmatic processing:
 
 ```json
 {
