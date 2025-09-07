@@ -47,8 +47,19 @@ export class CLIRunner {
     defaultTimeout: number = 30000 // 30 seconds
   ) {
     // Default to the built CLI path
-    this.cliPath =
-      cliPath || resolve(__dirname, '../../../packages/cli/dist/cli.js');
+    // In tests, __dirname might be in dist folder, so we need to resolve from project root
+    const defaultPath = resolve(__dirname, '../../../packages/cli/dist/cli.js');
+    this.cliPath = cliPath || defaultPath;
+
+    // Ensure the CLI exists
+    if (!cliPath && !require('fs').existsSync(this.cliPath)) {
+      // Try alternative path if we're running from dist folder
+      const altPath = resolve(process.cwd(), 'packages/cli/dist/cli.js');
+      if (require('fs').existsSync(altPath)) {
+        this.cliPath = altPath;
+      }
+    }
+
     this.defaultTimeout = defaultTimeout;
   }
 
@@ -104,10 +115,30 @@ export class CLIRunner {
           clearTimeout(timeoutHandle);
 
           const duration = Date.now() - startTime;
+
+          // Debug output for CI failures
+          if (code !== 0 && process.env.CI) {
+            console.error('CLI failed in CI with exit code:', code);
+            console.error('CLI path:', this.cliPath);
+            console.error(
+              'CLI exists:',
+              require('fs').existsSync(this.cliPath)
+            );
+            console.error('Args:', args);
+            if (args[0] && !args[0].startsWith('-')) {
+              console.error(
+                'First arg exists:',
+                require('fs').existsSync(args[0])
+              );
+            }
+            console.error('Stdout:', stdout.slice(0, 500));
+            console.error('Stderr:', stderr.slice(0, 500));
+          }
+
           resolve({
             stdout,
             stderr,
-            exitCode: code,
+            exitCode: code ?? 0,
             command: 'node',
             args: [this.cliPath, ...args],
             duration,
