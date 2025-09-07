@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Formatter } from './formatter';
 import type { NodeInfo } from '@code-outline/parser';
 
+// Helper function to strip ANSI color codes for test assertions
+function stripAnsi(str: string): string {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\u001b\[[0-9;]*m/g, '');
+}
+
 // Test data
 const sampleNodeInfo: NodeInfo = {
   type: 'program',
@@ -176,7 +182,7 @@ describe('Formatter', () => {
     });
 
     it('should format results with colored ASCII tree structure', () => {
-      const result = formatter.format(sampleResults);
+      const result = stripAnsi(formatter.format(sampleResults));
 
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
@@ -190,7 +196,7 @@ describe('Formatter', () => {
     });
 
     it('should display hierarchical structure with tree symbols', () => {
-      const result = formatter.format(sampleResults);
+      const result = stripAnsi(formatter.format(sampleResults));
 
       // Should contain tree structure symbols
       expect(result).toContain('├─');
@@ -201,7 +207,7 @@ describe('Formatter', () => {
     });
 
     it('should include position information', () => {
-      const result = formatter.format(sampleResults);
+      const result = stripAnsi(formatter.format(sampleResults));
 
       // Should contain position information in brackets [line:column]
       expect(result).toMatch(/\[\d+:\d+\]/);
@@ -230,13 +236,13 @@ describe('Formatter', () => {
         },
       ];
 
-      const result = formatter.format(resultsWithUnnamed);
+      const result = stripAnsi(formatter.format(resultsWithUnnamed));
       expect(result).toContain('statement_block');
       expect(result).not.toContain(': undefined');
     });
 
     it('should display different node types with appropriate formatting', () => {
-      const result = formatter.format(sampleResults);
+      const result = stripAnsi(formatter.format(sampleResults));
 
       // Different node types should be present
       expect(result).toContain('function_declaration');
@@ -245,14 +251,14 @@ describe('Formatter', () => {
     });
 
     it('should show nested children with proper indentation', () => {
-      const result = formatter.format(sampleResults);
+      const result = stripAnsi(formatter.format(sampleResults));
 
       // Should have indented children (method_definition is now directly under class with 2 spaces)
       expect(result).toMatch(/\s{2}└─.*method_definition/);
     });
 
     it('should handle empty results gracefully', () => {
-      const result = formatter.format([]);
+      const result = stripAnsi(formatter.format([]));
 
       expect(result).toBe('');
     });
@@ -263,7 +269,7 @@ describe('Formatter', () => {
         { file: 'empty2.js', outline: null },
       ];
 
-      const result = formatter.format(nullOnlyResults);
+      const result = stripAnsi(formatter.format(nullOnlyResults));
       expect(result).toBe('');
     });
   });
@@ -380,7 +386,7 @@ describe('Formatter', () => {
         },
       ];
 
-      const result = formatter.format(results);
+      const result = stripAnsi(formatter.format(results));
 
       // Should contain line number format (:line) for navigation (line is 1-indexed, so row 5 becomes line 6)
       expect(result).toContain(':6');
