@@ -121,7 +121,7 @@ describe('CLIOrchestrator', () => {
 
       expect(mockConsoleError).toHaveBeenCalledWith('Error: Invalid arguments');
       expect(mockArgumentParser.printHelp).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -144,7 +144,7 @@ describe('CLIOrchestrator', () => {
       await orchestrator.run();
 
       expect(mockConsoleError).toHaveBeenCalledWith('No files found');
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -178,7 +178,7 @@ describe('CLIOrchestrator', () => {
       await orchestrator.run();
 
       expect(mockConsoleError).toHaveBeenCalledWith('Processing failed');
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(process.exit).toHaveBeenCalledWith(1);
     });
   });

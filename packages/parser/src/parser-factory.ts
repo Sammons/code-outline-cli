@@ -2,9 +2,9 @@ import TreeSitterParser from 'tree-sitter';
 import JavaScript from 'tree-sitter-javascript';
 import type { SupportedFileType } from './file-reader';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const TypeScript = require('tree-sitter-typescript').typescript;
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const TSX = require('tree-sitter-typescript').tsx;
 
 /**

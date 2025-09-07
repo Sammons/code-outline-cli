@@ -127,7 +127,7 @@ describe('CLIArgumentParser', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('glance-with-tree-sitter')
       );
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(process.exit).toHaveBeenCalledWith(0);
     });
 
@@ -157,7 +157,7 @@ describe('CLIArgumentParser', () => {
       parser.parse();
 
       expect(mockConsoleLog).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(process.exit).toHaveBeenCalledWith(0);
     });
 
