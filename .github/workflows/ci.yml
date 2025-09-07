@@ -145,7 +145,7 @@ jobs:
             
             # Test CLI with sample TypeScript files
             if [ -d "../../packages/parser/src" ]; then
-              node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 --output /tmp/test-output.json
+              node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 > /tmp/test-output.json
               echo "CLI test completed"
             fi
           else

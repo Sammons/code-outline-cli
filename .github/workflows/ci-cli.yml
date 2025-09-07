@@ -77,5 +77,5 @@ jobs:
           cd packages/cli
           node dist/cli.js --version
           node dist/cli.js --help
-          node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 --output /tmp/test-output.json
+          node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 > /tmp/test-output.json
           echo "CLI integration test passed"
