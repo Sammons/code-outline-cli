@@ -15,8 +15,32 @@ describe('Multiple Files Processing', () => {
     testFs.createDir(testDir);
 
     // Use the pre-created asset files
-    programFile = resolve(__dirname, 'assets', 'program-file.ts');
-    utilityFile = resolve(__dirname, 'assets', 'utility-file.ts');
+    // Try to find assets relative to __dirname first, then fall back to project root
+    const assetPath1 = resolve(__dirname, 'assets', 'program-file.ts');
+    const assetPath2 = resolve(
+      process.cwd(),
+      'src/test-scenarios/_01-multiple-files/assets/program-file.ts'
+    );
+
+    if (require('fs').existsSync(assetPath1)) {
+      programFile = assetPath1;
+      utilityFile = resolve(__dirname, 'assets', 'utility-file.ts');
+    } else if (require('fs').existsSync(assetPath2)) {
+      programFile = assetPath2;
+      utilityFile = resolve(
+        process.cwd(),
+        'src/test-scenarios/_01-multiple-files/assets/utility-file.ts'
+      );
+    } else {
+      // Last resort - log error and use the original path
+      if (process.env.CI || process.env.GITHUB_ACTIONS) {
+        console.error('WARNING: Could not find test assets');
+        console.error('  Tried:', assetPath1);
+        console.error('  Tried:', assetPath2);
+      }
+      programFile = assetPath1;
+      utilityFile = resolve(__dirname, 'assets', 'utility-file.ts');
+    }
   });
 
   afterEach(() => {

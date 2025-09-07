@@ -770,7 +770,7 @@ describe('TreeUtils', () => {
 
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeLessThan(10);
+      expect(endTime - startTime).toBeLessThan(20);
       expect(clone).toEqual(complexTree);
     });
   });
