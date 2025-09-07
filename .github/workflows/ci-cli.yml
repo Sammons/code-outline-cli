@@ -1,0 +1,81 @@
+name: CLI CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/cli/**'
+      - 'packages/parser/**'
+      - 'packages/formatter/**'
+      - '.github/workflows/ci-cli.yml'
+      - '.github/actions/**'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/cli/**'
+      - 'packages/parser/**'
+      - 'packages/formatter/**'
+      - '.github/workflows/ci-cli.yml'
+      - '.github/actions/**'
+      - 'pnpm-lock.yaml'
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+concurrency:
+  group: cli-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test CLI
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['20', '22']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/
+            packages/*/lib/
+          key: cli-build-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('packages/{cli,parser,formatter}/src/**') }}
+          restore-keys: |
+            cli-build-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            cli-build-${{ runner.os }}-${{ matrix.node-version }}-
+
+      - name: Build CLI packages
+        run: |
+          pnpm --filter @sammons/code-outline-parser build
+          pnpm --filter @sammons/code-outline-formatter build
+          pnpm --filter @sammons/code-outline-cli build
+
+      - name: Run CLI tests
+        run: |
+          pnpm --filter @sammons/code-outline-parser test:run
+          pnpm --filter @sammons/code-outline-formatter test:run
+          pnpm --filter @sammons/code-outline-cli test:run
+
+      - name: Test CLI functionality
+        run: |
+          cd packages/cli
+          node dist/cli.js --version
+          node dist/cli.js --help
+          node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 --output /tmp/test-output.json
+          echo "CLI integration test passed"

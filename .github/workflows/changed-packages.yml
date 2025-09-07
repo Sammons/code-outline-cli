@@ -1,0 +1,123 @@
+name: Changed Packages CI
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+concurrency:
+  group: changed-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect Changed Packages
+    runs-on: ubuntu-latest
+    outputs:
+      cli: ${{ steps.changes.outputs.cli }}
+      parser: ${{ steps.changes.outputs.parser }}
+      formatter: ${{ steps.changes.outputs.formatter }}
+      website: ${{ steps.changes.outputs.website }}
+      changed-packages: ${{ steps.list-changed.outputs.packages }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Need full history for change detection
+
+      - name: Detect file changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            cli:
+              - 'packages/cli/**'
+            parser:
+              - 'packages/parser/**'
+            formatter:
+              - 'packages/formatter/**'
+            website:
+              - 'packages/website/**'
+
+      - name: List changed packages
+        id: list-changed
+        run: |
+          PACKAGES=""
+          if [ "${{ steps.changes.outputs.cli }}" == "true" ]; then
+            PACKAGES="${PACKAGES}@sammons/code-outline-cli,"
+          fi
+          if [ "${{ steps.changes.outputs.parser }}" == "true" ]; then
+            PACKAGES="${PACKAGES}@sammons/code-outline-parser,"
+          fi
+          if [ "${{ steps.changes.outputs.formatter }}" == "true" ]; then
+            PACKAGES="${PACKAGES}@sammons/code-outline-formatter,"
+          fi
+          if [ "${{ steps.changes.outputs.website }}" == "true" ]; then
+            PACKAGES="${PACKAGES}@code-outline/website,"
+          fi
+          # Remove trailing comma
+          PACKAGES=${PACKAGES%,}
+          echo "Changed packages: $PACKAGES"
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+
+  test-changed:
+    name: Test Changed Packages
+    needs: detect-changes
+    if: needs.detect-changes.outputs.changed-packages != ''
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['20', '22']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/*/dist/
+            packages/*/lib/
+          key: selective-build-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            selective-build-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            selective-build-${{ runner.os }}-${{ matrix.node-version }}-
+
+      - name: Build changed packages and dependencies
+        run: |
+          IFS=',' read -ra PACKAGES <<< "${{ needs.detect-changes.outputs.changed-packages }}"
+          for package in "${PACKAGES[@]}"; do
+            echo "Building $package and its dependencies..."
+            pnpm --filter "$package..." build
+          done
+
+      - name: Test changed packages
+        run: |
+          IFS=',' read -ra PACKAGES <<< "${{ needs.detect-changes.outputs.changed-packages }}"
+          for package in "${PACKAGES[@]}"; do
+            echo "Testing $package..."
+            pnpm --filter "$package" test:run || exit 1
+          done
+
+      - name: Run integration tests if CLI changed
+        if: needs.detect-changes.outputs.cli == 'true'
+        run: |
+          cd packages/cli
+          node dist/cli.js --version
+          node dist/cli.js --help
+          node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 --output /tmp/test-output.json
+          echo "CLI integration test passed"
