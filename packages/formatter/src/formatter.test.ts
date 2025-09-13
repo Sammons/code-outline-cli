@@ -287,7 +287,7 @@ describe('Formatter', () => {
       expect(result).toContain('<Outline>');
       expect(result).toContain('</Outline>');
       expect(result).toContain(
-        'This is a compressed code outline for LLM consumption'
+        '# Ultra-compressed code outline for LLM consumption'
       );
     });
 
@@ -295,7 +295,7 @@ describe('Formatter', () => {
       const result = formatter.format(sampleResults);
 
       expect(result).toContain(
-        'This is a compressed code outline for LLM consumption'
+        '# Ultra-compressed code outline for LLM consumption'
       );
       expect(result).toContain(
         'The outline shows the structure and organization of the codebase'
@@ -374,7 +374,7 @@ describe('Formatter', () => {
       expect(result).toContain('<Outline>');
       expect(result).toContain('</Outline>');
       expect(result).toContain(
-        'This is a compressed code outline for LLM consumption'
+        '# Ultra-compressed code outline for LLM consumption'
       );
     });
 

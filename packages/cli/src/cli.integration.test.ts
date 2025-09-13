@@ -149,7 +149,7 @@ export { greet, Person };
       expect(result.stdout).toContain('<Outline>');
       expect(result.stdout).toContain('</Outline>');
       expect(result.stdout).toContain(
-        'This is a compressed code outline for LLM consumption'
+        '# Ultra-compressed code outline for LLM consumption'
       );
       expect(result.stdout).toContain('function_declaration: greet');
     });
@@ -258,7 +258,7 @@ export { greet, Person };
       expect(result.stdout).toContain('<Outline>');
       expect(result.stdout).toContain('</Outline>');
       expect(result.stdout).toContain(
-        'This is a compressed code outline for LLM consumption'
+        '# Ultra-compressed code outline for LLM consumption'
       );
       expect(result.stdout).toContain('File: test/temp/test.js');
       expect(result.stdout).toContain('function_declaration: greet');
