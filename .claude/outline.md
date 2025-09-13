@@ -268,136 +268,6 @@ let_const createUser 40
 exp_UserService_validateEmail_c... 48
 exp_User_UserRole 49
 exp_Status 50
-<p2>/formatter.test.ts (614L)
-imp_describe_it_expect_beforeEach 1
-imp_Formatter 2
-imp_NodeInfo 3
-fn_stripAnsi 6
- blk 6
-let_const sampleNodeInfo 12
- var_sampleNodeInfo 12
-let_const sampleResults 48
- var_sampleResults 48
-<p2>/formatter.ts (415L)
-imp_*asYAML 1
-imp_pc 2
-imp_relative 3
-imp_readFileSync 4
-imp_NodeInfo 5
-exp_Formatter 7
- cls_Formatter 7
-  cb 7
-   mth_constructor 8
-    blk 11
-   mth_format 13
-    blk 13
-     let_const cwd 15
-      var_cwd 15
-     let_const resultsWithRelativePaths 16
-      var_resultsWithRelativePaths 16
-   mth_getRelativePath 38
-    blk 38
-     let_const relativePath 39
-      var_relativePath 39
-   mth_formatJSON 44
-    blk 50
-     let_const filtered 51
-      var_filtered 51
-     let_const enhanced 53
-      var_enhanced 53
-   mth_formatYAML 61
-    blk 67
-     let_const filtered 68
-      var_filtered 68
-     let_const enhanced 70
-      var_enhanced 70
-   mth_addFileToNodes 78
-    blk 81
-     let_const enhancedNode 82
-      var_enhancedNode 82
-     blk 85
-     blk 90
-   mth_formatASCII 99
-    blk 105
-     let_const output 106
-      var_output 106
-   mth_formatNodeASCII 129
-    blk 134
-     let_const lines 135
-      var_lines 135
-     let_const indentStr 136
-      var_indentStr 136
-     let_const prefix 137
-      var_prefix 137
-     let_let nodeStr 139
-      var_nodeStr 139
-     let_const typeColors 141
-      var_typeColors 141
-     let_const colorFn 153
-      var_colorFn 153
-     blk 155
-     blk 166
-     blk 172
-      for 173
-       let_let i 173
-        var_i 173
-       blk 173
-        let_const child 174
-         var_child 174
-        let_const isLast 175
-         var_isLast 175
-        let_const childPrefix 176
-         var_childPrefix 176
-   mth_formatLLMText 186
-    blk 192
-     let_const filtered 193
-      var_filtered 193
-     let_const pathMap 196
-      var_pathMap 196
-     let_const pathCounter 197
-      var_pathCounter 197
-     let_const processedPaths 198
-      var_processedPaths 198
-     let_const nodeTypeMap 205
-      var_nodeTypeMap 205
-     let_const output 208
-      var_output 208
-     blk 220
-     blk 228
-   mth_extractCommonPaths 259
-    blk 263
-     let_const pathParts 265
-      var_pathParts 265
-     let_const worthwhilePaths 276
-      var_worthwhilePaths 276
-   mth_createNodeTypeAbbreviations 293
-    blk 295
-     let_const typeFrequency 296
-      var_typeFrequency 296
-     let_const countTypes 298
-      var_countTypes 298
-     let_const abbreviations 310
-      var_abbreviations 310
-     let_const commonAbbreviations 311
-      var_commonAbbreviations 311
-   mth_compressPath 337
-    blk 337
-     let_let compressed 338
-      var_compressed 338
-     let_const sortedPaths 341
-      var_sortedPaths 341
-   mth_formatNodeUltraCompressed 355
-    blk 359
-     blk 360
-     let_const lines 364
-      var_lines 364
-   mth_getFileLineCount 406
-    blk 406
-     blk 407
-      let_const content 408
-       var_content 408
-<p2>/index.ts (2L)
-exp 1
 packages/parser/src/ast-traverser.ts (296L)
 imp_TreeSitterParser 1
 imp_NodeInfo 2
@@ -795,6 +665,136 @@ exp_validateDepthValue 278
    blk 286
     let_const validated 287
      var_validated 287
+<p2>/formatter.test.ts (614L)
+imp_describe_it_expect_beforeEach 1
+imp_Formatter 2
+imp_NodeInfo 3
+fn_stripAnsi 6
+ blk 6
+let_const sampleNodeInfo 12
+ var_sampleNodeInfo 12
+let_const sampleResults 48
+ var_sampleResults 48
+<p2>/formatter.ts (415L)
+imp_*asYAML 1
+imp_pc 2
+imp_relative 3
+imp_readFileSync 4
+imp_NodeInfo 5
+exp_Formatter 7
+ cls_Formatter 7
+  cb 7
+   mth_constructor 8
+    blk 11
+   mth_format 13
+    blk 13
+     let_const cwd 15
+      var_cwd 15
+     let_const resultsWithRelativePaths 16
+      var_resultsWithRelativePaths 16
+   mth_getRelativePath 38
+    blk 38
+     let_const relativePath 39
+      var_relativePath 39
+   mth_formatJSON 44
+    blk 50
+     let_const filtered 51
+      var_filtered 51
+     let_const enhanced 53
+      var_enhanced 53
+   mth_formatYAML 61
+    blk 67
+     let_const filtered 68
+      var_filtered 68
+     let_const enhanced 70
+      var_enhanced 70
+   mth_addFileToNodes 78
+    blk 81
+     let_const enhancedNode 82
+      var_enhancedNode 82
+     blk 85
+     blk 90
+   mth_formatASCII 99
+    blk 105
+     let_const output 106
+      var_output 106
+   mth_formatNodeASCII 129
+    blk 134
+     let_const lines 135
+      var_lines 135
+     let_const indentStr 136
+      var_indentStr 136
+     let_const prefix 137
+      var_prefix 137
+     let_let nodeStr 139
+      var_nodeStr 139
+     let_const typeColors 141
+      var_typeColors 141
+     let_const colorFn 153
+      var_colorFn 153
+     blk 155
+     blk 166
+     blk 172
+      for 173
+       let_let i 173
+        var_i 173
+       blk 173
+        let_const child 174
+         var_child 174
+        let_const isLast 175
+         var_isLast 175
+        let_const childPrefix 176
+         var_childPrefix 176
+   mth_formatLLMText 186
+    blk 192
+     let_const filtered 193
+      var_filtered 193
+     let_const pathMap 196
+      var_pathMap 196
+     let_const pathCounter 197
+      var_pathCounter 197
+     let_const processedPaths 198
+      var_processedPaths 198
+     let_const nodeTypeMap 205
+      var_nodeTypeMap 205
+     let_const output 208
+      var_output 208
+     blk 220
+     blk 228
+   mth_extractCommonPaths 259
+    blk 263
+     let_const pathParts 265
+      var_pathParts 265
+     let_const worthwhilePaths 276
+      var_worthwhilePaths 276
+   mth_createNodeTypeAbbreviations 293
+    blk 295
+     let_const typeFrequency 296
+      var_typeFrequency 296
+     let_const countTypes 298
+      var_countTypes 298
+     let_const abbreviations 310
+      var_abbreviations 310
+     let_const commonAbbreviations 311
+      var_commonAbbreviations 311
+   mth_compressPath 337
+    blk 337
+     let_let compressed 338
+      var_compressed 338
+     let_const sortedPaths 341
+      var_sortedPaths 341
+   mth_formatNodeUltraCompressed 355
+    blk 359
+     blk 360
+     let_const lines 364
+      var_lines 364
+   mth_getFileLineCount 406
+    blk 406
+     blk 407
+      let_const content 408
+       var_content 408
+<p2>/index.ts (2L)
+exp 1
 <p1>/base-extractor.ts (120L)
 imp_TreeSitterParser 1
 exp_BaseExtractor 6

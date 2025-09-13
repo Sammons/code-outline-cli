@@ -24,7 +24,10 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
-    "badges": "node scripts/badge-generator.js"
+    "badges": "node scripts/badge-generator.js",
+    "docs:check": "tsx scripts/check-docs-current.ts --exit-code",
+    "docs:update": "tsx scripts/generate-docs.ts",
+    "docs:validate": "tsx scripts/validate-generated-docs.ts"
   },
   "keywords": [
     "tree-sitter",

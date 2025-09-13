@@ -36,3 +36,6 @@ coverage/
 # Test temp files
 test/temp/
 .claude/outline.md
+
+# Generated documentation files
+packages/website/public/data/*.json

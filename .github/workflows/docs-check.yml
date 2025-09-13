@@ -1,0 +1,79 @@
+name: Documentation Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/cli/package.json'
+      - 'packages/parser/src/file-reader.ts'
+      - 'packages/parser/src/types.ts'
+      - 'scripts/generate-docs.ts'
+      - 'scripts/check-docs-current.ts'
+      - 'scripts/validate-generated-docs.ts'
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+concurrency:
+  group: docs-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check-docs:
+    name: Check Documentation Currency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '20'
+
+      - name: Build packages for docs check
+        run: pnpm build
+
+      - name: Check if documentation is current
+        run: pnpm docs:check
+        id: docs-check
+        continue-on-error: true
+
+      - name: Generate documentation if needed
+        if: steps.docs-check.outcome == 'failure'
+        run: pnpm docs:update
+
+      - name: Validate generated documentation
+        if: steps.docs-check.outcome == 'failure'
+        run: pnpm docs:validate
+
+      - name: Check for uncommitted changes
+        if: steps.docs-check.outcome == 'failure'
+        run: |
+          if [ -n "$(git status --porcelain packages/website/public/data/)" ]; then
+            echo "❌ Documentation files are outdated and need to be regenerated."
+            echo "Please run 'pnpm docs:update' locally and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git status --porcelain packages/website/public/data/ || true
+            echo ""
+            echo "To fix this:"
+            echo "1. Run: pnpm docs:update"
+            echo "2. Commit the updated documentation files"
+            echo "3. Push the changes"
+            exit 1
+          else
+            echo "✅ Documentation is current"
+          fi
+
+      - name: Documentation status summary
+        run: |
+          if [ "${{ steps.docs-check.outcome }}" = "success" ]; then
+            echo "✅ Documentation is up to date"
+          else
+            echo "🔄 Documentation was regenerated during check"
+          fi

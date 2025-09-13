@@ -47,6 +47,31 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
+      - name: Cache docs data
+        uses: actions/cache@v4
+        with:
+          path: packages/website/public/data/
+          key: docs-data-${{ hashFiles('packages/cli/package.json') }}
+          restore-keys: |
+            docs-data-
+
+      - name: Generate documentation data
+        run: |
+          echo "🔄 Checking if documentation needs generation..."
+          pnpm docs:check || {
+            echo "📝 Generating documentation data..."
+            pnpm docs:update || {
+              echo "⚠️ Documentation generation failed, continuing with cached/existing data"
+            }
+          }
+
+      - name: Validate generated documentation
+        run: |
+          pnpm docs:validate || {
+            echo "⚠️ Documentation validation failed, but build will continue"
+            exit 0
+          }
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

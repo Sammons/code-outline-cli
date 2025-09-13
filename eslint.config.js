@@ -12,7 +12,11 @@ module.exports = [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
-        project: ['./tsconfig.json', './packages/*/tsconfig.json'],
+        project: [
+          './tsconfig.json',
+          './packages/*/tsconfig.json',
+          './tsconfig.scripts.json',
+        ],
         tsconfigRootDir: __dirname,
       },
       globals: {
@@ -134,7 +138,28 @@ module.exports = [
       'no-console': 'off',
     },
   },
-  // Node.js config files
+  // Scripts directory TypeScript files
+  {
+    files: ['scripts/**/*.ts'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        project: './tsconfig.scripts.json',
+        tsconfigRootDir: __dirname,
+      },
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
+  // Node.js config files and scripts
   {
     files: ['*.config.js', '**/*.config.js', 'scripts/**/*.js'],
     languageOptions: {

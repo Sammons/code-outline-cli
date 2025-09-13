@@ -52,6 +52,25 @@ jobs:
             website-build-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
             website-build-${{ runner.os }}-
 
+      - name: Cache documentation data
+        uses: actions/cache@v4
+        with:
+          path: packages/website/public/data/
+          key: docs-data-${{ hashFiles('packages/cli/package.json') }}
+          restore-keys: |
+            docs-data-
+
+      - name: Build packages for documentation
+        run: pnpm build
+
+      - name: Generate documentation data
+        run: pnpm docs:check || pnpm docs:update
+        continue-on-error: true # Fail-safe: continue even if docs generation fails
+
+      - name: Validate documentation data
+        run: pnpm docs:validate
+        continue-on-error: true # Fail-safe: continue even if validation fails
+
       - name: Build website
         run: pnpm --filter @code-outline/website build
 
