@@ -61,6 +61,7 @@ describe('CLIArgumentParser', () => {
           depth: '5',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: false,
           version: false,
         },
@@ -79,6 +80,7 @@ describe('CLIArgumentParser', () => {
       expect(result.options.format).toBe('json');
       expect(result.options.depth).toBe(5);
       expect(result.options.namedOnly).toBe(true);
+      expect(result.options.llmtext).toBe(false);
       expect(result.pattern).toBe('src/**/*.ts');
     });
 
@@ -89,6 +91,7 @@ describe('CLIArgumentParser', () => {
           depth: 'Infinity',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: false,
           version: false,
         },
@@ -106,6 +109,7 @@ describe('CLIArgumentParser', () => {
           depth: 'Infinity',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: true,
           version: false,
         },
@@ -138,6 +142,7 @@ describe('CLIArgumentParser', () => {
           depth: 'Infinity',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: false,
           version: true,
         },
@@ -168,6 +173,7 @@ describe('CLIArgumentParser', () => {
           depth: 'Infinity',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: false,
           version: false,
         },
@@ -195,6 +201,7 @@ describe('CLIArgumentParser', () => {
           depth: '0',
           'named-only': true,
           all: false,
+          llmtext: false,
           help: false,
           version: false,
         },
@@ -222,6 +229,7 @@ describe('CLIArgumentParser', () => {
           depth: 'Infinity',
           'named-only': true,
           all: true,
+          llmtext: false,
           help: false,
           version: false,
         },
@@ -240,6 +248,64 @@ describe('CLIArgumentParser', () => {
       const result = parser.parse();
 
       expect(result.options.namedOnly).toBe(false);
+    });
+
+    it('should handle --llmtext flag correctly', () => {
+      mockParseArgs.mockReturnValue({
+        values: {
+          format: 'json',
+          depth: 'Infinity',
+          'named-only': true,
+          all: false,
+          llmtext: true,
+          help: false,
+          version: false,
+        },
+        positionals: ['test.js'],
+      });
+
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'json' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
+
+      const result = parser.parse();
+
+      expect(result.options.llmtext).toBe(true);
+      expect(result.options.format).toBe('llmtext'); // Should override format
+    });
+
+    it('should override format when --llmtext flag is provided', () => {
+      mockParseArgs.mockReturnValue({
+        values: {
+          format: 'yaml',
+          depth: 'Infinity',
+          'named-only': true,
+          all: false,
+          llmtext: true,
+          help: false,
+          version: false,
+        },
+        positionals: ['test.js'],
+      });
+
+      mockValidateFormat.mockReturnValue({
+        success: true,
+        value: 'yaml' as any,
+      });
+      mockValidateDepthValue.mockReturnValue({
+        success: true,
+        value: Infinity,
+      });
+
+      const result = parser.parse();
+
+      expect(result.options.llmtext).toBe(true);
+      expect(result.options.format).toBe('llmtext'); // Should override original yaml format
     });
   });
 
@@ -393,7 +459,13 @@ describe('CLIOutputHandler', () => {
     it('should create formatter with correct format', () => {
       new CLIOutputHandler('yaml' as any);
 
-      expect(mockFormatter).toHaveBeenCalledWith('yaml');
+      expect(mockFormatter).toHaveBeenCalledWith('yaml', undefined);
+    });
+
+    it('should create formatter with llmtext flag', () => {
+      new CLIOutputHandler('llmtext' as any, true);
+
+      expect(mockFormatter).toHaveBeenCalledWith('llmtext', true);
     });
   });
 

@@ -411,7 +411,7 @@ describe('types.ts', () => {
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
           expect(result.error).toBe(
-            `Invalid format "${format}". Must be one of: json, yaml, ascii`
+            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
           );
         });
       });
@@ -430,7 +430,7 @@ describe('types.ts', () => {
           expect(result.success).toBe(false);
           expect(result.value).toBeUndefined();
           expect(result.error).toBe(
-            `Invalid format "${format}". Must be one of: json, yaml, ascii`
+            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
           );
         });
       });
@@ -847,11 +847,11 @@ describe('types.ts', () => {
     describe('OUTPUT_FORMATS', () => {
       it('should be a readonly array', () => {
         expect(Array.isArray(OUTPUT_FORMATS)).toBe(true);
-        expect(OUTPUT_FORMATS.length).toBe(3);
+        expect(OUTPUT_FORMATS.length).toBe(4);
       });
 
       it('should contain expected output formats', () => {
-        expect(OUTPUT_FORMATS).toEqual(['json', 'yaml', 'ascii']);
+        expect(OUTPUT_FORMATS).toEqual(['json', 'yaml', 'ascii', 'llmtext']);
       });
 
       it('should not contain duplicates', () => {

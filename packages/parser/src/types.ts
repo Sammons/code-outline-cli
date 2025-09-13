@@ -190,7 +190,7 @@ export function validateDepth(depth: string): number {
 }
 
 // Output format types
-export const OUTPUT_FORMATS = ['json', 'yaml', 'ascii'] as const;
+export const OUTPUT_FORMATS = ['json', 'yaml', 'ascii', 'llmtext'] as const;
 export type OutputFormat = (typeof OUTPUT_FORMATS)[number];
 
 // Type guard for output format validation

@@ -75,6 +75,8 @@ export { greet, Person };
       expect(result.stdout).toContain('--format');
       expect(result.stdout).toContain('--depth');
       expect(result.stdout).toContain('--named-only');
+      expect(result.stdout).toContain('--llmtext');
+      expect(result.stdout).toContain('llmtext');
     });
 
     it('should show version when --version flag is used', async () => {
@@ -92,7 +94,7 @@ export { greet, Person };
     });
 
     it('should accept valid format options', async () => {
-      const formats = ['json', 'yaml', 'ascii'];
+      const formats = ['json', 'yaml', 'ascii', 'llmtext'];
 
       for (const format of formats) {
         const result = await runCLI([testFile, '--format', format]);
@@ -138,6 +140,30 @@ export { greet, Person };
 
       // Both should work, but --all should generally produce more output
       // (though this depends on the specific file content)
+    });
+
+    it('should handle --llmtext flag correctly', async () => {
+      const result = await runCLI([testFile, '--llmtext']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('<Outline>');
+      expect(result.stdout).toContain('</Outline>');
+      expect(result.stdout).toContain(
+        'This is a compressed code outline for LLM consumption'
+      );
+      expect(result.stdout).toContain('function_declaration: greet');
+    });
+
+    it('should override format when --llmtext flag is provided', async () => {
+      // Test that --llmtext overrides --format
+      const result = await runCLI([testFile, '--format', 'json', '--llmtext']);
+
+      expect(result.exitCode).toBe(0);
+      // Should produce llmtext format, not JSON
+      expect(result.stdout).toContain('<Outline>');
+      expect(result.stdout).toContain('</Outline>');
+      // Should not be valid JSON
+      expect(() => JSON.parse(result.stdout)).toThrow();
     });
   });
 
@@ -223,6 +249,24 @@ export { greet, Person };
       expect(result.stdout).toContain('📁');
       expect(result.stdout).toContain('test.js');
       expect(result.stdout).toContain('function_declaration'); // program is now implicit as the file root
+    });
+
+    it('should produce LLMText output', async () => {
+      const result = await runCLI([testFile, '--format', 'llmtext']);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('<Outline>');
+      expect(result.stdout).toContain('</Outline>');
+      expect(result.stdout).toContain(
+        'This is a compressed code outline for LLM consumption'
+      );
+      expect(result.stdout).toContain('File: test/temp/test.js');
+      expect(result.stdout).toContain('function_declaration: greet');
+      expect(result.stdout).toContain('class_declaration: Person');
+      // Should not contain decorative symbols
+      expect(result.stdout).not.toContain('📁');
+      expect(result.stdout).not.toContain('├─');
+      expect(result.stdout).not.toContain('└─');
     });
   });
 

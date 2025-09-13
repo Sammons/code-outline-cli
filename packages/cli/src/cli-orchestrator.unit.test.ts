@@ -80,6 +80,7 @@ describe('CLIOrchestrator', () => {
         format: 'json' as const,
         depth: 5,
         namedOnly: true,
+        llmtext: false,
         help: false,
         version: false,
       };
@@ -106,7 +107,10 @@ describe('CLIOrchestrator', () => {
         mockOptions.depth,
         mockOptions.namedOnly
       );
-      expect(CLIOutputHandler).toHaveBeenCalledWith(mockOptions.format);
+      expect(CLIOutputHandler).toHaveBeenCalledWith(
+        mockOptions.format,
+        mockOptions.llmtext
+      );
       expect(mockOutputHandler.formatAndOutput).toHaveBeenCalledWith(
         mockResults
       );

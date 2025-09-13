@@ -12,6 +12,7 @@ export interface CliOptions {
   format: OutputFormat;
   depth: number;
   namedOnly: boolean;
+  llmtext: boolean;
   help: boolean;
   version: boolean;
 }
@@ -67,10 +68,11 @@ Arguments:
   <pattern>        Glob pattern to match files (e.g., "src/**/*.ts", "*.js")
 
 Options:
-  -f, --format <type>    Output format: ascii, json, or yaml (default: ascii)
+  -f, --format <type>    Output format: ascii, json, yaml, or llmtext (default: ascii)
   -d, --depth <n>        Maximum AST depth to traverse (default: Infinity)
   -a, --all              Show all nodes, including unnamed ones
       --named-only       Show only named entities (default: true)
+      --llmtext          Use LLM-optimized compressed text format
   -h, --help             Show this help message
   -v, --version          Show version number
 
@@ -78,6 +80,7 @@ Output Formats:
   ascii    Tree-like visualization with color-coded syntax (default)
   json     Structured JSON output for programmatic processing
   yaml     Human-readable YAML format
+  llmtext  Compressed text format optimized for LLM consumption
 
 Examples:
   # Parse all TypeScript files in src directory
@@ -124,6 +127,10 @@ For more information, visit: https://github.com/sammons2/code-outline-cli
           type: 'boolean',
           default: false,
         },
+        llmtext: {
+          type: 'boolean',
+          default: false,
+        },
         help: {
           type: 'boolean',
           short: 'h',
@@ -163,6 +170,11 @@ For more information, visit: https://github.com/sammons2/code-outline-cli
     const namedOnly = values.all
       ? false
       : this.safeExtractValue(values['named-only'], true);
+
+    const llmtext = this.safeExtractValue(values.llmtext, false);
+
+    // If --llmtext flag is provided, override format to 'llmtext'
+    const finalFormat = llmtext ? 'llmtext' : format;
 
     const pattern = positionals[0];
 
@@ -209,9 +221,10 @@ For more information, visit: https://github.com/sammons2/code-outline-cli
 
     return {
       options: {
-        format,
+        format: finalFormat,
         depth,
         namedOnly,
+        llmtext,
         help: false,
         version: false,
       },

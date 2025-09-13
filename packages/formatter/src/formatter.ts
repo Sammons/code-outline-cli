@@ -4,7 +4,10 @@ import { relative } from 'node:path';
 import type { NodeInfo } from '@sammons/code-outline-parser';
 
 export class Formatter {
-  constructor(private outputFormat: 'json' | 'yaml' | 'ascii') {}
+  constructor(
+    private outputFormat: 'json' | 'yaml' | 'ascii' | 'llmtext',
+    private llmtext?: boolean
+  ) {}
 
   format(results: Array<{ file: string; outline: NodeInfo | null }>): string {
     // Convert absolute paths to relative paths
@@ -22,6 +25,8 @@ export class Formatter {
         return this.formatYAML(resultsWithRelativePaths);
       case 'ascii':
         return this.formatASCII(resultsWithRelativePaths);
+      case 'llmtext':
+        return this.formatLLMText(resultsWithRelativePaths);
       default: {
         const exhaustiveCheck: never = this.outputFormat;
         throw new Error(`Unknown format: ${String(exhaustiveCheck)}`);
@@ -171,6 +176,74 @@ export class Formatter {
         lines.push(
           this.formatNodeASCII(child, indent + 1, filePath, childPrefix)
         );
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  private formatLLMText(
+    results: Array<{
+      file: string;
+      outline: NodeInfo | null;
+      absolutePath?: string;
+    }>
+  ): string {
+    const output: string[] = [];
+
+    // Add header explaining the format
+    output.push('<Outline>');
+    output.push('This is a compressed code outline for LLM consumption.');
+    output.push(
+      'The outline shows the structure and organization of the codebase.'
+    );
+    output.push(
+      'Files and their code elements are listed in a hierarchical format.'
+    );
+    output.push('');
+
+    for (const { file, outline } of results) {
+      if (!outline) {
+        continue;
+      }
+
+      // Show the file as part of the tree structure
+      output.push(`File: ${file}`);
+      if (outline.children && outline.children.length > 0) {
+        // Format children with compressed symbols
+        outline.children.forEach((child) => {
+          output.push(this.formatNodeLLMText(child, 1));
+        });
+      } else {
+        output.push('  (no parseable content)');
+      }
+      output.push(''); // Add blank line between files
+    }
+
+    output.push('</Outline>');
+    return output.join('\n');
+  }
+
+  private formatNodeLLMText(node: NodeInfo, indent: number): string {
+    const lines: string[] = [];
+    const indentStr = '  '.repeat(indent);
+
+    let nodeStr = `${indentStr}`;
+
+    if (node.name) {
+      nodeStr += `${node.type}: ${node.name}`;
+    } else {
+      nodeStr += node.type;
+    }
+
+    // Add line number for easy navigation
+    nodeStr += ` [${node.start.row + 1}:${node.start.column}]`;
+
+    lines.push(nodeStr);
+
+    if (node.children) {
+      for (const child of node.children) {
+        lines.push(this.formatNodeLLMText(child, indent + 1));
       }
     }
 

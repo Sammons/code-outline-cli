@@ -27,7 +27,10 @@ export class CLIOrchestrator {
       );
 
       // Format and output results
-      const outputHandler = new CLIOutputHandler(options.format);
+      const outputHandler = new CLIOutputHandler(
+        options.format,
+        options.llmtext
+      );
       outputHandler.formatAndOutput(results);
     } catch (error: unknown) {
       if (error instanceof CLIArgumentError) {

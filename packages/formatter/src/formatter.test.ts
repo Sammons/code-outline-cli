@@ -274,6 +274,134 @@ describe('Formatter', () => {
     });
   });
 
+  describe('LLMText format', () => {
+    let formatter: Formatter;
+
+    beforeEach(() => {
+      formatter = new Formatter('llmtext');
+    });
+
+    it('should format results with XML outline tags', () => {
+      const result = formatter.format(sampleResults);
+
+      expect(result).toContain('<Outline>');
+      expect(result).toContain('</Outline>');
+      expect(result).toContain(
+        'This is a compressed code outline for LLM consumption'
+      );
+    });
+
+    it('should include descriptive header text', () => {
+      const result = formatter.format(sampleResults);
+
+      expect(result).toContain(
+        'This is a compressed code outline for LLM consumption'
+      );
+      expect(result).toContain(
+        'The outline shows the structure and organization of the codebase'
+      );
+      expect(result).toContain(
+        'Files and their code elements are listed in a hierarchical format'
+      );
+    });
+
+    it('should format files without decorative symbols', () => {
+      const result = formatter.format(sampleResults);
+
+      expect(result).toContain('File: /path/to/test.js');
+      expect(result).toContain('File: /path/to/another.js');
+      expect(result).not.toContain('📁'); // No file emoji
+      expect(result).not.toContain('├─'); // No tree symbols
+      expect(result).not.toContain('└─'); // No tree symbols
+    });
+
+    it('should filter out null outlines', () => {
+      const result = formatter.format(sampleResults);
+
+      expect(result).not.toContain('empty.js'); // Should exclude files with null outline
+      expect(result).toContain('test.js');
+      expect(result).toContain('another.js');
+    });
+
+    it('should display hierarchical structure with simple indentation', () => {
+      const result = formatter.format(sampleResults);
+
+      // Should show node types and names with simple indentation
+      expect(result).toContain('  function_declaration: greet');
+      expect(result).toContain('  class_declaration: Person');
+      expect(result).toContain('    method_definition: getName');
+      expect(result).toContain('  variable_declaration: const config');
+    });
+
+    it('should include position information', () => {
+      const result = formatter.format(sampleResults);
+
+      // Should contain position information in brackets [line:column]
+      expect(result).toMatch(/\[\d+:\d+\]/);
+      expect(result).toContain('[2:0]'); // function_declaration greet
+      expect(result).toContain('[6:0]'); // class_declaration Person
+    });
+
+    it('should handle nodes without names', () => {
+      const nodeWithoutName: NodeInfo = {
+        type: 'program',
+        start: { row: 0, column: 0 },
+        end: { row: 4, column: 1 },
+        children: [
+          {
+            type: 'statement_block',
+            start: { row: 2, column: 0 },
+            end: { row: 4, column: 1 },
+          },
+        ],
+      };
+
+      const resultsWithUnnamed = [
+        {
+          file: 'test.js',
+          outline: nodeWithoutName,
+        },
+      ];
+
+      const result = formatter.format(resultsWithUnnamed);
+      expect(result).toContain('  statement_block [3:0]');
+      expect(result).not.toContain(': undefined');
+    });
+
+    it('should handle empty results gracefully', () => {
+      const result = formatter.format([]);
+
+      expect(result).toContain('<Outline>');
+      expect(result).toContain('</Outline>');
+      expect(result).toContain(
+        'This is a compressed code outline for LLM consumption'
+      );
+    });
+
+    it('should add blank lines between files', () => {
+      const result = formatter.format(sampleResults);
+
+      // Should have blank lines separating file sections
+      const lines = result.split('\n');
+      let foundFirstFile = false;
+      let foundBlankLine = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('File: ')) {
+          if (foundFirstFile) {
+            // Check if there's a blank line before this file (not the first one)
+            expect(lines[i - 1]).toBe('');
+            foundBlankLine = true;
+            break;
+          }
+          foundFirstFile = true;
+        }
+      }
+
+      expect(foundBlankLine).toBe(true);
+    });
+  });
+
   describe('format validation', () => {
     it('should throw error for unknown format', () => {
       expect(() => new Formatter('unknown' as any)).not.toThrow();
@@ -285,10 +413,11 @@ describe('Formatter', () => {
     });
 
     it('should handle all supported formats', () => {
-      const formats: Array<'json' | 'yaml' | 'ascii'> = [
+      const formats: Array<'json' | 'yaml' | 'ascii' | 'llmtext'> = [
         'json',
         'yaml',
         'ascii',
+        'llmtext',
       ];
 
       formats.forEach((format) => {
