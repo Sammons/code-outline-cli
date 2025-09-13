@@ -1,6 +1,6 @@
 {
   "name": "@sammons/code-outline-parser",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Tree-sitter based parser for JavaScript/TypeScript code analysis",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

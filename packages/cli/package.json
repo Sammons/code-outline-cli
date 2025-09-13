@@ -1,6 +1,6 @@
 {
   "name": "@sammons/code-outline-cli",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "CLI tool to parse and provide concise output for JavaScript/TypeScript files",
   "publishConfig": {
     "access": "public",
