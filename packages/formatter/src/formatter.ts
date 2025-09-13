@@ -1,6 +1,7 @@
 import * as YAML from 'yaml';
 import pc from 'picocolors';
 import { relative } from 'node:path';
+import { readFileSync } from 'node:fs';
 import type { NodeInfo } from '@sammons/code-outline-parser';
 
 export class Formatter {
@@ -208,9 +209,11 @@ export class Formatter {
     output.push('<Outline>');
     output.push('# Ultra-compressed code outline for LLM consumption');
     output.push('# Format: type_name line_number (indented for hierarchy)');
+    output.push(
+      '# Numbers after elements are 1-indexed line numbers for navigation'
+    );
     output.push('# Import/export names joined with underscore: imp_parseArgs');
     output.push('# Variables and functions show actual names after type');
-    output.push('# Line numbers indicate source location for navigation');
     output.push('');
 
     // Add path variable definitions if any
@@ -239,7 +242,12 @@ export class Formatter {
       const compressedFile = this.compressPath(file, pathMap);
       const fileContent = this.formatNodeUltraCompressed(outline, nodeTypeMap);
       if (fileContent.trim()) {
-        output.push(`${compressedFile}`);
+        // Add file line count inline with path
+        const lineCount = this.getFileLineCount(file);
+        const fileHeader = lineCount
+          ? `${compressedFile} (${lineCount}L)`
+          : compressedFile;
+        output.push(fileHeader);
         output.push(fileContent);
       }
     }
@@ -393,5 +401,14 @@ export class Formatter {
     });
 
     return lines.join('\n');
+  }
+
+  private getFileLineCount(filePath: string): number | null {
+    try {
+      const content = readFileSync(filePath, 'utf8');
+      return content.split('\n').length;
+    } catch {
+      return null; // File might not exist or be readable
+    }
   }
 }
