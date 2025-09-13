@@ -151,7 +151,7 @@ export { greet, Person };
       expect(result.stdout).toContain(
         '# Ultra-compressed code outline for LLM consumption'
       );
-      expect(result.stdout).toContain('function_declaration: greet');
+      expect(result.stdout).toContain('function_declaration_greet 1');
     });
 
     it('should override format when --llmtext flag is provided', async () => {
@@ -260,9 +260,9 @@ export { greet, Person };
       expect(result.stdout).toContain(
         '# Ultra-compressed code outline for LLM consumption'
       );
-      expect(result.stdout).toContain('File: test/temp/test.js');
-      expect(result.stdout).toContain('function_declaration: greet');
-      expect(result.stdout).toContain('class_declaration: Person');
+      expect(result.stdout).toContain('test/temp/test.js (15L)');
+      expect(result.stdout).toContain('function_declaration_greet 1');
+      expect(result.stdout).toContain('class_declaration_Person 5');
       // Should not contain decorative symbols
       expect(result.stdout).not.toContain('📁');
       expect(result.stdout).not.toContain('├─');
