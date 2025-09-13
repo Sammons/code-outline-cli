@@ -11,7 +11,7 @@ A CLI tool that uses tree-sitter to parse JavaScript and TypeScript files, provi
 ## ✨ Features
 
 - 🚀 **Tree-sitter parsing** for JavaScript/TypeScript/TSX files
-- 📊 **Multiple output formats**: ASCII tree view, JSON, and YAML
+- 📊 **Multiple output formats**: ASCII tree view, JSON, YAML, and LLMText
 - 🎯 **Filtering**: Named-only or all nodes, with depth control
 - 🎨 **Color-coded output** in terminal
 - 🔍 **Pattern matching** with glob support
@@ -70,6 +70,12 @@ Parse TSX files and output as YAML:
 code-outline "src/**/*.tsx" --format yaml
 ```
 
+Generate LLM-optimized compressed output:
+
+```bash
+code-outline "src/**/*.ts" --llmtext
+```
+
 Show all nodes including unnamed ones:
 
 ```bash
@@ -78,14 +84,15 @@ code-outline "src/**/*.ts" --all
 
 ## ⚙️ Options
 
-| Option            | Short | Description                               | Default    |
-| ----------------- | ----- | ----------------------------------------- | ---------- |
-| `--format <type>` | `-f`  | Output format: `ascii`, `json`, or `yaml` | `ascii`    |
-| `--depth <n>`     | `-d`  | Maximum AST depth to traverse             | `Infinity` |
-| `--named-only`    |       | Show only named AST nodes                 | `true`     |
-| `--all`           | `-a`  | Show all nodes (overrides `--named-only`) | `false`    |
-| `--help`          | `-h`  | Show help message                         |            |
-| `--version`       | `-v`  | Show version number                       |            |
+| Option            | Short | Description                                          | Default    |
+| ----------------- | ----- | ---------------------------------------------------- | ---------- |
+| `--format <type>` | `-f`  | Output format: `ascii`, `json`, `yaml`, or `llmtext` | `ascii`    |
+| `--depth <n>`     | `-d`  | Maximum AST depth to traverse                        | `Infinity` |
+| `--named-only`    |       | Show only named AST nodes                            | `true`     |
+| `--all`           | `-a`  | Show all nodes (overrides `--named-only`)            | `false`    |
+| `--llmtext`       |       | Generate LLM-optimized compressed output             | `false`    |
+| `--help`          | `-h`  | Show help message                                    |            |
+| `--version`       | `-v`  | Show version number                                  |            |
 
 ## 📋 Output Formats
 
@@ -157,6 +164,21 @@ files:
             row: 8
             column: 1
 ```
+
+### LLMText Format
+
+Compressed, LLM-optimized output for efficient token usage:
+
+```
+src/index.ts|program|import_statement:CLIOrchestrator[3:0]|function_declaration:main[5:0]|statement_block[5:37]|lexical_declaration:orchestrator[6:2]|variable_declarator:orchestrator[6:8]|export_statement:{main}[11:0]
+```
+
+This format provides:
+
+- **Pipe-separated structure** for easy parsing
+- **Compressed syntax** to minimize token count
+- **Essential information**: file path, node types, names, and positions
+- **Perfect for LLM context** when analyzing codebases
 
 ## 📝 Node Information
 
@@ -231,9 +253,9 @@ pnpm test:ui
 
 This project is a monorepo with the following packages:
 
-- **`@code-outline/cli`**: Main CLI application
-- **`@code-outline/parser`**: Tree-sitter parsing logic
-- **`@code-outline/formatter`**: Output formatting utilities
+- **`@sammons/code-outline-cli`**: Main CLI application
+- **`@sammons/code-outline-parser`**: Tree-sitter parsing logic
+- **`@sammons/code-outline-formatter`**: Output formatting utilities
 
 ```
 code-outline-cli/

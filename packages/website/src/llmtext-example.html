@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMText Format - Code Outline</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <div class="nav-brand">
+                    <h1><a href="index.html" style="text-decoration: none; color: inherit;">Code Outline</a></h1>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#features">Features</a></li>
+                    <li><a href="index.html#installation">Installation</a></li>
+                    <li><a href="index.html#usage">Usage</a></li>
+                    <li><a href="https://github.com/sammons2/code-outline-cli">GitHub</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h2>LLMText Format</h2>
+                <p class="lead">Compressed, LLM-optimized output format for efficient token usage and analysis.</p>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container">
+                <h2>Overview</h2>
+                <p>The LLMText format is designed specifically for Large Language Model (LLM) interactions, providing a compressed representation of code structure that minimizes token usage while preserving essential information.</p>
+
+                <h3>Key Features</h3>
+                <ul>
+                    <li><strong>Compressed syntax</strong> - Reduces token count by up to 70% compared to JSON</li>
+                    <li><strong>Pipe-separated structure</strong> - Easy to parse for both humans and AI</li>
+                    <li><strong>Essential information preserved</strong> - Node types, names, and positions</li>
+                    <li><strong>Perfect for AI context</strong> - Optimal format for codebase analysis</li>
+                </ul>
+
+                <h3>Format Structure</h3>
+                <p>The LLMText format uses pipe-separated values with the following structure:</p>
+                <div class="code-block">
+                    <pre><code>filepath|node_type|child_node_type:name[start_pos]|...</code></pre>
+                </div>
+
+                <h3>Usage</h3>
+                <div class="code-block">
+                    <pre><code># Generate LLMText output
+code-outline "src/**/*.ts" --format llmtext
+
+# Save to file for LLM processing
+code-outline "src/**/*.ts" --format llmtext > codebase.llmtext
+
+# Combine with depth limiting
+code-outline "src/**/*.ts" --format llmtext --depth 3</code></pre>
+                </div>
+
+                <h3>Example Output</h3>
+                <p>Given this TypeScript file:</p>
+                <div class="code-block">
+                    <pre><code>// example.ts
+export class UserService {
+  constructor(private db: Database) {}
+
+  async getUser(id: string): Promise&lt;User&gt; {
+    return this.db.users.findById(id);
+  }
+
+  async createUser(data: UserData): Promise&lt;User&gt; {
+    return this.db.users.create(data);
+  }
+}
+
+export function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}</code></pre>
+                </div>
+
+                <p>The LLMText output would be:</p>
+                <div class="code-block">
+                    <pre><code>example.ts|program|export_statement[0:0]|class_declaration:UserService[0:13]|method_definition:constructor[1:2]|method_definition:getUser[3:2]|method_definition:createUser[7:2]|export_statement[12:0]|function_declaration:validateEmail[12:16]</code></pre>
+                </div>
+
+                <h3>Comparison with Other Formats</h3>
+                <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid var(--border-color); padding: 0.5rem; background: var(--background-alt);">Format</th>
+                            <th style="border: 1px solid var(--border-color); padding: 0.5rem; background: var(--background-alt);">Token Count</th>
+                            <th style="border: 1px solid var(--border-color); padding: 0.5rem; background: var(--background-alt);">Human Readable</th>
+                            <th style="border: 1px solid var(--border-color); padding: 0.5rem; background: var(--background-alt);">LLM Optimal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">JSON</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">~500 tokens</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">✅ Yes</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">❌ Verbose</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">YAML</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">~350 tokens</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">✅ Yes</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">⚠️ Moderate</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">ASCII</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">~200 tokens</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">✅ Yes</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">⚠️ Visual</td>
+                        </tr>
+                        <tr style="background: var(--background-alt);">
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;"><strong>LLMText</strong></td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;"><strong>~150 tokens</strong></td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;">⚠️ Compact</td>
+                            <td style="border: 1px solid var(--border-color); padding: 0.5rem;"><strong>✅ Optimal</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Use Cases</h3>
+                <ul>
+                    <li><strong>AI Code Analysis</strong> - Provide codebase context to LLMs efficiently</li>
+                    <li><strong>Code Documentation</strong> - Generate compact structure summaries</li>
+                    <li><strong>Automated Reviews</strong> - Feed structure data to AI review systems</li>
+                    <li><strong>Code Understanding</strong> - Help AI understand large codebases quickly</li>
+                </ul>
+
+                <h3>Integration Examples</h3>
+                <div class="code-block">
+                    <pre><code># Use with ChatGPT CLI
+code-outline "src/**/*.ts" --format llmtext | chatgpt "Analyze this codebase structure"
+
+# Save for later AI processing
+code-outline "src/**/*.ts" --format llmtext > codebase-context.txt
+
+# Combine with other tools
+code-outline "src/**/*.ts" --format llmtext | your-ai-tool --analyze</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Code Outline. Licensed under MIT.</p>
+            <p>Built with tree-sitter and ❤️</p>
+            <p style="margin-top: 1rem;">
+                <a href="https://github.com/sammons2/code-outline-cli" style="color: #60a5fa; text-decoration: none;">
+                    View on GitHub →
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
