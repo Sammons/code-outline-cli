@@ -17,6 +17,7 @@
                     <li><a href="#features">Features</a></li>
                     <li><a href="#installation">Installation</a></li>
                     <li><a href="#usage">Usage</a></li>
+                    <li><a href="llmtext-example.html">LLMText Format</a></li>
                     <li><a href="https://github.com/sammons2/code-outline-cli">GitHub</a></li>
                 </ul>
             </div>
@@ -45,7 +46,7 @@
                     </div>
                     <div class="feature-card">
                         <h3>📊 Multiple Formats</h3>
-                        <p>Export code outlines in JSON, YAML, or ASCII tree format</p>
+                        <p>Export code outlines in JSON, YAML, ASCII tree, or LLMText format</p>
                     </div>
                     <div class="feature-card">
                         <h3>🤖 LLM Ready</h3>
@@ -64,10 +65,10 @@
                 <h2>Installation</h2>
                 <div class="code-block">
                     <pre><code># Install with npm
-npm install -g @code-outline/cli
+npm install -g @sammons/code-outline-cli
 
 # Or use with npx
-npx @code-outline/cli "src/**/*.ts"
+npx @sammons/code-outline-cli "src/**/*.ts"
 
 # For monorepo development
 pnpm install
@@ -100,15 +101,15 @@ code-outline "index.js" --all</code></pre>
                 <h2>Monorepo Packages</h2>
                 <div class="package-grid">
                     <div class="package-card">
-                        <h3>@code-outline/cli</h3>
+                        <h3>@sammons/code-outline-cli</h3>
                         <p>Command-line interface for analyzing code files</p>
                     </div>
                     <div class="package-card">
-                        <h3>@code-outline/parser</h3>
+                        <h3>@sammons/code-outline-parser</h3>
                         <p>Core parsing engine using tree-sitter</p>
                     </div>
                     <div class="package-card">
-                        <h3>@code-outline/formatter</h3>
+                        <h3>@sammons/code-outline-formatter</h3>
                         <p>Output formatting utilities for various formats</p>
                     </div>
                 </div>

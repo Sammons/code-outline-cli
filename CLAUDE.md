@@ -8,18 +8,7 @@ A CLI tool that parses JavaScript/TypeScript files using tree-sitter and outputs
 
 ## Repository Structure
 
-```
-code-outline-cli/
-├── packages/
-│   ├── cli/          # Main CLI (@sammons/code-outline-cli) v2.0.3
-│   ├── parser/       # Tree-sitter parsing (@sammons/code-outline-parser) v2.0.1
-│   ├── formatter/    # Output formatting (@sammons/code-outline-formatter) v2.0.1
-│   └── website/      # Documentation site (private, not published)
-├── src/test-scenarios/  # Integration test scenarios
-├── test/               # Shared test fixtures
-├── scripts/           # Build utilities
-└── badges/            # Auto-generated status badges
-```
+@./.claude/outline.md
 
 ## Key Commands
 

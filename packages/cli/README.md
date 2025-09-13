@@ -15,7 +15,7 @@ A CLI tool that parses JavaScript/TypeScript files using tree-sitter and provide
 ## 📦 Installation
 
 ```bash
-npm install -g @sammons/code-outline-cli
+npm install -g @sammons/code-outline-cli@2.1.0
 ```
 
 Or use directly with npx:
@@ -74,14 +74,15 @@ code-outline src/index.ts --all
 
 ## 📋 Command Line Options
 
-| Option             | Alias | Description                               | Default    |
-| ------------------ | ----- | ----------------------------------------- | ---------- |
-| `--format <type>`  | `-f`  | Output format: `json`, `yaml`, or `ascii` | `json`     |
-| `--depth <number>` | `-d`  | Maximum depth to traverse                 | `Infinity` |
-| `--named-only`     |       | Show only named nodes                     | `true`     |
-| `--all`            | `-a`  | Show all nodes (including anonymous)      | `false`    |
-| `--help`           | `-h`  | Show help message                         |            |
-| `--version`        | `-v`  | Show version number                       |            |
+| Option             | Alias | Description                              | Default    |
+| ------------------ | ----- | ---------------------------------------- | ---------- | ---- | -------- | ------- |
+| `--format <type>`  | `-f`  | Output format: `ascii                    | json       | yaml | llmtext` | `ascii` |
+| `--depth <number>` | `-d`  | Maximum depth to traverse                | `Infinity` |
+| `--named-only`     |       | Show only named nodes                    | `true`     |
+| `--all`            | `-a`  | Show all nodes (including anonymous)     | `false`    |
+| `--llmtext`        |       | Generate LLM-optimized compressed output | `false`    |
+| `--help`           | `-h`  | Show help message                        |            |
+| `--version`        | `-v`  | Show version number                      |            |
 
 ## 📖 Examples
 
@@ -180,6 +181,9 @@ code-outline src/index.ts --format ascii | pbcopy
 
 # Save outline to a file
 code-outline "src/**/*.ts" --format yaml > codebase-outline.yaml
+
+# Generate LLM-optimized compressed output
+code-outline "src/**/*.ts" --format llmtext
 ```
 
 ## 🛠️ Advanced Usage
