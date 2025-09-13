@@ -69,7 +69,7 @@ export { greet, Person };
       const result = await runCLI(['--help']);
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('glance-with-tree-sitter');
+      expect(result.stdout).toContain('Code Outline CLI');
       expect(result.stdout).toContain('Usage:');
       expect(result.stdout).toContain('Options:');
       expect(result.stdout).toContain('--format');
