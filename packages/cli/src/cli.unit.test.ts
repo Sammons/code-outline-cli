@@ -125,7 +125,7 @@ describe('CLIArgumentParser', () => {
       parser.parse();
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('glance-with-tree-sitter')
+        expect.stringContaining('Code Outline CLI')
       );
 
       expect(process.exit).toHaveBeenCalledWith(0);
@@ -248,7 +248,7 @@ describe('CLIArgumentParser', () => {
       parser.printHelp();
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('glance-with-tree-sitter')
+        expect.stringContaining('Code Outline CLI')
       );
     });
   });
