@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Formatter } from './formatter';
 import type { NodeInfo } from '@sammons/code-outline-parser';
 
+// Import ProcessedFile interface from CLI package
+interface ProcessedFile {
+  file: string;
+  outline: NodeInfo | null;
+}
+
 // Helper function to strip ANSI color codes for test assertions
 function stripAnsi(str: string): string {
   // eslint-disable-next-line no-control-regex
@@ -94,7 +100,9 @@ describe('Formatter', () => {
       const result = formatter.format(sampleResults);
       const parsed = JSON.parse(result);
 
-      expect(parsed.every((item: any) => item.outline !== null)).toBe(true);
+      expect(parsed.every((item: ProcessedFile) => item.outline !== null)).toBe(
+        true
+      );
     });
 
     it('should preserve all node information in JSON output', () => {

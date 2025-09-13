@@ -72,7 +72,7 @@ jobs:
         continue-on-error: true # Fail-safe: continue even if validation fails
 
       - name: Build website
-        run: pnpm --filter @code-outline/website build
+        run: pnpm --filter @sammons/website build
 
       - name: Upload website artifacts
         if: github.ref == 'refs/heads/main'

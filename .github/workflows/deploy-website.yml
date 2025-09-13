@@ -41,7 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build website
-        run: pnpm --filter @code-outline/website build
+        run: pnpm --filter @sammons/website build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -59,7 +59,7 @@ jobs:
             PACKAGES="${PACKAGES}@sammons/code-outline-formatter,"
           fi
           if [ "${{ steps.changes.outputs.website }}" == "true" ]; then
-            PACKAGES="${PACKAGES}@code-outline/website,"
+            PACKAGES="${PACKAGES}@sammons/website,"
           fi
           # Remove trailing comma
           PACKAGES=${PACKAGES%,}

@@ -18,9 +18,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "type-check": "tsc --noEmit",
-    "website:dev": "pnpm --filter @code-outline/website dev",
-    "website:build": "pnpm --filter @code-outline/website build",
-    "website:preview": "pnpm --filter @code-outline/website preview",
+    "website:dev": "pnpm --filter @sammons/website dev",
+    "website:build": "pnpm --filter @sammons/website build",
+    "website:preview": "pnpm --filter @sammons/website preview",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
@@ -42,7 +42,7 @@
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=8.0.0"
+    "pnpm": ">=10.0.0"
   },
   "repository": {
     "type": "git",
