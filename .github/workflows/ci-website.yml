@@ -41,7 +41,7 @@ jobs:
           node-version: '20'
 
       - name: Cache build outputs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             packages/website/.next/
@@ -53,7 +53,7 @@ jobs:
             website-build-${{ runner.os }}-
 
       - name: Cache documentation data
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: packages/website/public/data/
           key: docs-data-${{ hashFiles('packages/cli/package.json') }}
