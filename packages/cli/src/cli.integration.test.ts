@@ -31,7 +31,10 @@ function runCLI(
   });
 }
 
-describe('CLI', () => {
+// concurrency: 1 because every test in this file shares one on-disk fixture
+// directory that afterEach deletes wholesale. Interleaved runs let one test's
+// cleanup remove files another test's spawned CLI is still reading.
+describe('CLI', { concurrency: 1 }, () => {
   const testDir = resolve(import.meta.dirname, '../../../test/temp');
   const testFile = resolve(testDir, 'test.js');
 
