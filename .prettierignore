@@ -40,3 +40,7 @@ temp/
 
 # Test assets (intentionally contain syntax errors or formatting issues)
 src/test-scenarios/*/assets/
+# Test fixtures are byte-exact ground truth. Prettier rewrites YAML quote
+# style, which would silently corrupt the golden file the YAML round-trip
+# test compares against.
+test/fixtures/

@@ -4,8 +4,14 @@ import { stringifyYaml } from './yaml-stringify.ts';
 
 describe('stringifyYaml', () => {
   it('renders a bare colon-space value quoted, but a colon without trailing space unquoted', () => {
-    assert.strictEqual(stringifyYaml({ name: 'has:colon' }), 'name: has:colon\n');
-    assert.strictEqual(stringifyYaml({ name: 'key: value' }), 'name: "key: value"\n');
+    assert.strictEqual(
+      stringifyYaml({ name: 'has:colon' }),
+      'name: has:colon\n'
+    );
+    assert.strictEqual(
+      stringifyYaml({ name: 'key: value' }),
+      'name: "key: value"\n'
+    );
     assert.strictEqual(stringifyYaml({ name: '::' }), 'name: "::"\n');
   });
 

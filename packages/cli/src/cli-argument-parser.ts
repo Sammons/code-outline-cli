@@ -13,7 +13,7 @@ import { join } from 'node:path';
 // needs an import attribute under ESM (raw .ts run by Node) but that attribute
 // is illegal in the CommonJS output tsc emits to dist/. Reading the file works
 // unchanged in both.
-const readVersion = () => {
+const readVersion = (): string => {
   const here = import.meta.dirname;
   for (const candidate of [
     join(here, '..', 'package.json'),
@@ -21,8 +21,7 @@ const readVersion = () => {
   ]) {
     try {
       return JSON.parse(readFileSync(candidate, 'utf8')).version as string;
-    }
-    catch {
+    } catch {
       // Try the next candidate: the file sits one level up from src/ and two
       // levels up from dist/ depending on whether we run sources or the build.
     }

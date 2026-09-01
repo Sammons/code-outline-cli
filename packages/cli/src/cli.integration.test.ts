@@ -156,9 +156,11 @@ export { greet, Person };
       assert.strictEqual(result.exitCode, 0);
       assert.ok(result.stdout.includes('<Outline>'));
       assert.ok(result.stdout.includes('</Outline>'));
-      assert.ok(result.stdout.includes(
-        '# Ultra-compressed code outline for LLM consumption'
-      ));
+      assert.ok(
+        result.stdout.includes(
+          '# Ultra-compressed code outline for LLM consumption'
+        )
+      );
       assert.ok(result.stdout.includes('function_declaration_greet 1'));
     });
 
@@ -265,9 +267,11 @@ export { greet, Person };
       assert.strictEqual(result.exitCode, 0);
       assert.ok(result.stdout.includes('<Outline>'));
       assert.ok(result.stdout.includes('</Outline>'));
-      assert.ok(result.stdout.includes(
-        '# Ultra-compressed code outline for LLM consumption'
-      ));
+      assert.ok(
+        result.stdout.includes(
+          '# Ultra-compressed code outline for LLM consumption'
+        )
+      );
       // The CLI prints a path relative to cwd; derive it rather than hardcoding
       // the fixture directory, which is now unique per test.
       const relativeTestFile = relative(process.cwd(), testFile);

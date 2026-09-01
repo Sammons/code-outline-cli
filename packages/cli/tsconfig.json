@@ -4,9 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../parser"
@@ -15,10 +13,5 @@
       "path": "../formatter"
     }
   ],
-  "exclude": [
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "dist",
-    "node_modules"
-  ]
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "dist", "node_modules"]
 }

@@ -136,7 +136,10 @@ function validateDocumentationFiles(): ValidationResult {
     warnings: [],
   };
 
-  const dataDir = resolve(import.meta.dirname, '../packages/website/public/data');
+  const dataDir = resolve(
+    import.meta.dirname,
+    '../packages/website/public/data'
+  );
 
   // Validate versions.json
   const versionsPath = resolve(dataDir, 'versions.json');

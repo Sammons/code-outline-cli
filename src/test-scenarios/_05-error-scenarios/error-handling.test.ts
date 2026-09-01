@@ -5,7 +5,11 @@ import { cliRunner } from '../common/cli-runner.ts';
 import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
 
 describe('Error Handling Scenarios', () => {
-  const syntaxErrorFile = resolve(import.meta.dirname, 'assets', 'syntax-error.js');
+  const syntaxErrorFile = resolve(
+    import.meta.dirname,
+    'assets',
+    'syntax-error.js'
+  );
   const emptyFile = resolve(import.meta.dirname, 'assets', 'empty-file.ts');
 
   let testFs: TestFileSystem;
@@ -24,7 +28,10 @@ describe('Error Handling Scenarios', () => {
 
   describe('File System Errors', () => {
     it('should handle non-existent files gracefully', async () => {
-      const nonExistentFile = resolve(import.meta.dirname, 'nonexistent-file.ts');
+      const nonExistentFile = resolve(
+        import.meta.dirname,
+        'nonexistent-file.ts'
+      );
       const result = await cliRunner.runExpectFailure([nonExistentFile]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -42,7 +49,11 @@ describe('Error Handling Scenarios', () => {
     });
 
     it('should handle patterns that match no files', async () => {
-      const noMatchPattern = resolve(import.meta.dirname, 'assets', '*.nonexistent');
+      const noMatchPattern = resolve(
+        import.meta.dirname,
+        'assets',
+        '*.nonexistent'
+      );
       const result = await cliRunner.runExpectFailure([noMatchPattern]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -58,7 +69,7 @@ describe('Error Handling Scenarios', () => {
       // Should either succeed (if no files) or fail gracefully
       if (result.exitCode !== 0) {
         // Should have meaningful error message, not crash
-        assert.ok((result.stderr.length) > (0));
+        assert.ok(result.stderr.length > 0);
         // Should contain either permission error or no files found message
         const stderrLower = result.stderr.toLowerCase();
         assert.strictEqual(
@@ -88,18 +99,22 @@ describe('Error Handling Scenarios', () => {
           // File was partially parsed
           assert.strictEqual(parsed.length, 1);
           const fileResult = parsed[0];
-          assert.ok((fileResult.file).includes('syntax-error.js'));
+          assert.ok(fileResult.file.includes('syntax-error.js'));
           // Outline might be null or have limited structure due to syntax errors
         }
       } else {
         // If it fails, should fail gracefully with meaningful error
-        assert.ok((result.stderr.length) > (0));
+        assert.ok(result.stderr.length > 0);
       }
     });
 
     it('should continue processing other files when one has syntax errors', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'mixed-files-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'mixed-files-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create mix of good and bad files
@@ -158,7 +173,11 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle files that are partially parseable', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'partial-parse-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'partial-parse-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const partialFile = resolve(testDir, 'partial.js');
@@ -194,7 +213,7 @@ describe('Error Handling Scenarios', () => {
         assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
-        assert.ok((fileResult.file).includes('partial.js'));
+        assert.ok(fileResult.file.includes('partial.js'));
 
         // Should capture at least some structure if possible
         if (fileResult.outline) {
@@ -214,7 +233,7 @@ describe('Error Handling Scenarios', () => {
         assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
-        assert.ok((fileResult.file).includes('empty-file.ts'));
+        assert.ok(fileResult.file.includes('empty-file.ts'));
 
         if (fileResult.outline) {
           assert.strictEqual(fileResult.outline.type, 'program');
@@ -222,13 +241,17 @@ describe('Error Handling Scenarios', () => {
         }
       } else {
         // Should fail gracefully
-        assert.ok((result.stderr.length) > (0));
+        assert.ok(result.stderr.length > 0);
       }
     });
 
     it('should handle files with only comments', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'comments-only-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'comments-only-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const commentsFile = resolve(testDir, 'comments.ts');
@@ -263,7 +286,7 @@ describe('Error Handling Scenarios', () => {
 
         // Should have minimal or no children
         const childCount = fileResult.outline!.children?.length ?? 0;
-        assert.ok((childCount) >= (0));
+        assert.ok(childCount >= 0);
       }
     });
 
@@ -323,7 +346,7 @@ describe('Error Handling Scenarios', () => {
           '--depth',
           depth,
         ]);
-        assert.ok((result.stderr.toLowerCase()).includes('depth'));
+        assert.ok(result.stderr.toLowerCase().includes('depth'));
       }
     });
 
@@ -370,7 +393,11 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle large files gracefully', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'large-file-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'large-file-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create a large file with many functions
@@ -395,7 +422,7 @@ describe('Error Handling Scenarios', () => {
       const duration = Date.now() - startTime;
 
       // Should handle large files reasonably quickly
-      assert.ok((duration) < (10000)); // 10 seconds max
+      assert.ok(duration < 10000); // 10 seconds max
 
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
@@ -405,11 +432,11 @@ describe('Error Handling Scenarios', () => {
           const outline = parsed[0].outline;
           if (outline) {
             const totalNodes = CLIAssertions.countNodes(outline);
-            assert.ok((totalNodes) > (100)); // Should find many nodes (reduced expectation)
+            assert.ok(totalNodes > 100); // Should find many nodes (reduced expectation)
           }
         } else {
           // File might be skipped if parsing is too complex
-          assert.ok((parsed.length) >= (0));
+          assert.ok(parsed.length >= 0);
         }
       }
     });
@@ -417,7 +444,11 @@ describe('Error Handling Scenarios', () => {
     it('should handle timeout scenarios', async () => {
       // Test with very short timeout to simulate timeout scenario
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'timeout-test-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'timeout-test-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const testFile = resolve(testDir, 'test.ts');
@@ -435,7 +466,7 @@ describe('Error Handling Scenarios', () => {
       } catch (error: any) {
         // Should get timeout error
         assert.strictEqual(error.name, 'CLITimeoutError');
-        assert.ok((error.message).includes('timed out'));
+        assert.ok(error.message.includes('timed out'));
       }
     });
   });
@@ -489,9 +520,18 @@ describe('Error Handling Scenarios', () => {
 
       // All files should be represented
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('valid.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('syntax-error.js')), true);
-      assert.strictEqual(files.some((f) => f.includes('empty.ts')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('valid.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('syntax-error.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('empty.ts')),
+        true
+      );
     });
 
     it('should maintain consistent behavior across error conditions', async () => {
@@ -504,19 +544,23 @@ describe('Error Handling Scenarios', () => {
       assert.notStrictEqual(result2.exitCode, 0);
 
       // Both should have error messages
-      assert.ok((result1.stderr.length) > (0));
-      assert.ok((result2.stderr.length) > (0));
+      assert.ok(result1.stderr.length > 0);
+      assert.ok(result2.stderr.length > 0);
 
       // Error messages should be similar
-      assert.ok((result1.stderr.toLowerCase()).includes('no files found'));
-      assert.ok((result2.stderr.toLowerCase()).includes('no files found'));
+      assert.ok(result1.stderr.toLowerCase().includes('no files found'));
+      assert.ok(result2.stderr.toLowerCase().includes('no files found'));
     });
   });
 
   describe('Recovery and Graceful Degradation', () => {
     it('should recover from parser errors and continue', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(import.meta.dirname, 'temp', 'recovery-test-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'recovery-test-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create files that progressively get more problematic
@@ -568,7 +612,7 @@ describe('Error Handling Scenarios', () => {
       }
 
       // At least some files should parse successfully
-      assert.ok((successCount) > (0));
+      assert.ok(successCount > 0);
     });
   });
 });

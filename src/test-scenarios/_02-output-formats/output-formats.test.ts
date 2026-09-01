@@ -171,12 +171,24 @@ describe('Output Formats', () => {
 
       // Should have same outline structure
       if (jsonParsed[0].outline && yamlParsed[0].outline) {
-        assert.strictEqual(yamlParsed[0].outline.type, jsonParsed[0].outline.type);
-        assert.strictEqual(yamlParsed[0].outline.children?.length, jsonParsed[0].outline.children?.length);
+        assert.strictEqual(
+          yamlParsed[0].outline.type,
+          jsonParsed[0].outline.type
+        );
+        assert.strictEqual(
+          yamlParsed[0].outline.children?.length,
+          jsonParsed[0].outline.children?.length
+        );
 
         // Position data should match
-        assert.strictEqual(yamlParsed[0].outline.start.row, jsonParsed[0].outline.start.row);
-        assert.strictEqual(yamlParsed[0].outline.start.column, jsonParsed[0].outline.start.column);
+        assert.strictEqual(
+          yamlParsed[0].outline.start.row,
+          jsonParsed[0].outline.start.row
+        );
+        assert.strictEqual(
+          yamlParsed[0].outline.start.column,
+          jsonParsed[0].outline.start.column
+        );
       }
     });
 

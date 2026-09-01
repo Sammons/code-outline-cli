@@ -24,7 +24,8 @@ const INDICATOR_START_CHARS = new Set([
 
 const RESERVED_WORDS = new Set(['true', 'false', 'null']);
 
-const NUMERIC_LOOKING = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$/;
+const NUMERIC_LOOKING =
+  /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$/;
 
 const isNumericLooking = (value: string): boolean => {
   if (value === 'Infinity' || value === 'NaN' || value === '-Infinity') {
@@ -82,7 +83,11 @@ const escapeDoubleQuoted = (value: string): string => {
   return `"${out}"`;
 };
 
-const scalarToString = (value: unknown, indent: string, key?: string): string => {
+const scalarToString = (
+  value: unknown,
+  indent: string,
+  key?: string
+): string => {
   if (typeof value === 'string') {
     if (value.includes('\n')) {
       const lines = value.split('\n');
@@ -104,13 +109,19 @@ const scalarToString = (value: unknown, indent: string, key?: string): string =>
   if (value === null || value === undefined) {
     return 'null';
   }
-  throw new Error(`Unsupported scalar value for key ${key ?? '?'}: ${String(value)}`);
+  throw new Error(
+    `Unsupported scalar value for key ${key ?? '?'}: ${String(value)}`
+  );
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const stringifyValue = (value: unknown, indent: string, lines: string[]): void => {
+const stringifyValue = (
+  value: unknown,
+  indent: string,
+  lines: string[]
+): void => {
   if (Array.isArray(value)) {
     for (const item of value) {
       stringifyArrayItem(item, indent, lines);
@@ -124,7 +135,11 @@ const stringifyValue = (value: unknown, indent: string, lines: string[]): void =
   throw new Error('stringifyValue expects an object or array at the top level');
 };
 
-const stringifyArrayItem = (item: unknown, indent: string, lines: string[]): void => {
+const stringifyArrayItem = (
+  item: unknown,
+  indent: string,
+  lines: string[]
+): void => {
   if (isPlainObject(item)) {
     const entries = Object.entries(item).filter(([, v]) => v !== undefined);
     entries.forEach(([key, value], index) => {
@@ -145,7 +160,11 @@ const stringifyArrayItem = (item: unknown, indent: string, lines: string[]): voi
   lines.push(`${indent}- ${rendered}`);
 };
 
-const stringifyObject = (obj: Record<string, unknown>, indent: string, lines: string[]): void => {
+const stringifyObject = (
+  obj: Record<string, unknown>,
+  indent: string,
+  lines: string[]
+): void => {
   const entries = Object.entries(obj).filter(([, v]) => v !== undefined);
   for (const [key, value] of entries) {
     appendEntry(key, value, indent, `${indent}`, lines);

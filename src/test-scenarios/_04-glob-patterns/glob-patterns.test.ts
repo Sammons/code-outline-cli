@@ -36,9 +36,18 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
-      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), false); // In subdir
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file2.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file3.tsx')),
+        false
+      ); // In subdir
     });
 
     it('should match TypeScript files with *.ts pattern', async () => {
@@ -50,7 +59,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file1.ts
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file1.ts'));
+      assert.ok(parsed[0].file.includes('file1.ts'));
     });
 
     it('should match JavaScript files with *.js pattern', async () => {
@@ -62,7 +71,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file2.js
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file2.js'));
+      assert.ok(parsed[0].file.includes('file2.js'));
     });
 
     it('should match multiple extensions with brace pattern', async () => {
@@ -76,8 +85,14 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file2.js')),
+        true
+      );
     });
   });
 
@@ -93,9 +108,18 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 3);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
-      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file2.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file3.tsx')),
+        true
+      );
     });
 
     it('should match TypeScript files recursively with **/*.ts pattern', async () => {
@@ -107,7 +131,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file1.ts (not .tsx files)
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file1.ts'));
+      assert.ok(parsed[0].file.includes('file1.ts'));
     });
 
     it('should match TSX files with **/*.tsx pattern', async () => {
@@ -119,7 +143,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file3.tsx
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file3.tsx'));
+      assert.ok(parsed[0].file.includes('file3.tsx'));
     });
 
     it('should match multiple extensions recursively', async () => {
@@ -133,9 +157,18 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 3);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
-      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file2.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file3.tsx')),
+        true
+      );
     });
   });
 
@@ -149,8 +182,8 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file3.tsx from subdir
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file3.tsx'));
-      assert.ok((parsed[0].file).includes('subdir'));
+      assert.ok(parsed[0].file.includes('file3.tsx'));
+      assert.ok(parsed[0].file.includes('subdir'));
     });
 
     it('should match with directory wildcard', async () => {
@@ -162,7 +195,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should match files that are exactly two levels deep
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file3.tsx'));
+      assert.ok(parsed[0].file.includes('file3.tsx'));
     });
   });
 
@@ -198,8 +231,14 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file2.js')),
+        true
+      );
     });
   });
 
@@ -252,8 +291,14 @@ describe('Glob Pattern Matching', () => {
       assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('file1.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('file3.tsx')),
+        true
+      );
     });
   });
 
@@ -267,7 +312,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should work regardless of platform
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file1.ts'));
+      assert.ok(parsed[0].file.includes('file1.ts'));
     });
 
     it('should handle patterns with mixed separators', async () => {
@@ -279,7 +324,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      assert.ok((parsed[0].file).includes('file3.tsx'));
+      assert.ok(parsed[0].file.includes('file3.tsx'));
     });
   });
 
@@ -297,7 +342,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should complete quickly even with recursive pattern
-      assert.ok((duration) < (5000)); // 5 seconds max
+      assert.ok(duration < 5000); // 5 seconds max
       assert.strictEqual(parsed.length, 3); // Our known files
     });
 
@@ -316,7 +361,7 @@ describe('Glob Pattern Matching', () => {
         const duration = Date.now() - startTime;
 
         CLIAssertions.expectSuccess(result);
-        assert.ok((duration) < (3000)); // Each should be quick
+        assert.ok(duration < 3000); // Each should be quick
       }
     });
   });
@@ -342,8 +387,8 @@ describe('Glob Pattern Matching', () => {
         'class_declaration'
       );
 
-      assert.ok((interfaces.length) > (0));
-      assert.ok((classes.length) > (0));
+      assert.ok(interfaces.length > 0);
+      assert.ok(classes.length > 0);
     });
 
     it('should correctly parse matched JavaScript files', async () => {
@@ -366,8 +411,8 @@ describe('Glob Pattern Matching', () => {
         'function_declaration'
       );
 
-      assert.ok((classes.length) > (0));
-      assert.ok((functions.length) > (0));
+      assert.ok(classes.length > 0);
+      assert.ok(functions.length > 0);
     });
 
     it('should correctly parse matched TSX files', async () => {
@@ -390,8 +435,8 @@ describe('Glob Pattern Matching', () => {
         'lexical_declaration' // Modern TypeScript uses lexical_declaration for const/let
       );
 
-      assert.ok((functions.length) > (0));
-      assert.ok((variables.length) > (0));
+      assert.ok(functions.length > 0);
+      assert.ok(variables.length > 0);
     });
   });
 

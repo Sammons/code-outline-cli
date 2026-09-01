@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CLIOrchestrator } from './cli-orchestrator.ts';
 import { CLIArgumentError } from './cli-argument-parser.ts';
 import { FileProcessorError } from './file-processor.ts';
-import { CLIOutputHandler } from './cli-output-handler.ts';
+import type { CLIOutputHandler } from './cli-output-handler.ts';
 import type { ParsedArgs } from './cli-argument-parser.ts';
 import type { ProcessedFile } from './file-processor.ts';
 
@@ -104,8 +104,8 @@ describe('CLIOrchestrator', () => {
         options: mockOptions,
         pattern: mockPattern,
       }));
-      fakeFileProcessor.findFiles.mock.mockImplementation(async () =>
-        mockFiles
+      fakeFileProcessor.findFiles.mock.mockImplementation(
+        async () => mockFiles
       );
       fakeFileProcessor.processFiles.mock.mockImplementation(
         async () => mockResults

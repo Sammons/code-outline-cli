@@ -294,72 +294,142 @@ describe('types.ts', () => {
       });
 
       it('should throw error for zero', () => {
-        assert.throws(() => validateDepth('0'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth('0'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
       });
 
       it('should throw error for negative numbers', () => {
-        assert.throws(() => validateDepth('-1'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('-10'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('-999'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth('-1'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('-10'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('-999'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
       });
 
       it('should throw error for non-numeric strings', () => {
-        assert.throws(() => validateDepth('abc'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth('abc'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
         // parseInt('1abc', 10) returns 1, so this should actually work
         assert.strictEqual(validateDepth('1abc'), 1);
-        assert.throws(() => validateDepth('abc1'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth('abc1'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
         // parseInt('1.5', 10) returns 1, so this should actually work
         assert.strictEqual(validateDepth('1.5'), 1);
       });
 
       it('should throw error for empty string', () => {
-        assert.throws(() => validateDepth(''), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth(''),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
       });
 
       it('should throw error for whitespace strings', () => {
-        assert.throws(() => validateDepth(' '), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('\n'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('\t'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth(' '),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('\n'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('\t'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
       });
 
       it('should handle mixed valid/invalid strings (parseInt behavior)', () => {
@@ -371,21 +441,42 @@ describe('types.ts', () => {
       });
 
       it('should be case sensitive for Infinity', () => {
-        assert.throws(() => validateDepth('infinity'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('INFINITY'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
-        assert.throws(() => validateDepth('InFiNiTy'), (err) => {
-          assert.ok(err instanceof Error);
-          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
-          return true;
-        });
+        assert.throws(
+          () => validateDepth('infinity'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('INFINITY'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
+        assert.throws(
+          () => validateDepth('InFiNiTy'),
+          (err) => {
+            assert.ok(err instanceof Error);
+            assert.ok(
+              err.message.includes(
+                'Depth must be a positive number or "Infinity"'
+              )
+            );
+            return true;
+          }
+        );
       });
     });
 
@@ -437,7 +528,10 @@ describe('types.ts', () => {
           const result = validateFormat(format);
           assert.strictEqual(result.success, false);
           assert.strictEqual(result.value, undefined);
-          assert.strictEqual(result.error, `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`);
+          assert.strictEqual(
+            result.error,
+            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
+          );
         });
       });
 
@@ -454,7 +548,10 @@ describe('types.ts', () => {
           const result = validateFormat(format);
           assert.strictEqual(result.success, false);
           assert.strictEqual(result.value, undefined);
-          assert.strictEqual(result.error, `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`);
+          assert.strictEqual(
+            result.error,
+            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
+          );
         });
       });
     });
@@ -516,7 +613,10 @@ describe('types.ts', () => {
           const result = validateDepthValue(depth);
           assert.strictEqual(result.success, false);
           assert.strictEqual(result.value, undefined);
-          assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
+          assert.strictEqual(
+            result.error,
+            'Depth must be a positive number or "Infinity"'
+          );
         });
       });
 
@@ -535,7 +635,10 @@ describe('types.ts', () => {
         // Test that it properly wraps validateDepth errors
         const result = validateDepthValue('0');
         assert.strictEqual(result.success, false);
-        assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
+        assert.strictEqual(
+          result.error,
+          'Depth must be a positive number or "Infinity"'
+        );
       });
 
       it('should handle non-Error exceptions (edge case)', () => {
@@ -543,7 +646,10 @@ describe('types.ts', () => {
         // We can't easily mock validateDepth to throw a non-Error, so this tests the code path
         const result = validateDepthValue('not-a-number');
         assert.strictEqual(result.success, false);
-        assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
+        assert.strictEqual(
+          result.error,
+          'Depth must be a positive number or "Infinity"'
+        );
       });
     });
   });
@@ -659,7 +765,10 @@ describe('types.ts', () => {
         assert.ok(error instanceof Error);
         assert.ok(error instanceof UnsupportedFileTypeError);
         assert.strictEqual(error.name, 'UnsupportedFileTypeError');
-        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx');
+        assert.strictEqual(
+          error.message,
+          'Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx'
+        );
       });
 
       it('should handle empty supported types array', () => {
@@ -667,7 +776,10 @@ describe('types.ts', () => {
         const supportedTypes: string[] = [];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
 
-        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.unknown. Supported types: ');
+        assert.strictEqual(
+          error.message,
+          'Unsupported file type for /path/to/file.unknown. Supported types: '
+        );
       });
 
       it('should handle single supported type', () => {
@@ -675,7 +787,10 @@ describe('types.ts', () => {
         const supportedTypes = ['js'];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
 
-        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.py. Supported types: js');
+        assert.strictEqual(
+          error.message,
+          'Unsupported file type for /path/to/file.py. Supported types: js'
+        );
       });
 
       it('should be throwable and catchable', () => {
@@ -699,7 +814,10 @@ describe('types.ts', () => {
 
       it('should handle empty file path', () => {
         const error = new UnsupportedFileTypeError('', ['js']);
-        assert.strictEqual(error.message, 'Unsupported file type for . Supported types: js');
+        assert.strictEqual(
+          error.message,
+          'Unsupported file type for . Supported types: js'
+        );
       });
 
       it('should be distinguishable from other error types', () => {
@@ -860,7 +978,12 @@ describe('types.ts', () => {
       });
 
       it('should contain expected output formats', () => {
-        assert.deepStrictEqual(OUTPUT_FORMATS, ['json', 'yaml', 'ascii', 'llmtext']);
+        assert.deepStrictEqual(OUTPUT_FORMATS, [
+          'json',
+          'yaml',
+          'ascii',
+          'llmtext',
+        ]);
       });
 
       it('should not contain duplicates', () => {

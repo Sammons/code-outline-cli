@@ -75,14 +75,14 @@ needs it is missing an injection seam.
 
 ## Assertions
 
-| Intent | Assertion |
-|---|---|
-| Exact equality | `assert.strictEqual(actual, expected)` |
-| Deep shape | `assert.deepStrictEqual(actual, expected)` |
-| Truthiness | `assert.ok(value)` |
-| Throws | `assert.throws(() => fn())` |
-| Rejects | `await assert.rejects(promise)` |
-| Matches a pattern | `assert.match(text, /pattern/)` |
+| Intent            | Assertion                                  |
+| ----------------- | ------------------------------------------ |
+| Exact equality    | `assert.strictEqual(actual, expected)`     |
+| Deep shape        | `assert.deepStrictEqual(actual, expected)` |
+| Truthiness        | `assert.ok(value)`                         |
+| Throws            | `assert.throws(() => fn())`                |
+| Rejects           | `await assert.rejects(promise)`            |
+| Matches a pattern | `assert.match(text, /pattern/)`            |
 
 Prefer one `assert.deepStrictEqual` over several per-property checks. A deep
 compare reports every drift at once.

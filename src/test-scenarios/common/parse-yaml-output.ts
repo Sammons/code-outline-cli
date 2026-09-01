@@ -28,7 +28,8 @@ class YamlParseError extends Error {
   }
 }
 
-const NUMERIC_LOOKING = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$/;
+const NUMERIC_LOOKING =
+  /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$/;
 
 const unescapeDoubleQuoted = (inner: string, lineNumber: number): string => {
   let out = '';
@@ -46,7 +47,10 @@ const unescapeDoubleQuoted = (inner: string, lineNumber: number): string => {
         out += '\t';
         i++;
       } else {
-        throw new YamlParseError(`Unsupported escape sequence "\\${next}" in double-quoted scalar`, lineNumber);
+        throw new YamlParseError(
+          `Unsupported escape sequence "\\${next}" in double-quoted scalar`,
+          lineNumber
+        );
       }
     } else {
       out += ch;
@@ -58,16 +62,25 @@ const unescapeDoubleQuoted = (inner: string, lineNumber: number): string => {
 // Parses a scalar that appears after "key: " or "- key: " on a single line.
 const parseScalar = (raw: string, lineNumber: number): unknown => {
   if (raw.length === 0) {
-    throw new YamlParseError('Empty scalar (use "" for an empty string)', lineNumber);
+    throw new YamlParseError(
+      'Empty scalar (use "" for an empty string)',
+      lineNumber
+    );
   }
   if (raw[0] === '"') {
     if (raw[raw.length - 1] !== '"' || raw.length < 2) {
-      throw new YamlParseError(`Unterminated double-quoted scalar: ${raw}`, lineNumber);
+      throw new YamlParseError(
+        `Unterminated double-quoted scalar: ${raw}`,
+        lineNumber
+      );
     }
     return unescapeDoubleQuoted(raw.slice(1, -1), lineNumber);
   }
   if (raw[0] === "'") {
-    throw new YamlParseError('Single-quoted scalars are not supported (our writer never emits them)', lineNumber);
+    throw new YamlParseError(
+      'Single-quoted scalars are not supported (our writer never emits them)',
+      lineNumber
+    );
   }
   if (NUMERIC_LOOKING.test(raw)) {
     return Number(raw);
@@ -92,7 +105,10 @@ const tokenize = (text: string): Line[] => {
     }
     const match = /^( *)(.*)$/.exec(rawLine);
     if (!match) {
-      throw new YamlParseError(`Could not tokenize line: ${JSON.stringify(rawLine)}`, i);
+      throw new YamlParseError(
+        `Could not tokenize line: ${JSON.stringify(rawLine)}`,
+        i
+      );
     }
     const indent = match[1]!.length;
     const content = match[2]!;
@@ -102,20 +118,33 @@ const tokenize = (text: string): Line[] => {
 };
 
 // Splits "key: rest" into [key, rest]. `rest` may be empty (value on following lines).
-const splitKeyValue = (content: string, lineNumber: number): { key: string; rest: string } => {
+const splitKeyValue = (
+  content: string,
+  lineNumber: number
+): { key: string; rest: string } => {
   const colonIndex = content.indexOf(': ');
   if (colonIndex !== -1) {
-    return { key: content.slice(0, colonIndex), rest: content.slice(colonIndex + 2) };
+    return {
+      key: content.slice(0, colonIndex),
+      rest: content.slice(colonIndex + 2),
+    };
   }
   if (content.endsWith(':')) {
     return { key: content.slice(0, -1), rest: '' };
   }
-  throw new YamlParseError(`Expected "key: value" or "key:" mapping entry, got: ${content}`, lineNumber);
+  throw new YamlParseError(
+    `Expected "key: value" or "key:" mapping entry, got: ${content}`,
+    lineNumber
+  );
 };
 
 // Reads a block scalar body ("|-" already consumed). Returns the joined string
 // and the index of the first line NOT part of the block.
-const readBlockScalar = (lines: Line[], startIndex: number, parentIndent: number): { value: string; nextIndex: number } => {
+const readBlockScalar = (
+  lines: Line[],
+  startIndex: number,
+  parentIndent: number
+): { value: string; nextIndex: number } => {
   const bodyLines: string[] = [];
   let i = startIndex;
   let blockIndent: number | null = null;
@@ -131,14 +160,21 @@ const readBlockScalar = (lines: Line[], startIndex: number, parentIndent: number
     i++;
   }
   if (bodyLines.length === 0) {
-    throw new YamlParseError('Block scalar ("|-") has no body lines', lines[startIndex - 1]?.lineNumber ?? startIndex);
+    throw new YamlParseError(
+      'Block scalar ("|-") has no body lines',
+      lines[startIndex - 1]?.lineNumber ?? startIndex
+    );
   }
   return { value: bodyLines.join('\n'), nextIndex: i };
 };
 
 // Parses a block mapping starting at `startIndex`, all lines sharing `mapIndent`.
 // Returns the parsed object and the index of the first line not part of this mapping.
-const parseMapping = (lines: Line[], startIndex: number, mapIndent: number): { value: Record<string, unknown>; nextIndex: number } => {
+const parseMapping = (
+  lines: Line[],
+  startIndex: number,
+  mapIndent: number
+): { value: Record<string, unknown>; nextIndex: number } => {
   const result: Record<string, unknown> = {};
   let i = startIndex;
   while (i < lines.length) {
@@ -154,7 +190,10 @@ const parseMapping = (lines: Line[], startIndex: number, mapIndent: number): { v
       // Value is on following, more-indented lines: nested mapping or sequence.
       const next = lines[i + 1];
       if (!next || next.indent <= mapIndent) {
-        throw new YamlParseError(`Key "${key}" has no value and no nested block follows`, line.lineNumber);
+        throw new YamlParseError(
+          `Key "${key}" has no value and no nested block follows`,
+          line.lineNumber
+        );
       }
       if (next.content.startsWith('- ')) {
         const seqResult = parseSequence(lines, i + 1, next.indent);
@@ -181,7 +220,11 @@ const parseMapping = (lines: Line[], startIndex: number, mapIndent: number): { v
 };
 
 // Parses a block sequence of mappings starting at `startIndex`, all "- " markers at `seqIndent`.
-const parseSequence = (lines: Line[], startIndex: number, seqIndent: number): { value: unknown[]; nextIndex: number } => {
+const parseSequence = (
+  lines: Line[],
+  startIndex: number,
+  seqIndent: number
+): { value: unknown[]; nextIndex: number } => {
   const result: unknown[] = [];
   let i = startIndex;
   while (i < lines.length) {
@@ -193,7 +236,11 @@ const parseSequence = (lines: Line[], startIndex: number, seqIndent: number): { 
     // continues on lines indented two past the dash, i.e. at `seqIndent + 2`.
     const itemContentIndent = seqIndent + 2;
     const firstLineContent = line.content.slice(2);
-    const syntheticFirstLine: Line = { indent: itemContentIndent, content: firstLineContent, lineNumber: line.lineNumber };
+    const syntheticFirstLine: Line = {
+      indent: itemContentIndent,
+      content: firstLineContent,
+      lineNumber: line.lineNumber,
+    };
     const rest = lines.slice(i + 1);
     const itemMappingLines = [syntheticFirstLine, ...rest];
     const itemResult = parseMapping(itemMappingLines, 0, itemContentIndent);
@@ -218,18 +265,27 @@ export const parseYamlOutput = (text: string): unknown => {
   }
   const first = lines[0]!;
   if (first.indent !== 0) {
-    throw new YamlParseError('Top-level content must start at column 0', first.lineNumber);
+    throw new YamlParseError(
+      'Top-level content must start at column 0',
+      first.lineNumber
+    );
   }
   if (first.content.startsWith('- ')) {
     const result = parseSequence(lines, 0, 0);
     if (result.nextIndex !== lines.length) {
-      throw new YamlParseError('Unexpected trailing content after top-level sequence', lines[result.nextIndex]!.lineNumber);
+      throw new YamlParseError(
+        'Unexpected trailing content after top-level sequence',
+        lines[result.nextIndex]!.lineNumber
+      );
     }
     return result.value;
   }
   const result = parseMapping(lines, 0, 0);
   if (result.nextIndex !== lines.length) {
-    throw new YamlParseError('Unexpected trailing content after top-level mapping', lines[result.nextIndex]!.lineNumber);
+    throw new YamlParseError(
+      'Unexpected trailing content after top-level mapping',
+      lines[result.nextIndex]!.lineNumber
+    );
   }
   return result.value;
 };

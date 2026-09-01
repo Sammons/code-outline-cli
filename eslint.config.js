@@ -1,9 +1,9 @@
-const js = require('@eslint/js');
-const typescript = require('@typescript-eslint/eslint-plugin');
-const typescriptParser = require('@typescript-eslint/parser');
-const globals = require('globals');
+import js from '@eslint/js';
+import typescript from '@typescript-eslint/eslint-plugin';
+import typescriptParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -14,10 +14,11 @@ module.exports = [
         sourceType: 'module',
         project: [
           './tsconfig.json',
-          './packages/*/tsconfig.json',
-          './tsconfig.scripts.json',
+          // Lint-only project: the per-package tsconfigs exclude *.test.ts so
+          // tests stay out of dist/, but type-aware linting needs to see them.
+          './tsconfig.eslint.json',
         ],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,
@@ -105,11 +106,7 @@ module.exports = [
   },
   // Configuration files
   {
-    files: [
-      '*.config.ts',
-      '*.config.js',
-      'eslint.config.js',
-    ],
+    files: ['*.config.ts', '*.config.js', 'eslint.config.js'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
@@ -136,7 +133,7 @@ module.exports = [
         ecmaVersion: 2022,
         sourceType: 'module',
         project: './tsconfig.scripts.json',
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,
@@ -153,7 +150,7 @@ module.exports = [
     files: ['*.config.js', '**/*.config.js', 'scripts/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },

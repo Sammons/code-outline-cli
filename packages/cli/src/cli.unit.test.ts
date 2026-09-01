@@ -234,9 +234,7 @@ describe('FileProcessor', () => {
     beforeEach(() => {
       fakeParser = new FakeParser();
       processor = new FileProcessor(
-        fakeParser as unknown as ConstructorParameters<
-          typeof FileProcessor
-        >[0],
+        fakeParser as unknown as ConstructorParameters<typeof FileProcessor>[0],
         fakeGlob.asFunction as unknown as ConstructorParameters<
           typeof FileProcessor
         >[1]
@@ -284,7 +282,12 @@ describe('FileProcessor', () => {
       fakeParser.parseFile.mock.mockImplementation(async () => {
         callCount += 1;
         if (callCount === 1) {
-          return { type: 'program', start: { row: 0, column: 0 }, end: { row: 0, column: 0 }, children: [] };
+          return {
+            type: 'program',
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+            children: [],
+          };
         }
         throw new Error('Parse error');
       });

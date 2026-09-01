@@ -61,7 +61,6 @@ export class TestFileSystem {
 
 export { TestAssets } from './assets/sample-constructs.ts';
 
-
 /**
  * Assertion helpers for CLI results
  */

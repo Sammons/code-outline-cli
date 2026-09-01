@@ -49,7 +49,10 @@ export class CLIRunner {
   ) {
     // Default to the built CLI path
     // In tests, import.meta.dirname might be in dist folder, so we need to resolve from project root
-    const defaultPath = resolve(import.meta.dirname, '../../../packages/cli/dist/cli.js');
+    const defaultPath = resolve(
+      import.meta.dirname,
+      '../../../packages/cli/dist/cli.js'
+    );
 
     // Try multiple possible locations for the CLI
     const possiblePaths = [

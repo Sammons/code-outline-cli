@@ -8,12 +8,53 @@ import { parseYamlOutput } from './parse-yaml-output.ts';
 // golden.yaml (repo root) is the real `yaml` library's stringify() output for
 // this exact input -- see FROZEN-DESIGN.md Unit A.
 const names = [
-  'simple', 'with space', 'has:colon', 'has#hash', "has'quote", 'has"dquote',
-  'has\\backslash', 'trailing ', ' leading', '123', 'true', 'false', 'null',
-  'yes', 'no', 'on', 'off', '~', '', '-dash', 'a-b', 'multi\nline',
-  'tab\there', 'emoji😀', '*star', '&amp', '!bang', '%pct', '@at', '`tick',
-  '{brace}', '[brack]', 'a,b', '>gt', '|pipe', '?q', '0x1F', '1.5', '1e3',
-  '.5', 'Infinity', 'NaN', '::', '- ', 'key: value', 'très', '中文',
+  'simple',
+  'with space',
+  'has:colon',
+  'has#hash',
+  "has'quote",
+  'has"dquote',
+  'has\\backslash',
+  'trailing ',
+  ' leading',
+  '123',
+  'true',
+  'false',
+  'null',
+  'yes',
+  'no',
+  'on',
+  'off',
+  '~',
+  '',
+  '-dash',
+  'a-b',
+  'multi\nline',
+  'tab\there',
+  'emoji😀',
+  '*star',
+  '&amp',
+  '!bang',
+  '%pct',
+  '@at',
+  '`tick',
+  '{brace}',
+  '[brack]',
+  'a,b',
+  '>gt',
+  '|pipe',
+  '?q',
+  '0x1F',
+  '1.5',
+  '1e3',
+  '.5',
+  'Infinity',
+  'NaN',
+  '::',
+  '- ',
+  'key: value',
+  'très',
+  '中文',
 ];
 
 const buildExpected = () =>
@@ -37,15 +78,24 @@ const buildExpected = () =>
   }));
 
 describe('parseYamlOutput', () => {
-  it('round-trips golden.yaml back into the exact object graph gen.mjs built', () => {
-    const goldenPath = resolve(import.meta.dirname, '../../../golden.yaml');
+  it('round-trips the golden YAML fixture into the exact object graph that produced it', () => {
+    // Ground truth: the real `yaml` library's output for the 47 adversarial
+    // names below, captured before that dependency was removed. Committed as a
+    // fixture so this round-trip stays checkable.
+    const goldenPath = resolve(
+      import.meta.dirname,
+      '../../../test/fixtures/yaml-golden.yaml'
+    );
     const text = readFileSync(goldenPath, 'utf8');
     const parsed = parseYamlOutput(text);
     assert.deepStrictEqual(parsed, buildExpected());
   });
 
   it('parses a simple mapping', () => {
-    assert.deepStrictEqual(parseYamlOutput('a: 1\nb: two\n'), { a: 1, b: 'two' });
+    assert.deepStrictEqual(parseYamlOutput('a: 1\nb: two\n'), {
+      a: 1,
+      b: 'two',
+    });
   });
 
   it('parses an empty sequence', () => {
@@ -53,13 +103,20 @@ describe('parseYamlOutput', () => {
   });
 
   it('parses a double-quoted scalar with escapes', () => {
-    assert.deepStrictEqual(parseYamlOutput('a: "line\\twith\\ttabs and \\"quotes\\" and \\\\backslash"\n'), {
-      a: 'line\twith\ttabs and "quotes" and \\backslash',
-    });
+    assert.deepStrictEqual(
+      parseYamlOutput(
+        'a: "line\\twith\\ttabs and \\"quotes\\" and \\\\backslash"\n'
+      ),
+      {
+        a: 'line\twith\ttabs and "quotes" and \\backslash',
+      }
+    );
   });
 
   it('parses a block scalar', () => {
-    assert.deepStrictEqual(parseYamlOutput('a: |-\n  line1\n  line2\n'), { a: 'line1\nline2' });
+    assert.deepStrictEqual(parseYamlOutput('a: |-\n  line1\n  line2\n'), {
+      a: 'line1\nline2',
+    });
   });
 
   it('throws with a line number on unsupported input', () => {

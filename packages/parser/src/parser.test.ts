@@ -177,8 +177,14 @@ describe('Parser', () => {
     });
 
     it('should detect correct file extensions', async () => {
-      const jsFixture = resolve(import.meta.dirname, '../../../test/fixtures/sample.js');
-      const tsFixture = resolve(import.meta.dirname, '../../../test/fixtures/sample.ts');
+      const jsFixture = resolve(
+        import.meta.dirname,
+        '../../../test/fixtures/sample.js'
+      );
+      const tsFixture = resolve(
+        import.meta.dirname,
+        '../../../test/fixtures/sample.ts'
+      );
       const tsxFixture = resolve(
         import.meta.dirname,
         '../../../test/fixtures/sample.tsx'
@@ -278,7 +284,10 @@ describe('Parser', () => {
       assert.notStrictEqual(methods, undefined);
       if (methods && methods.length > 0) {
         // Should have method names
-        assert.strictEqual(methods.some((method) => method.name), true);
+        assert.strictEqual(
+          methods.some((method) => method.name),
+          true
+        );
       }
     });
 

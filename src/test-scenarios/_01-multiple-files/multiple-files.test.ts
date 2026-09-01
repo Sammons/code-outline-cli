@@ -13,12 +13,20 @@ describe('Multiple Files Processing', () => {
 
   beforeEach(() => {
     testFs = new TestFileSystem();
-    testDir = resolve(import.meta.dirname, 'temp', 'multiple-files-' + Date.now());
+    testDir = resolve(
+      import.meta.dirname,
+      'temp',
+      'multiple-files-' + Date.now()
+    );
     testFs.createDir(testDir);
 
     // Use the pre-created asset files
     // Try to find assets relative to import.meta.dirname first, then fall back to project root
-    const assetPath1 = resolve(import.meta.dirname, 'assets', 'program-file.ts');
+    const assetPath1 = resolve(
+      import.meta.dirname,
+      'assets',
+      'program-file.ts'
+    );
     const assetPath2 = resolve(
       process.cwd(),
       'src/test-scenarios/_01-multiple-files/assets/program-file.ts'
@@ -127,8 +135,14 @@ describe('Multiple Files Processing', () => {
 
       // Should have both files
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.includes('program-file.ts')), true);
-      assert.strictEqual(files.some((f) => f.includes('utility-file.ts')), true);
+      assert.strictEqual(
+        files.some((f) => f.includes('program-file.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('utility-file.ts')),
+        true
+      );
 
       // Each file should have valid outline
       for (const fileResult of parsed) {
@@ -185,8 +199,14 @@ describe('Multiple Files Processing', () => {
 
       // Should process both JS and TSX files
       const files = parsed.map((p) => p.file);
-      assert.strictEqual(files.some((f) => f.endsWith('.js')), true);
-      assert.strictEqual(files.some((f) => f.endsWith('.tsx')), true);
+      assert.strictEqual(
+        files.some((f) => f.endsWith('.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.endsWith('.tsx')),
+        true
+      );
     });
   });
 
@@ -217,8 +237,12 @@ describe('Multiple Files Processing', () => {
       assert.strictEqual(jsonParsed[0].file, yamlParsed[0].file);
 
       if (jsonParsed[0].outline && yamlParsed[0].outline) {
-        assert.strictEqual(jsonParsed[0].outline.type, yamlParsed[0].outline.type);
-        assert.strictEqual(jsonParsed[0].outline.children?.length, 
+        assert.strictEqual(
+          jsonParsed[0].outline.type,
+          yamlParsed[0].outline.type
+        );
+        assert.strictEqual(
+          jsonParsed[0].outline.children?.length,
           yamlParsed[0].outline.children?.length
         );
       }
@@ -338,7 +362,8 @@ describe('Multiple Files Processing', () => {
       assert.strictEqual(relativeParsed.length, 1);
 
       // Structure should be identical
-      assert.strictEqual(absoluteParsed[0].outline?.type, 
+      assert.strictEqual(
+        absoluteParsed[0].outline?.type,
         relativeParsed[0].outline?.type
       );
     });
