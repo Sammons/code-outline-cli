@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '20'
+          node-version: '26'
 
       - name: Build packages for docs check
         run: pnpm build

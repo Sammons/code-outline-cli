@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Parser } from './parser';
-import type { NodeInfo } from './types';
-import { TreeUtils } from './tree-utils';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { Parser } from './parser.ts';
+import type { NodeInfo } from './types.ts';
+import { TreeUtils } from './tree-utils.ts';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -15,57 +16,57 @@ describe('Parser', () => {
   describe('parseFile', () => {
     it('should parse JavaScript files correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.js'
       );
       const result = await parser.parseFile(fixturePath);
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
-      expect(result?.children).toBeDefined();
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
+      assert.notStrictEqual(result?.children, undefined);
 
       // Should contain the function declaration
       const functions = result?.children?.filter(
         (child) => child.type === 'function_declaration'
       );
-      expect(functions).toHaveLength(1);
-      expect(functions?.[0].name).toBe('greet');
+      assert.strictEqual(functions.length, 1);
+      assert.strictEqual(functions?.[0].name, 'greet');
     });
 
     it('should parse TypeScript files correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
       const result = await parser.parseFile(fixturePath);
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       // Should contain interface declarations
       const interfaces = result?.children?.filter(
         (child) => child.type === 'interface_declaration'
       );
-      expect(interfaces).toHaveLength(1);
-      expect(interfaces?.[0].name).toBe('User');
+      assert.strictEqual(interfaces.length, 1);
+      assert.strictEqual(interfaces?.[0].name, 'User');
 
       // Should contain class declarations
       const classes = result?.children?.filter(
         (child) => child.type === 'class_declaration'
       );
-      expect(classes).toHaveLength(1);
-      expect(classes?.[0].name).toBe('UserService');
+      assert.strictEqual(classes.length, 1);
+      assert.strictEqual(classes?.[0].name, 'UserService');
     });
 
     it('should parse TSX files correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.tsx'
       );
       const result = await parser.parseFile(fixturePath);
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       // Should contain variable declarations for React components
       const variableDeclarations = result?.children?.filter(
@@ -73,75 +74,75 @@ describe('Parser', () => {
           child.type === 'lexical_declaration' ||
           child.type === 'variable_declaration'
       );
-      expect(variableDeclarations).toBeDefined();
+      assert.notStrictEqual(variableDeclarations, undefined);
 
       // Should contain class declarations
       const classes = result?.children?.filter(
         (child) => child.type === 'class_declaration'
       );
-      expect(classes).toHaveLength(1);
-      expect(classes?.[0].name).toBe('ClassComponent');
+      assert.strictEqual(classes.length, 1);
+      assert.strictEqual(classes?.[0].name, 'ClassComponent');
     });
 
     it('should handle complex nested structures', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/complex.ts'
       );
       const result = await parser.parseFile(fixturePath);
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       // Should contain classes
       const classes = result?.children?.filter(
         (child) => child.type === 'class_declaration'
       );
-      expect(classes?.length).toBeGreaterThanOrEqual(1);
+      assert.ok(classes?.length >= 1);
 
       const productService = classes?.find((c) => c.name === 'ProductService');
-      expect(productService).toBeTruthy();
+      assert.ok(productService);
 
       // Should contain interface declarations
       const interfaces = result?.children?.filter(
         (child) => child.type === 'interface_declaration'
       );
-      expect(interfaces?.length).toBeGreaterThanOrEqual(1);
+      assert.ok(interfaces?.length >= 1);
 
       const productInterface = interfaces?.find((i) => i.name === 'Product');
-      expect(productInterface).toBeTruthy();
+      assert.ok(productInterface);
 
       // Should contain exports
       const exports = result?.children?.filter(
         (child) => child.type === 'export_statement'
       );
-      expect(exports?.length).toBeGreaterThanOrEqual(1);
+      assert.ok(exports?.length >= 1);
     });
 
     it('should respect maxDepth parameter', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/complex.ts'
       );
 
       // Parse with depth 1
       const shallowResult = await parser.parseFile(fixturePath, 1);
-      expect(shallowResult).toBeTruthy();
+      assert.ok(shallowResult);
 
       // Parse with depth 3
       const deepResult = await parser.parseFile(fixturePath, 3);
-      expect(deepResult).toBeTruthy();
+      assert.ok(deepResult);
 
       // Deep result should have more nested information
       const shallowCount = TreeUtils.countNodes(shallowResult!);
       const deepCount = TreeUtils.countNodes(deepResult!);
 
-      expect(deepCount).toBeGreaterThanOrEqual(shallowCount);
+      assert.ok(deepCount >= shallowCount);
     });
 
     it('should handle namedOnly parameter', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
 
@@ -159,27 +160,33 @@ describe('Parser', () => {
         false
       );
 
-      expect(namedOnlyResult).toBeTruthy();
-      expect(allNodesResult).toBeTruthy();
+      assert.ok(namedOnlyResult);
+      assert.ok(allNodesResult);
 
       const namedCount = TreeUtils.countNodes(namedOnlyResult!);
       const allCount = TreeUtils.countNodes(allNodesResult!);
 
       // All nodes result should have more nodes than named only
-      expect(allCount).toBeGreaterThanOrEqual(namedCount);
+      assert.ok(allCount >= namedCount);
     });
 
     it('should handle invalid file paths gracefully', async () => {
       const invalidPath = '/nonexistent/file.js';
 
-      await expect(parser.parseFile(invalidPath)).rejects.toThrow();
+      await assert.rejects(parser.parseFile(invalidPath));
     });
 
     it('should detect correct file extensions', async () => {
-      const jsFixture = resolve(__dirname, '../../../test/fixtures/sample.js');
-      const tsFixture = resolve(__dirname, '../../../test/fixtures/sample.ts');
+      const jsFixture = resolve(
+        import.meta.dirname,
+        '../../../test/fixtures/sample.js'
+      );
+      const tsFixture = resolve(
+        import.meta.dirname,
+        '../../../test/fixtures/sample.ts'
+      );
       const tsxFixture = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.tsx'
       );
 
@@ -188,21 +195,21 @@ describe('Parser', () => {
       const tsxResult = await parser.parseFile(tsxFixture);
 
       // All should parse successfully
-      expect(jsResult).toBeTruthy();
-      expect(tsResult).toBeTruthy();
-      expect(tsxResult).toBeTruthy();
+      assert.ok(jsResult);
+      assert.ok(tsResult);
+      assert.ok(tsxResult);
 
       // Each should be a program node
-      expect(jsResult?.type).toBe('program');
-      expect(tsResult?.type).toBe('program');
-      expect(tsxResult?.type).toBe('program');
+      assert.strictEqual(jsResult?.type, 'program');
+      assert.strictEqual(tsResult?.type, 'program');
+      assert.strictEqual(tsxResult?.type, 'program');
     });
   });
 
   describe('name extraction', () => {
     it('should extract function names correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.js'
       );
       const result = await parser.parseFile(fixturePath);
@@ -210,12 +217,12 @@ describe('Parser', () => {
       const functions = result?.children?.filter(
         (child) => child.type === 'function_declaration'
       );
-      expect(functions?.[0].name).toBe('greet');
+      assert.strictEqual(functions?.[0].name, 'greet');
     });
 
     it('should extract class names correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
       const result = await parser.parseFile(fixturePath);
@@ -223,12 +230,12 @@ describe('Parser', () => {
       const classes = result?.children?.filter(
         (child) => child.type === 'class_declaration'
       );
-      expect(classes?.[0].name).toBe('UserService');
+      assert.strictEqual(classes?.[0].name, 'UserService');
     });
 
     it('should extract interface names correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
       const result = await parser.parseFile(fixturePath);
@@ -236,12 +243,12 @@ describe('Parser', () => {
       const interfaces = result?.children?.filter(
         (child) => child.type === 'interface_declaration'
       );
-      expect(interfaces?.[0].name).toBe('User');
+      assert.strictEqual(interfaces?.[0].name, 'User');
     });
 
     it('should extract variable declarator names', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
       const result = await parser.parseFile(fixturePath);
@@ -251,13 +258,13 @@ describe('Parser', () => {
         (child) => child.type === 'lexical_declaration'
       );
 
-      expect(lexicalDeclarations).toBeDefined();
-      expect(lexicalDeclarations!.length).toBeGreaterThan(0);
+      assert.notStrictEqual(lexicalDeclarations, undefined);
+      assert.ok(lexicalDeclarations!.length > 0);
     });
 
     it('should handle method definitions in classes', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.ts'
       );
       const result = await parser.parseFile(fixturePath);
@@ -267,23 +274,26 @@ describe('Parser', () => {
       );
       const userServiceClass = classes?.find((c) => c.name === 'UserService');
 
-      expect(userServiceClass).toBeTruthy();
-      expect(userServiceClass?.children).toBeDefined();
+      assert.ok(userServiceClass);
+      assert.notStrictEqual(userServiceClass?.children, undefined);
 
       const methods = userServiceClass?.children?.filter(
         (child) => child.type === 'method_definition'
       );
 
-      expect(methods).toBeDefined();
+      assert.notStrictEqual(methods, undefined);
       if (methods && methods.length > 0) {
         // Should have method names
-        expect(methods.some((method) => method.name)).toBe(true);
+        assert.strictEqual(
+          methods.some((method) => method.name),
+          true
+        );
       }
     });
 
     it('should handle arrow functions with names', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.js'
       );
       const result = await parser.parseFile(fixturePath);
@@ -295,37 +305,37 @@ describe('Parser', () => {
           child.type === 'lexical_declaration'
       );
 
-      expect(variableDeclarations).toBeDefined();
-      expect(variableDeclarations!.length).toBeGreaterThan(0);
+      assert.notStrictEqual(variableDeclarations, undefined);
+      assert.ok(variableDeclarations!.length > 0);
     });
   });
 
   describe('position tracking', () => {
     it('should track node positions correctly', async () => {
       const fixturePath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../test/fixtures/sample.js'
       );
       const result = await parser.parseFile(fixturePath);
 
-      expect(result?.start).toBeDefined();
-      expect(result?.end).toBeDefined();
-      expect(result?.start.row).toBeTypeOf('number');
-      expect(result?.start.column).toBeTypeOf('number');
-      expect(result?.end.row).toBeTypeOf('number');
-      expect(result?.end.column).toBeTypeOf('number');
+      assert.notStrictEqual(result?.start, undefined);
+      assert.notStrictEqual(result?.end, undefined);
+      assert.strictEqual(typeof result?.start.row, 'number');
+      assert.strictEqual(typeof result?.start.column, 'number');
+      assert.strictEqual(typeof result?.end.row, 'number');
+      assert.strictEqual(typeof result?.end.column, 'number');
 
       // Start should be before or equal to end
-      expect(result!.start.row).toBeLessThanOrEqual(result!.end.row);
+      assert.ok(result!.start.row <= result!.end.row);
 
       if (result?.children) {
         for (const child of result.children) {
-          expect(child.start).toBeDefined();
-          expect(child.end).toBeDefined();
-          expect(child.start.row).toBeTypeOf('number');
-          expect(child.start.column).toBeTypeOf('number');
-          expect(child.end.row).toBeTypeOf('number');
-          expect(child.end.column).toBeTypeOf('number');
+          assert.notStrictEqual(child.start, undefined);
+          assert.notStrictEqual(child.end, undefined);
+          assert.strictEqual(typeof child.start.row, 'number');
+          assert.strictEqual(typeof child.start.column, 'number');
+          assert.strictEqual(typeof child.end.row, 'number');
+          assert.strictEqual(typeof child.end.column, 'number');
         }
       }
     });
@@ -342,22 +352,22 @@ describe('Parser', () => {
 
       const result = parser.parseSource(source, 'javascript');
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
-      expect(result?.children).toBeDefined();
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
+      assert.notStrictEqual(result?.children, undefined);
 
       // Should contain the function declaration
       const functions = result?.children?.filter(
         (child) => child.type === 'function_declaration'
       );
-      expect(functions).toHaveLength(1);
-      expect(functions?.[0].name).toBe('testFunction');
+      assert.strictEqual(functions.length, 1);
+      assert.strictEqual(functions?.[0].name, 'testFunction');
 
       // Should contain variable declaration
       const variables = result?.children?.filter(
         (child) => child.type === 'lexical_declaration'
       );
-      expect(variables).toHaveLength(1);
+      assert.strictEqual(variables.length, 1);
     });
 
     it('should parse TypeScript source code directly', () => {
@@ -378,22 +388,22 @@ describe('Parser', () => {
 
       const result = parser.parseSource(source, 'typescript');
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       // Should contain interface declaration
       const interfaces = result?.children?.filter(
         (child) => child.type === 'interface_declaration'
       );
-      expect(interfaces).toHaveLength(1);
-      expect(interfaces?.[0].name).toBe('TestInterface');
+      assert.strictEqual(interfaces.length, 1);
+      assert.strictEqual(interfaces?.[0].name, 'TestInterface');
 
       // Should contain class declaration
       const classes = result?.children?.filter(
         (child) => child.type === 'class_declaration'
       );
-      expect(classes).toHaveLength(1);
-      expect(classes?.[0].name).toBe('TestClass');
+      assert.strictEqual(classes.length, 1);
+      assert.strictEqual(classes?.[0].name, 'TestClass');
     });
 
     it('should parse TSX source code directly', () => {
@@ -413,21 +423,21 @@ describe('Parser', () => {
 
       const result = parser.parseSource(source, 'tsx');
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       // Should contain import statement
       const imports = result?.children?.filter(
         (child) => child.type === 'import_statement'
       );
-      expect(imports).toHaveLength(1);
+      assert.strictEqual(imports.length, 1);
 
       // Should contain interface declaration
       const interfaces = result?.children?.filter(
         (child) => child.type === 'interface_declaration'
       );
-      expect(interfaces).toHaveLength(1);
-      expect(interfaces?.[0].name).toBe('Props');
+      assert.strictEqual(interfaces.length, 1);
+      assert.strictEqual(interfaces?.[0].name, 'Props');
     });
 
     it('should respect maxDepth parameter in parseSource', () => {
@@ -443,17 +453,17 @@ describe('Parser', () => {
 
       // Parse with depth 1
       const shallowResult = parser.parseSource(source, 'javascript', 1);
-      expect(shallowResult).toBeTruthy();
+      assert.ok(shallowResult);
 
       // Parse with depth 3
       const deepResult = parser.parseSource(source, 'javascript', 3);
-      expect(deepResult).toBeTruthy();
+      assert.ok(deepResult);
 
       // Deep result should have more nested information
       const shallowCount = TreeUtils.countNodes(shallowResult!);
       const deepCount = TreeUtils.countNodes(deepResult!);
 
-      expect(deepCount).toBeGreaterThanOrEqual(shallowCount);
+      assert.ok(deepCount >= shallowCount);
     });
 
     it('should respect namedOnly parameter in parseSource', () => {
@@ -479,14 +489,14 @@ describe('Parser', () => {
         false
       );
 
-      expect(namedOnlyResult).toBeTruthy();
-      expect(allNodesResult).toBeTruthy();
+      assert.ok(namedOnlyResult);
+      assert.ok(allNodesResult);
 
       const namedCount = TreeUtils.countNodes(namedOnlyResult!);
       const allCount = TreeUtils.countNodes(allNodesResult!);
 
       // All nodes result should have more nodes than named only
-      expect(allCount).toBeGreaterThanOrEqual(namedCount);
+      assert.ok(allCount >= namedCount);
     });
 
     it('should handle parsing errors gracefully in parseSource', () => {
@@ -496,8 +506,8 @@ describe('Parser', () => {
       // Instead they parse as much as possible and create error nodes
       // So we expect it to return a result even with invalid syntax
       const result = parser.parseSource(invalidSource, 'javascript');
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
     });
 
     it('should default to javascript when no fileType is specified', () => {
@@ -509,14 +519,14 @@ describe('Parser', () => {
 
       const result = parser.parseSource(source);
 
-      expect(result).toBeTruthy();
-      expect(result?.type).toBe('program');
+      assert.ok(result);
+      assert.strictEqual(result?.type, 'program');
 
       const functions = result?.children?.filter(
         (child) => child.type === 'function_declaration'
       );
-      expect(functions).toHaveLength(1);
-      expect(functions?.[0].name).toBe('defaultTest');
+      assert.strictEqual(functions.length, 1);
+      assert.strictEqual(functions?.[0].name, 'defaultTest');
     });
   });
 
@@ -524,65 +534,65 @@ describe('Parser', () => {
     it('should return an array of supported file extensions', () => {
       const extensions = parser.getSupportedExtensions();
 
-      expect(Array.isArray(extensions)).toBe(true);
-      expect(extensions.length).toBeGreaterThan(0);
+      assert.strictEqual(Array.isArray(extensions), true);
+      assert.ok(extensions.length > 0);
 
       // Should include common JavaScript and TypeScript extensions
-      expect(extensions).toContain('.js');
-      expect(extensions).toContain('.jsx');
-      expect(extensions).toContain('.ts');
-      expect(extensions).toContain('.tsx');
+      assert.ok(extensions.includes('.js'));
+      assert.ok(extensions.includes('.jsx'));
+      assert.ok(extensions.includes('.ts'));
+      assert.ok(extensions.includes('.tsx'));
     });
 
     it('should return extensions in a consistent format', () => {
       const extensions = parser.getSupportedExtensions();
 
       extensions.forEach((ext) => {
-        expect(ext).toMatch(/^\.[a-zA-Z]+$/); // Should start with . and contain only letters
+        assert.match(ext, /^\.[a-zA-Z]+$/); // Should start with . and contain only letters
       });
     });
   });
 
   describe('isFileSupported', () => {
     it('should return true for supported JavaScript files', () => {
-      expect(parser.isFileSupported('test.js')).toBe(true);
-      expect(parser.isFileSupported('component.jsx')).toBe(true);
-      expect(parser.isFileSupported('/path/to/file.js')).toBe(true);
-      expect(parser.isFileSupported('complex.file.name.js')).toBe(true);
+      assert.strictEqual(parser.isFileSupported('test.js'), true);
+      assert.strictEqual(parser.isFileSupported('component.jsx'), true);
+      assert.strictEqual(parser.isFileSupported('/path/to/file.js'), true);
+      assert.strictEqual(parser.isFileSupported('complex.file.name.js'), true);
     });
 
     it('should return true for supported TypeScript files', () => {
-      expect(parser.isFileSupported('test.ts')).toBe(true);
-      expect(parser.isFileSupported('component.tsx')).toBe(true);
-      expect(parser.isFileSupported('/path/to/file.ts')).toBe(true);
-      expect(parser.isFileSupported('complex.file.name.tsx')).toBe(true);
+      assert.strictEqual(parser.isFileSupported('test.ts'), true);
+      assert.strictEqual(parser.isFileSupported('component.tsx'), true);
+      assert.strictEqual(parser.isFileSupported('/path/to/file.ts'), true);
+      assert.strictEqual(parser.isFileSupported('complex.file.name.tsx'), true);
     });
 
     it('should return false for unsupported file types', () => {
-      expect(parser.isFileSupported('test.py')).toBe(false);
-      expect(parser.isFileSupported('readme.txt')).toBe(false);
-      expect(parser.isFileSupported('config.json')).toBe(false);
-      expect(parser.isFileSupported('style.css')).toBe(false);
-      expect(parser.isFileSupported('image.png')).toBe(false);
+      assert.strictEqual(parser.isFileSupported('test.py'), false);
+      assert.strictEqual(parser.isFileSupported('readme.txt'), false);
+      assert.strictEqual(parser.isFileSupported('config.json'), false);
+      assert.strictEqual(parser.isFileSupported('style.css'), false);
+      assert.strictEqual(parser.isFileSupported('image.png'), false);
     });
 
     it('should handle files without extensions', () => {
-      expect(parser.isFileSupported('filename')).toBe(false);
-      expect(parser.isFileSupported('/path/to/filename')).toBe(false);
+      assert.strictEqual(parser.isFileSupported('filename'), false);
+      assert.strictEqual(parser.isFileSupported('/path/to/filename'), false);
     });
 
     it('should handle empty or invalid file paths', () => {
-      expect(parser.isFileSupported('')).toBe(false);
-      expect(parser.isFileSupported('.')).toBe(false);
-      expect(parser.isFileSupported('..')).toBe(false);
+      assert.strictEqual(parser.isFileSupported(''), false);
+      assert.strictEqual(parser.isFileSupported('.'), false);
+      assert.strictEqual(parser.isFileSupported('..'), false);
     });
 
     it('should be case insensitive', () => {
       // The FileReader.isSupported method converts extensions to lowercase
-      expect(parser.isFileSupported('test.JS')).toBe(true);
-      expect(parser.isFileSupported('test.TS')).toBe(true);
-      expect(parser.isFileSupported('test.JSX')).toBe(true);
-      expect(parser.isFileSupported('test.TSX')).toBe(true);
+      assert.strictEqual(parser.isFileSupported('test.JS'), true);
+      assert.strictEqual(parser.isFileSupported('test.TS'), true);
+      assert.strictEqual(parser.isFileSupported('test.JSX'), true);
+      assert.strictEqual(parser.isFileSupported('test.TSX'), true);
     });
   });
 });

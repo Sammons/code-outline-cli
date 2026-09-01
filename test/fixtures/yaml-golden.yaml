@@ -1,0 +1,942 @@
+- file: src/f0.ts
+  absolutePath: /abs/src/f0.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: simple
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f0.ts
+- file: src/f1.ts
+  absolutePath: /abs/src/f1.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: with space
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f1.ts
+- file: src/f2.ts
+  absolutePath: /abs/src/f2.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: has:colon
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f2.ts
+- file: src/f3.ts
+  absolutePath: /abs/src/f3.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: has#hash
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f3.ts
+- file: src/f4.ts
+  absolutePath: /abs/src/f4.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: has'quote
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f4.ts
+- file: src/f5.ts
+  absolutePath: /abs/src/f5.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: has"dquote
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f5.ts
+- file: src/f6.ts
+  absolutePath: /abs/src/f6.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: has\backslash
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f6.ts
+- file: src/f7.ts
+  absolutePath: /abs/src/f7.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "trailing "
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f7.ts
+- file: src/f8.ts
+  absolutePath: /abs/src/f8.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: " leading"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f8.ts
+- file: src/f9.ts
+  absolutePath: /abs/src/f9.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "123"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f9.ts
+- file: src/f10.ts
+  absolutePath: /abs/src/f10.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "true"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f10.ts
+- file: src/f11.ts
+  absolutePath: /abs/src/f11.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "false"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f11.ts
+- file: src/f12.ts
+  absolutePath: /abs/src/f12.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "null"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f12.ts
+- file: src/f13.ts
+  absolutePath: /abs/src/f13.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: yes
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f13.ts
+- file: src/f14.ts
+  absolutePath: /abs/src/f14.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: no
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f14.ts
+- file: src/f15.ts
+  absolutePath: /abs/src/f15.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: on
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f15.ts
+- file: src/f16.ts
+  absolutePath: /abs/src/f16.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: off
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f16.ts
+- file: src/f17.ts
+  absolutePath: /abs/src/f17.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "~"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f17.ts
+- file: src/f18.ts
+  absolutePath: /abs/src/f18.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: ""
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f18.ts
+- file: src/f19.ts
+  absolutePath: /abs/src/f19.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: -dash
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f19.ts
+- file: src/f20.ts
+  absolutePath: /abs/src/f20.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: a-b
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f20.ts
+- file: src/f21.ts
+  absolutePath: /abs/src/f21.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: |-
+          multi
+          line
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f21.ts
+- file: src/f22.ts
+  absolutePath: /abs/src/f22.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "tab\there"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f22.ts
+- file: src/f23.ts
+  absolutePath: /abs/src/f23.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: emoji😀
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f23.ts
+- file: src/f24.ts
+  absolutePath: /abs/src/f24.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "*star"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f24.ts
+- file: src/f25.ts
+  absolutePath: /abs/src/f25.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "&amp"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f25.ts
+- file: src/f26.ts
+  absolutePath: /abs/src/f26.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "!bang"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f26.ts
+- file: src/f27.ts
+  absolutePath: /abs/src/f27.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "%pct"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f27.ts
+- file: src/f28.ts
+  absolutePath: /abs/src/f28.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "@at"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f28.ts
+- file: src/f29.ts
+  absolutePath: /abs/src/f29.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "`tick"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f29.ts
+- file: src/f30.ts
+  absolutePath: /abs/src/f30.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "{brace}"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f30.ts
+- file: src/f31.ts
+  absolutePath: /abs/src/f31.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "[brack]"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f31.ts
+- file: src/f32.ts
+  absolutePath: /abs/src/f32.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: a,b
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f32.ts
+- file: src/f33.ts
+  absolutePath: /abs/src/f33.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: ">gt"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f33.ts
+- file: src/f34.ts
+  absolutePath: /abs/src/f34.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "|pipe"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f34.ts
+- file: src/f35.ts
+  absolutePath: /abs/src/f35.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "?q"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f35.ts
+- file: src/f36.ts
+  absolutePath: /abs/src/f36.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "0x1F"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f36.ts
+- file: src/f37.ts
+  absolutePath: /abs/src/f37.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "1.5"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f37.ts
+- file: src/f38.ts
+  absolutePath: /abs/src/f38.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "1e3"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f38.ts
+- file: src/f39.ts
+  absolutePath: /abs/src/f39.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: ".5"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f39.ts
+- file: src/f40.ts
+  absolutePath: /abs/src/f40.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: Infinity
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f40.ts
+- file: src/f41.ts
+  absolutePath: /abs/src/f41.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: NaN
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f41.ts
+- file: src/f42.ts
+  absolutePath: /abs/src/f42.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "::"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f42.ts
+- file: src/f43.ts
+  absolutePath: /abs/src/f43.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "- "
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f43.ts
+- file: src/f44.ts
+  absolutePath: /abs/src/f44.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: "key: value"
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f44.ts
+- file: src/f45.ts
+  absolutePath: /abs/src/f45.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: très
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f45.ts
+- file: src/f46.ts
+  absolutePath: /abs/src/f46.ts
+  outline:
+    type: program
+    start:
+      row: 0
+      column: 0
+    end:
+      row: 10
+      column: 5
+    children:
+      - type: function_declaration
+        name: 中文
+        start:
+          row: 1
+          column: 2
+        end:
+          row: 3
+          column: 4
+        file: src/f46.ts

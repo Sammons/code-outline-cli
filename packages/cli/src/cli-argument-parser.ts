@@ -6,7 +6,30 @@ import {
   validateFormat,
   validateDepthValue,
 } from '@sammons/code-outline-parser';
-import { version } from '../package.json';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Read the version at runtime rather than importing package.json. A JSON import
+// needs an import attribute under ESM (raw .ts run by Node) but that attribute
+// is illegal in the CommonJS output tsc emits to dist/. Reading the file works
+// unchanged in both.
+const readVersion = (): string => {
+  const here = import.meta.dirname;
+  for (const candidate of [
+    join(here, '..', 'package.json'),
+    join(here, '..', '..', 'package.json'),
+  ]) {
+    try {
+      return JSON.parse(readFileSync(candidate, 'utf8')).version as string;
+    } catch {
+      // Try the next candidate: the file sits one level up from src/ and two
+      // levels up from dist/ depending on whether we run sources or the build.
+    }
+  }
+  return '0.0.0';
+};
+
+const version = readVersion();
 
 export interface CliOptions {
   format: OutputFormat;
@@ -30,6 +53,17 @@ export class CLIArgumentError extends Error {
 }
 
 export class CLIArgumentParser {
+  private readonly argv: () => string[];
+  private readonly log: (message: string) => void;
+
+  constructor(
+    argv: () => string[] = () => process.argv,
+    log: (message: string) => void = (message) => console.log(message)
+  ) {
+    this.argv = argv;
+    this.log = log;
+  }
+
   // Type guard to safely extract unknown values from parseArgs result
   private safeExtractValue<T>(value: unknown, defaultValue: T): T {
     // Use proper type narrowing instead of type assertions
@@ -58,7 +92,7 @@ export class CLIArgumentParser {
   }
 
   public printHelp(): void {
-    console.log(`
+    this.log(`
 🌳 Code Outline CLI - Parse and analyze JavaScript/TypeScript files
 
 Usage:
@@ -97,7 +131,7 @@ Examples:
 
 Supported Files:
   .js      JavaScript files
-  .ts      TypeScript files  
+  .ts      TypeScript files
   .tsx     TypeScript JSX files
 
 For more information, visit: https://github.com/sammons2/code-outline-cli
@@ -105,11 +139,12 @@ For more information, visit: https://github.com/sammons2/code-outline-cli
   }
 
   public printVersion(): void {
-    console.log(version);
+    this.log(version);
   }
 
   public parse(): ParsedArgs {
     const { values, positionals } = parseArgs({
+      args: this.argv().slice(2),
       options: {
         format: {
           type: 'string',

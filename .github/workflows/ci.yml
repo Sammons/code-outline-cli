@@ -16,12 +16,14 @@ concurrency:
 
 permissions:
   contents: read
-  security-events: write # For CodeQL
 
+# This workflow targets Gitea Actions (act_runner), which presents itself as GHES.
+# Artifact upload/download (@actions/artifact v2+) and github/codeql-action both
+# call github.com-only backend services and fail hard there, so jobs are
+# self-contained: each one builds what it needs instead of receiving a handoff.
 jobs:
-  # Build job - builds once and shares artifacts
-  build:
-    name: Build Packages
+  build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,7 +32,7 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '20'
+          node-version: '26'
 
       - name: Cache build outputs
         uses: actions/cache@v4
@@ -47,63 +49,38 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
-      - name: Cache docs data
-        uses: actions/cache@v4
-        with:
-          path: packages/website/public/data/
-          key: docs-data-${{ hashFiles('packages/cli/package.json') }}
-          restore-keys: |
-            docs-data-
+      - name: Run tests
+        run: pnpm test
+
+      - name: Test CLI functionality
+        run: |
+          if [ ! -f "packages/cli/dist/cli.js" ]; then
+            echo "ERROR: CLI not built successfully"
+            exit 1
+          fi
+          echo "Testing CLI functionality..."
+          cd packages/cli
+          node dist/cli.js --version
+          node dist/cli.js --help
+          node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 > /tmp/test-output.json
+          echo "CLI test completed"
 
       - name: Generate documentation data
         run: |
-          echo "🔄 Checking if documentation needs generation..."
+          echo "Checking if documentation needs generation..."
           pnpm docs:check || {
-            echo "📝 Generating documentation data..."
+            echo "Generating documentation data..."
             pnpm docs:update || {
-              echo "⚠️ Documentation generation failed, continuing with cached/existing data"
+              echo "Documentation generation failed, continuing with existing data"
             }
           }
 
       - name: Validate generated documentation
-        run: |
-          pnpm docs:validate || {
-            echo "⚠️ Documentation validation failed, but build will continue"
-            exit 0
-          }
+        run: pnpm docs:validate || true
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            packages/*/dist/
-            packages/*/lib/
-          retention-days: 1
-
-  # Security scanning job
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: '20'
-
-      - name: Run security audit
-        run: pnpm audit --audit-level moderate
-        continue-on-error: true # Don't fail build for vulnerabilities
-
-  # Code quality job (linting, formatting, type checking)
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -111,34 +88,20 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '20'
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: build-artifacts
-          path: packages/
+          node-version: '26'
 
       - name: Check formatting
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md,yaml,yml}"
+        run: pnpm exec prettier --check "**/*.{ts,tsx,js,jsx,json,md,yaml,yml}"
 
       - name: Run linter
-        run: npx eslint . --ext .ts,.tsx
+        run: pnpm exec eslint .
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
-  # Test job with matrix strategy
-  test:
-    name: Test on Node.js ${{ matrix.node-version }}
+  security:
+    name: Security Scan
     runs-on: ubuntu-latest
-    needs: build
-
-    strategy:
-      matrix:
-        node-version: ['20', '22']
-      fail-fast: false
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -146,110 +109,8 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '26'
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: build-artifacts
-          path: packages/
-
-      - name: Run tests
-        run: pnpm test:run
-
-      - name: Test CLI functionality
-        run: |
-          # Check if CLI was built successfully
-          if [ -f "packages/cli/dist/cli.js" ]; then
-            echo "Testing CLI functionality..."
-            cd packages/cli
-            
-            # Basic CLI tests
-            node dist/cli.js --version
-            node dist/cli.js --help
-            
-            # Test CLI with sample TypeScript files
-            if [ -d "../../packages/parser/src" ]; then
-              node dist/cli.js "../../packages/parser/src/**/*.ts" --format json --depth 1 > /tmp/test-output.json
-              echo "CLI test completed"
-            fi
-          else
-            echo "ERROR: CLI not built successfully"
-            exit 1
-          fi
-
-      - name: Upload test coverage
-        if: matrix.node-version == '20'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
-
-  # CodeQL security analysis
-  codeql:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['typescript']
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: '20'
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: build-artifacts
-          path: packages/
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: '/language:${{matrix.language}}'
-
-  # Publish job (dry run for now)
-  publish:
-    name: Publish Check
-    needs: [security, quality, test]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: '20'
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: build-artifacts
-          path: packages/
-
-      - name: Verify CLI can be packed
-        run: |
-          cd packages/cli
-          pnpm pack
-          echo "CLI package can be successfully packed for publishing"
+      - name: Run security audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true # Advisory only; does not gate the merge

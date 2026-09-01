@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { CLIOrchestrator } from './cli-orchestrator.js';
+import { CLIOrchestrator } from './cli-orchestrator.ts';
 
 async function main(): Promise<void> {
   const orchestrator = new CLIOrchestrator();

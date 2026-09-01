@@ -1,14 +1,20 @@
-import * as YAML from 'yaml';
 import pc from 'picocolors';
 import { relative } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { NodeInfo } from '@sammons/code-outline-parser';
+import { stringifyYaml } from './yaml-stringify.ts';
 
 export class Formatter {
+  private readonly outputFormat: 'json' | 'yaml' | 'ascii' | 'llmtext';
+  private readonly llmtext?: boolean;
+
   constructor(
-    private outputFormat: 'json' | 'yaml' | 'ascii' | 'llmtext',
-    private llmtext?: boolean
-  ) {}
+    outputFormat: 'json' | 'yaml' | 'ascii' | 'llmtext',
+    llmtext?: boolean
+  ) {
+    this.outputFormat = outputFormat;
+    this.llmtext = llmtext;
+  }
 
   format(results: Array<{ file: string; outline: NodeInfo | null }>): string {
     // Convert absolute paths to relative paths
@@ -72,7 +78,7 @@ export class Formatter {
       absolutePath: result.absolutePath,
       outline: this.addFileToNodes(result.outline!, result.file),
     }));
-    return YAML.stringify(enhanced);
+    return stringifyYaml(enhanced);
   }
 
   private addFileToNodes(

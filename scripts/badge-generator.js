@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Badge Generator Script
@@ -10,8 +11,8 @@ const path = require('path');
 
 class BadgeGenerator {
   constructor() {
-    this.badgesDir = path.join(__dirname, '..', 'badges');
-    this.templatesDir = path.join(__dirname, 'badge-templates');
+    this.badgesDir = path.join(import.meta.dirname, '..', 'badges');
+    this.templatesDir = path.join(import.meta.dirname, 'badge-templates');
 
     // Ensure directories exist
     if (!fs.existsSync(this.badgesDir)) {
@@ -106,7 +107,7 @@ class BadgeGenerator {
     try {
       // Try to read coverage summary JSON first
       const coverageSummaryPath = path.join(
-        __dirname,
+        import.meta.dirname,
         '..',
         'coverage',
         'coverage-summary.json'
@@ -125,7 +126,12 @@ class BadgeGenerator {
       }
 
       // Fallback to parsing lcov.info
-      const lcovPath = path.join(__dirname, '..', 'coverage', 'lcov.info');
+      const lcovPath = path.join(
+        import.meta.dirname,
+        '..',
+        'coverage',
+        'lcov.info'
+      );
       if (fs.existsSync(lcovPath)) {
         const lcovContent = fs.readFileSync(lcovPath, 'utf8');
         const lines = lcovContent.split('\n');
@@ -248,7 +254,10 @@ class BadgeGenerator {
 
     // Generate version badge
     const packageJson = JSON.parse(
-      fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
+      fs.readFileSync(
+        path.join(import.meta.dirname, '..', 'package.json'),
+        'utf8'
+      )
     );
     const versionBadge = this.generateBadge(
       'version',
@@ -272,9 +281,9 @@ class BadgeGenerator {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const generator = new BadgeGenerator();
   generator.generateBadges().catch(console.error);
 }
 
-module.exports = BadgeGenerator;
+export default BadgeGenerator;

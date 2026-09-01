@@ -1,8 +1,8 @@
-import type { NodeInfo } from './types';
-import { FileReader } from './file-reader';
-import { ParserFactory } from './parser-factory';
-import { ASTTraverser, type TraversalOptions } from './ast-traverser';
-import { NameExtractor } from './name-extractor';
+import type { NodeInfo } from './types.ts';
+import { FileReader } from './file-reader.ts';
+import { ParserFactory } from './parser-factory.ts';
+import { ASTTraverser, type TraversalOptions } from './ast-traverser.ts';
+import { NameExtractor } from './name-extractor.ts';
 
 /**
  * Main Parser class that coordinates the parsing process

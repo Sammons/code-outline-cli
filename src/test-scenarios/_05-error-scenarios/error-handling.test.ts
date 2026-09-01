@@ -1,18 +1,23 @@
-import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { describe, it, before, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions, TestFileSystem } from '../common/test-utils.js';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
 
 describe('Error Handling Scenarios', () => {
-  const syntaxErrorFile = resolve(__dirname, 'assets', 'syntax-error.js');
-  const emptyFile = resolve(__dirname, 'assets', 'empty-file.ts');
+  const syntaxErrorFile = resolve(
+    import.meta.dirname,
+    'assets',
+    'syntax-error.js'
+  );
+  const emptyFile = resolve(import.meta.dirname, 'assets', 'empty-file.ts');
 
   let testFs: TestFileSystem;
 
-  beforeAll(async () => {
+  before(async () => {
     // Ensure CLI is accessible
     const isAccessible = await cliRunner.testAccess();
-    expect(isAccessible).toBe(true);
+    assert.strictEqual(isAccessible, true);
   });
 
   afterEach(() => {
@@ -23,7 +28,10 @@ describe('Error Handling Scenarios', () => {
 
   describe('File System Errors', () => {
     it('should handle non-existent files gracefully', async () => {
-      const nonExistentFile = resolve(__dirname, 'nonexistent-file.ts');
+      const nonExistentFile = resolve(
+        import.meta.dirname,
+        'nonexistent-file.ts'
+      );
       const result = await cliRunner.runExpectFailure([nonExistentFile]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -31,7 +39,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle non-existent directories in patterns', async () => {
       const nonExistentPattern = resolve(
-        __dirname,
+        import.meta.dirname,
         'nonexistent-directory',
         '*.ts'
       );
@@ -41,7 +49,11 @@ describe('Error Handling Scenarios', () => {
     });
 
     it('should handle patterns that match no files', async () => {
-      const noMatchPattern = resolve(__dirname, 'assets', '*.nonexistent');
+      const noMatchPattern = resolve(
+        import.meta.dirname,
+        'assets',
+        '*.nonexistent'
+      );
       const result = await cliRunner.runExpectFailure([noMatchPattern]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -57,14 +69,15 @@ describe('Error Handling Scenarios', () => {
       // Should either succeed (if no files) or fail gracefully
       if (result.exitCode !== 0) {
         // Should have meaningful error message, not crash
-        expect(result.stderr.length).toBeGreaterThan(0);
+        assert.ok(result.stderr.length > 0);
         // Should contain either permission error or no files found message
         const stderrLower = result.stderr.toLowerCase();
-        expect(
+        assert.strictEqual(
           stderrLower.includes('no files found') ||
             stderrLower.includes('permission denied') ||
-            stderrLower.includes('eacces')
-        ).toBe(true);
+            stderrLower.includes('eacces'),
+          true
+        );
       }
     });
   });
@@ -81,23 +94,27 @@ describe('Error Handling Scenarios', () => {
         // Might return empty array if file can't be parsed, or entry with null outline
         if (parsed.length === 0) {
           // File was skipped due to parsing errors - this is acceptable
-          expect(parsed).toEqual([]);
+          assert.deepStrictEqual(parsed, []);
         } else {
           // File was partially parsed
-          expect(parsed.length).toBe(1);
+          assert.strictEqual(parsed.length, 1);
           const fileResult = parsed[0];
-          expect(fileResult.file).toContain('syntax-error.js');
+          assert.ok(fileResult.file.includes('syntax-error.js'));
           // Outline might be null or have limited structure due to syntax errors
         }
       } else {
         // If it fails, should fail gracefully with meaningful error
-        expect(result.stderr.length).toBeGreaterThan(0);
+        assert.ok(result.stderr.length > 0);
       }
     });
 
     it('should continue processing other files when one has syntax errors', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'mixed-files-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'mixed-files-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create mix of good and bad files
@@ -140,23 +157,27 @@ describe('Error Handling Scenarios', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should process both files
-      expect(parsed.length).toBe(2);
+      assert.strictEqual(parsed.length, 2);
 
       // Good file should have proper outline
       const goodResult = parsed.find((p) => p.file.includes('good.ts'));
-      expect(goodResult).toBeTruthy();
-      expect(goodResult!.outline).toBeTruthy();
-      expect(goodResult!.outline!.type).toBe('program');
+      assert.ok(goodResult);
+      assert.ok(goodResult!.outline);
+      assert.strictEqual(goodResult!.outline!.type, 'program');
 
       // Bad file should be included but might have null outline
       const badResult = parsed.find((p) => p.file.includes('bad.js'));
-      expect(badResult).toBeTruthy();
+      assert.ok(badResult);
       // Outline could be null or have partial structure
     });
 
     it('should handle files that are partially parseable', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'partial-parse-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'partial-parse-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const partialFile = resolve(testDir, 'partial.js');
@@ -189,14 +210,14 @@ describe('Error Handling Scenarios', () => {
       // Should handle partial parsing gracefully
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
-        expect(fileResult.file).toContain('partial.js');
+        assert.ok(fileResult.file.includes('partial.js'));
 
         // Should capture at least some structure if possible
         if (fileResult.outline) {
-          expect(fileResult.outline.type).toBe('program');
+          assert.strictEqual(fileResult.outline.type, 'program');
         }
       }
     });
@@ -209,24 +230,28 @@ describe('Error Handling Scenarios', () => {
       // Should either succeed with minimal structure or handle gracefully
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
-        expect(fileResult.file).toContain('empty-file.ts');
+        assert.ok(fileResult.file.includes('empty-file.ts'));
 
         if (fileResult.outline) {
-          expect(fileResult.outline.type).toBe('program');
+          assert.strictEqual(fileResult.outline.type, 'program');
           // Might have no children or minimal structure
         }
       } else {
         // Should fail gracefully
-        expect(result.stderr.length).toBeGreaterThan(0);
+        assert.ok(result.stderr.length > 0);
       }
     });
 
     it('should handle files with only comments', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'comments-only-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'comments-only-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const commentsFile = resolve(testDir, 'comments.ts');
@@ -253,22 +278,22 @@ describe('Error Handling Scenarios', () => {
 
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
-        expect(fileResult.outline).toBeTruthy();
-        expect(fileResult.outline!.type).toBe('program');
+        assert.ok(fileResult.outline);
+        assert.strictEqual(fileResult.outline!.type, 'program');
 
         // Should have minimal or no children
         const childCount = fileResult.outline!.children?.length ?? 0;
-        expect(childCount).toBeGreaterThanOrEqual(0);
+        assert.ok(childCount >= 0);
       }
     });
 
     it('should handle files with only whitespace', async () => {
       testFs = new TestFileSystem();
       const testDir = resolve(
-        __dirname,
+        import.meta.dirname,
         'temp',
         'whitespace-only-' + Date.now()
       );
@@ -292,11 +317,11 @@ describe('Error Handling Scenarios', () => {
 
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
 
         const fileResult = parsed[0];
         if (fileResult.outline) {
-          expect(fileResult.outline.type).toBe('program');
+          assert.strictEqual(fileResult.outline.type, 'program');
         }
       }
     });
@@ -321,7 +346,7 @@ describe('Error Handling Scenarios', () => {
           '--depth',
           depth,
         ]);
-        expect(result.stderr.toLowerCase()).toContain('depth');
+        assert.ok(result.stderr.toLowerCase().includes('depth'));
       }
     });
 
@@ -343,7 +368,7 @@ describe('Error Handling Scenarios', () => {
       // Should resolve conflict and work
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
       }
     });
   });
@@ -351,7 +376,7 @@ describe('Error Handling Scenarios', () => {
   describe('Resource and Performance Edge Cases', () => {
     it('should handle very long file paths', async () => {
       testFs = new TestFileSystem();
-      const longDir = resolve(__dirname, 'temp', 'a'.repeat(100));
+      const longDir = resolve(import.meta.dirname, 'temp', 'a'.repeat(100));
       testFs.createDir(longDir);
 
       const longFile = resolve(longDir, 'b'.repeat(100) + '.ts');
@@ -362,13 +387,17 @@ describe('Error Handling Scenarios', () => {
       // Should handle long paths gracefully
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(1);
+        assert.strictEqual(parsed.length, 1);
       }
     });
 
     it('should handle large files gracefully', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'large-file-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'large-file-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create a large file with many functions
@@ -393,7 +422,7 @@ describe('Error Handling Scenarios', () => {
       const duration = Date.now() - startTime;
 
       // Should handle large files reasonably quickly
-      expect(duration).toBeLessThan(10000); // 10 seconds max
+      assert.ok(duration < 10000); // 10 seconds max
 
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
@@ -403,11 +432,11 @@ describe('Error Handling Scenarios', () => {
           const outline = parsed[0].outline;
           if (outline) {
             const totalNodes = CLIAssertions.countNodes(outline);
-            expect(totalNodes).toBeGreaterThan(100); // Should find many nodes (reduced expectation)
+            assert.ok(totalNodes > 100); // Should find many nodes (reduced expectation)
           }
         } else {
           // File might be skipped if parsing is too complex
-          expect(parsed.length).toBeGreaterThanOrEqual(0);
+          assert.ok(parsed.length >= 0);
         }
       }
     });
@@ -415,7 +444,11 @@ describe('Error Handling Scenarios', () => {
     it('should handle timeout scenarios', async () => {
       // Test with very short timeout to simulate timeout scenario
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'timeout-test-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'timeout-test-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       const testFile = resolve(testDir, 'test.ts');
@@ -428,12 +461,12 @@ describe('Error Handling Scenarios', () => {
         // If it completes within 1ms, that's fine too
         if (result.exitCode === 0) {
           const parsed = CLIAssertions.expectValidJson(result);
-          expect(parsed.length).toBe(1);
+          assert.strictEqual(parsed.length, 1);
         }
       } catch (error: any) {
         // Should get timeout error
-        expect(error.name).toBe('CLITimeoutError');
-        expect(error.message).toContain('timed out');
+        assert.strictEqual(error.name, 'CLITimeoutError');
+        assert.ok(error.message.includes('timed out'));
       }
     });
   });
@@ -442,7 +475,7 @@ describe('Error Handling Scenarios', () => {
     it('should handle mix of valid and invalid files in glob patterns', async () => {
       testFs = new TestFileSystem();
       const testDir = resolve(
-        __dirname,
+        import.meta.dirname,
         'temp',
         'mixed-validity-' + Date.now()
       );
@@ -478,18 +511,27 @@ describe('Error Handling Scenarios', () => {
       // Should process all files
       CLIAssertions.expectSuccess(result);
       const parsed = CLIAssertions.expectValidJson(result);
-      expect(parsed.length).toBe(3);
+      assert.strictEqual(parsed.length, 3);
 
       // Valid file should have proper structure
       const validFile = parsed.find((p) => p.file.includes('valid.ts'));
-      expect(validFile).toBeTruthy();
-      expect(validFile!.outline).toBeTruthy();
+      assert.ok(validFile);
+      assert.ok(validFile!.outline);
 
       // All files should be represented
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('valid.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('syntax-error.js'))).toBe(true);
-      expect(files.some((f) => f.includes('empty.ts'))).toBe(true);
+      assert.strictEqual(
+        files.some((f) => f.includes('valid.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('syntax-error.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('empty.ts')),
+        true
+      );
     });
 
     it('should maintain consistent behavior across error conditions', async () => {
@@ -498,23 +540,27 @@ describe('Error Handling Scenarios', () => {
       const result2 = await cliRunner.run(['/another/nonexistent/path/*.js']);
 
       // Both should fail consistently
-      expect(result1.exitCode).not.toBe(0);
-      expect(result2.exitCode).not.toBe(0);
+      assert.notStrictEqual(result1.exitCode, 0);
+      assert.notStrictEqual(result2.exitCode, 0);
 
       // Both should have error messages
-      expect(result1.stderr.length).toBeGreaterThan(0);
-      expect(result2.stderr.length).toBeGreaterThan(0);
+      assert.ok(result1.stderr.length > 0);
+      assert.ok(result2.stderr.length > 0);
 
       // Error messages should be similar
-      expect(result1.stderr.toLowerCase()).toContain('no files found');
-      expect(result2.stderr.toLowerCase()).toContain('no files found');
+      assert.ok(result1.stderr.toLowerCase().includes('no files found'));
+      assert.ok(result2.stderr.toLowerCase().includes('no files found'));
     });
   });
 
   describe('Recovery and Graceful Degradation', () => {
     it('should recover from parser errors and continue', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'recovery-test-' + Date.now());
+      const testDir = resolve(
+        import.meta.dirname,
+        'temp',
+        'recovery-test-' + Date.now()
+      );
       testFs.createDir(testDir);
 
       // Create files that progressively get more problematic
@@ -551,7 +597,7 @@ describe('Error Handling Scenarios', () => {
       // Should continue processing despite errors
       CLIAssertions.expectSuccess(result);
       const parsed = CLIAssertions.expectValidJson(result);
-      expect(parsed.length).toBe(3);
+      assert.strictEqual(parsed.length, 3);
 
       // Should have varying levels of success
       let successCount = 0;
@@ -566,7 +612,7 @@ describe('Error Handling Scenarios', () => {
       }
 
       // At least some files should parse successfully
-      expect(successCount).toBeGreaterThan(0);
+      assert.ok(successCount > 0);
     });
   });
 });

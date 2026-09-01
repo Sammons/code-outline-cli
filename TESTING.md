@@ -1,147 +1,95 @@
-# Testing Setup Summary
+# Testing
 
-The Vitest testing framework has been successfully set up for the code-outline CLI project with comprehensive test coverage.
+Tests run on Node's built-in test runner. There is no third-party test
+framework, no transform step, and no test-only dependency.
 
-## What Was Implemented
+## Stack
 
-### 1. Testing Dependencies
+- **`node:test`** — test runner (`describe`, `it`, `before`, `after`, `mock.fn`)
+- **`node:assert/strict`** — assertions
+- **Node 26 native type stripping** — `.ts` test files run directly
 
-- **Vitest** - Fast unit testing framework for JavaScript/TypeScript
-- **@vitest/coverage-v8** - Code coverage reporting with V8 provider
-- **mock-fs** - File system mocking utilities for testing
-- **@types/mock-fs** - TypeScript definitions for mock-fs
+Node 26 strips types natively, so a test file is executed as written. Nothing
+compiles the tests first.
 
-### 2. Configuration Files
-
-- **vitest.config.ts** - Main testing configuration with:
-  - Global test environment setup
-  - Coverage reporting configuration
-  - Path aliases for packages
-  - Test file patterns and exclusions
-  - Coverage thresholds (70% global, 75% parser, 80% formatter)
-
-### 3. Test Scripts Added
-
-Root package.json:
-
-- `pnpm test` - Run all tests
-- `pnpm test:run` - Run tests once (non-watch)
-- `pnpm test:coverage` - Run with coverage reporting
-- `pnpm test:watch` - Run in watch mode
-- `pnpm test:ui` - Run with Vitest UI
-
-Each package also has individual test commands.
-
-### 4. Test Files Created
-
-#### Parser Tests (`packages/parser/src/parser.test.ts`)
-
-- File parsing for JavaScript, TypeScript, TSX
-- Complex nested structures (classes, interfaces, namespaces)
-- Depth limiting functionality
-- Named-only vs all-nodes filtering
-- Name extraction from various node types
-- Position tracking verification
-- Error handling for invalid files
-
-#### Formatter Tests (`packages/formatter/src/formatter.test.ts`)
-
-- JSON output format validation
-- YAML output format validation
-- ASCII tree output with colors and indentation
-- Null outline filtering
-- Edge cases (deep nesting, special characters)
-- Format validation and error handling
-
-#### CLI Tests (`packages/cli/src/cli.test.ts`)
-
-- Argument parsing (help, version, format, depth, named-only)
-- Input validation and error handling
-- File pattern matching with glob patterns
-- Integration testing with parser and formatter
-- Output format verification
-- Error scenarios and graceful failures
-
-### 5. Test Fixtures
-
-Created sample files in `test/fixtures/`:
-
-- **sample.js** - Basic JavaScript with functions, classes, exports
-- **sample.ts** - TypeScript with interfaces, enums, classes
-- **sample.tsx** - React components with hooks and class components
-- **complex.ts** - Complex structures with generics, namespaces, inheritance
-
-### 6. Testing Utilities
-
-- **test/setup.ts** - Global test setup and configuration
-- **test/utils.ts** - Helper functions for:
-  - Creating/cleaning temporary test files
-  - Counting and searching nodes in AST trees
-  - Sample code templates
-  - Mock NodeInfo creation
-
-### 7. Coverage Configuration
-
-- **Providers**: V8 coverage provider for accurate reporting
-- **Reports**: Text, JSON, HTML, and LCOV formats
-- **Thresholds**:
-  - Global: 70% (branches, functions, lines, statements)
-  - Parser: 75%
-  - Formatter: 80%
-- **Exclusions**: Test files, config files, build artifacts
-
-## Test Results
-
-✅ **60 tests passing** across 3 test suites
-
-- Parser: 15 tests
-- Formatter: 20 tests
-- CLI: 25 tests
-
-All major functionality is tested including:
-
-- Parsing different file types (JS/TS/TSX)
-- Output formatting in multiple formats
-- CLI argument handling and validation
-- Error conditions and edge cases
-- Integration between packages
-
-## Running Tests
+## Commands
 
 ```bash
-# Run all tests
-pnpm test
-
-# Run with coverage
-pnpm test:coverage
-
-# Run specific package tests
-cd packages/parser && pnpm test
-cd packages/formatter && pnpm test
-cd packages/cli && pnpm test
-
-# Watch mode for development
-pnpm test:watch
-
-# Interactive UI
-pnpm test:ui
+pnpm test           # run every test
+pnpm test:coverage  # run with coverage
 ```
 
-## IDE Integration
+Run a single file:
 
-The setup works with:
+```bash
+node --test packages/parser/src/parser.test.ts
+```
 
-- VS Code Jest/Vitest extensions
-- WebStorm/IntelliJ test runners
-- Any editor with LSP support
+Run one test by name:
 
-## Next Steps
+```bash
+node --test --test-name-pattern "parses a class declaration" packages/parser/src/parser.test.ts
+```
 
-The testing framework is ready for:
+## Layout
 
-1. Adding new test cases as features are developed
-2. CI/CD integration with coverage reporting
-3. Performance testing and benchmarking
-4. Integration with code quality tools
+Tests sit beside the source they exercise:
 
-The test suite provides a solid foundation for maintaining code quality and preventing regressions as the project evolves.
+```
+packages/parser/src/parser.ts
+packages/parser/src/parser.test.ts
+```
+
+End-to-end scenarios that drive the built CLI live in `src/test-scenarios/`.
+
+## Writing a test
+
+Import every helper explicitly. `node:test` defines no globals.
+
+```ts
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { parseSource } from './parser.ts';
+
+describe('parseSource', () => {
+  it('returns a program node for valid input', () => {
+    const result = parseSource('const a = 1;');
+    assert.strictEqual(result.type, 'program');
+  });
+});
+```
+
+## Faking collaborators
+
+Classes take their collaborators as constructor parameters, each defaulting to
+the real implementation. A test passes a fake; production code constructs
+normally.
+
+```ts
+const orchestrator = new CLIOrchestrator(fakeParser, fakeFileProcessor);
+```
+
+Use `mock.fn()` from `node:test` to record calls. Do NOT reach for module
+mocking: `mock.module()` is still experimental on Node 26, and a class that
+needs it is missing an injection seam.
+
+## Assertions
+
+| Intent            | Assertion                                  |
+| ----------------- | ------------------------------------------ |
+| Exact equality    | `assert.strictEqual(actual, expected)`     |
+| Deep shape        | `assert.deepStrictEqual(actual, expected)` |
+| Truthiness        | `assert.ok(value)`                         |
+| Throws            | `assert.throws(() => fn())`                |
+| Rejects           | `await assert.rejects(promise)`            |
+| Matches a pattern | `assert.match(text, /pattern/)`            |
+
+Prefer one `assert.deepStrictEqual` over several per-property checks. A deep
+compare reports every drift at once.
+
+## Rules
+
+- Never weaken an assertion to make a failing test pass. Fix the code.
+- Never add a snapshot test.
+- A test that needs a network service or a Docker container is an integration
+  test. Keep unit tests in-process.

@@ -1,0 +1,21 @@
+{
+  // Lint-only project. The per-package tsconfigs exclude *.test.ts so tests
+  // never land in the published dist/, but typescript-eslint still needs a
+  // project that CONTAINS the tests in order to type-aware-lint them.
+  // This config emits nothing; it exists purely to widen that view.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": [
+    "packages/parser/src/**/*.ts",
+    "packages/formatter/src/**/*.ts",
+    "packages/cli/src/**/*.ts",
+    "src/**/*.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/dist"]
+}

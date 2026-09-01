@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Formatter } from './formatter';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { Formatter } from './formatter.ts';
 import type { NodeInfo } from '@sammons/code-outline-parser';
 
 // Import ProcessedFile interface from CLI package
@@ -89,18 +90,19 @@ describe('Formatter', () => {
     it('should format results as valid JSON', () => {
       const result = formatter.format(sampleResults);
 
-      expect(() => JSON.parse(result)).not.toThrow();
+      assert.doesNotThrow(() => JSON.parse(result));
 
       const parsed = JSON.parse(result);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed).toHaveLength(2); // Should exclude null outlines
+      assert.strictEqual(Array.isArray(parsed), true);
+      assert.strictEqual(parsed.length, 2); // Should exclude null outlines
     });
 
     it('should filter out null outlines', () => {
       const result = formatter.format(sampleResults);
       const parsed = JSON.parse(result);
 
-      expect(parsed.every((item: ProcessedFile) => item.outline !== null)).toBe(
+      assert.strictEqual(
+        parsed.every((item: ProcessedFile) => item.outline !== null),
         true
       );
     });
@@ -111,22 +113,22 @@ describe('Formatter', () => {
 
       const firstItem = parsed[0];
       // File paths are now relative or absolute based on location
-      expect(firstItem.file).toBeTruthy();
-      expect(firstItem.absolutePath).toBe('/path/to/test.js');
-      expect(firstItem.outline.type).toBe('program');
-      expect(firstItem.outline.children).toHaveLength(2);
-      expect(firstItem.outline.children[0].name).toBe('greet');
-      expect(firstItem.outline.children[0].file).toBeTruthy(); // Named nodes have file reference
-      expect(firstItem.outline.children[1].name).toBe('Person');
-      expect(firstItem.outline.children[1].file).toBeTruthy(); // Named nodes have file reference
+      assert.ok(firstItem.file);
+      assert.strictEqual(firstItem.absolutePath, '/path/to/test.js');
+      assert.strictEqual(firstItem.outline.type, 'program');
+      assert.strictEqual(firstItem.outline.children.length, 2);
+      assert.strictEqual(firstItem.outline.children[0].name, 'greet');
+      assert.ok(firstItem.outline.children[0].file); // Named nodes have file reference
+      assert.strictEqual(firstItem.outline.children[1].name, 'Person');
+      assert.ok(firstItem.outline.children[1].file); // Named nodes have file reference
     });
 
     it('should handle empty results array', () => {
       const result = formatter.format([]);
       const parsed = JSON.parse(result);
 
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed).toHaveLength(0);
+      assert.strictEqual(Array.isArray(parsed), true);
+      assert.strictEqual(parsed.length, 0);
     });
 
     it('should handle results with all null outlines', () => {
@@ -138,8 +140,8 @@ describe('Formatter', () => {
       const result = formatter.format(nullResults);
       const parsed = JSON.parse(result);
 
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed).toHaveLength(0);
+      assert.strictEqual(Array.isArray(parsed), true);
+      assert.strictEqual(parsed.length, 0);
     });
   });
 
@@ -153,32 +155,32 @@ describe('Formatter', () => {
     it('should format results as valid YAML', () => {
       const result = formatter.format(sampleResults);
 
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.strictEqual(typeof result, 'string');
+      assert.ok(result.length > 0);
 
       // Basic YAML structure checks
-      expect(result).toMatch(/^-/m); // Should start array items with dash
-      expect(result).toContain('file:');
-      expect(result).toContain('outline:');
+      assert.match(result, /^-/m); // Should start array items with dash
+      assert.ok(result.includes('file:'));
+      assert.ok(result.includes('outline:'));
     });
 
     it('should filter out null outlines in YAML', () => {
       const result = formatter.format(sampleResults);
 
       // Should not contain the empty.js file since it has null outline
-      expect(result).not.toContain('empty.js');
+      assert.ok(!result.includes('empty.js'));
       // Files are referenced in the YAML output
-      expect(result).toMatch(/test\.js|path\/to\/test\.js/);
-      expect(result).toMatch(/another\.js|path\/to\/another\.js/);
+      assert.match(result, /test\.js|path\/to\/test\.js/);
+      assert.match(result, /another\.js|path\/to\/another\.js/);
     });
 
     it('should preserve nested structure in YAML', () => {
       const result = formatter.format(sampleResults);
 
-      expect(result).toContain('type: program');
-      expect(result).toContain('children:');
-      expect(result).toContain('name: greet');
-      expect(result).toContain('name: Person');
+      assert.ok(result.includes('type: program'));
+      assert.ok(result.includes('children:'));
+      assert.ok(result.includes('name: greet'));
+      assert.ok(result.includes('name: Person'));
     });
   });
 
@@ -192,35 +194,35 @@ describe('Formatter', () => {
     it('should format results with colored ASCII tree structure', () => {
       const result = stripAnsi(formatter.format(sampleResults));
 
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.strictEqual(typeof result, 'string');
+      assert.ok(result.length > 0);
 
       // Should contain file headers
-      expect(result).toContain('📁');
+      assert.ok(result.includes('📁'));
       // Files are shown with relative paths
-      expect(result).toMatch(/test\.js|path\/to\/test\.js/);
-      expect(result).toMatch(/another\.js|path\/to\/another\.js/);
-      expect(result).not.toContain('empty.js'); // Filtered out
+      assert.match(result, /test\.js|path\/to\/test\.js/);
+      assert.match(result, /another\.js|path\/to\/another\.js/);
+      assert.ok(!result.includes('empty.js')); // Filtered out
     });
 
     it('should display hierarchical structure with tree symbols', () => {
       const result = stripAnsi(formatter.format(sampleResults));
 
       // Should contain tree structure symbols
-      expect(result).toContain('├─');
+      assert.ok(result.includes('├─'));
 
       // Should show node types and names (program is implicit as the file root)
-      expect(result).toContain('function_declaration: greet');
-      expect(result).toContain('class_declaration: Person');
+      assert.ok(result.includes('function_declaration: greet'));
+      assert.ok(result.includes('class_declaration: Person'));
     });
 
     it('should include position information', () => {
       const result = stripAnsi(formatter.format(sampleResults));
 
       // Should contain position information in brackets [line:column]
-      expect(result).toMatch(/\[\d+:\d+\]/);
+      assert.match(result, /\[\d+:\d+\]/);
       // Should contain line references for named nodes (:lineNumber)
-      expect(result).toMatch(/:\d+/);
+      assert.match(result, /:\d+/);
     });
 
     it('should handle nodes without names', () => {
@@ -245,30 +247,30 @@ describe('Formatter', () => {
       ];
 
       const result = stripAnsi(formatter.format(resultsWithUnnamed));
-      expect(result).toContain('statement_block');
-      expect(result).not.toContain(': undefined');
+      assert.ok(result.includes('statement_block'));
+      assert.ok(!result.includes(': undefined'));
     });
 
     it('should display different node types with appropriate formatting', () => {
       const result = stripAnsi(formatter.format(sampleResults));
 
       // Different node types should be present
-      expect(result).toContain('function_declaration');
-      expect(result).toContain('class_declaration');
-      expect(result).toContain('variable_declaration');
+      assert.ok(result.includes('function_declaration'));
+      assert.ok(result.includes('class_declaration'));
+      assert.ok(result.includes('variable_declaration'));
     });
 
     it('should show nested children with proper indentation', () => {
       const result = stripAnsi(formatter.format(sampleResults));
 
       // Should have indented children (method_definition is now directly under class with 2 spaces)
-      expect(result).toMatch(/\s{2}└─.*method_definition/);
+      assert.match(result, /\s{2}└─.*method_definition/);
     });
 
     it('should handle empty results gracefully', () => {
       const result = stripAnsi(formatter.format([]));
 
-      expect(result).toBe('');
+      assert.strictEqual(result, '');
     });
 
     it('should skip files with null outlines', () => {
@@ -278,7 +280,7 @@ describe('Formatter', () => {
       ];
 
       const result = stripAnsi(formatter.format(nullOnlyResults));
-      expect(result).toBe('');
+      assert.strictEqual(result, '');
     });
   });
 
@@ -292,62 +294,66 @@ describe('Formatter', () => {
     it('should format results with XML outline tags', () => {
       const result = formatter.format(sampleResults);
 
-      expect(result).toContain('<Outline>');
-      expect(result).toContain('</Outline>');
-      expect(result).toContain(
-        '# Ultra-compressed code outline for LLM consumption'
+      assert.ok(result.includes('<Outline>'));
+      assert.ok(result.includes('</Outline>'));
+      assert.ok(
+        result.includes('# Ultra-compressed code outline for LLM consumption')
       );
     });
 
     it('should include descriptive header text', () => {
       const result = formatter.format(sampleResults);
 
-      expect(result).toContain(
-        '# Ultra-compressed code outline for LLM consumption'
+      assert.ok(
+        result.includes('# Ultra-compressed code outline for LLM consumption')
       );
-      expect(result).toContain(
-        '# Format: type_name line_number (indented for hierarchy)'
+      assert.ok(
+        result.includes(
+          '# Format: type_name line_number (indented for hierarchy)'
+        )
       );
-      expect(result).toContain(
-        '# Numbers after elements are 1-indexed line numbers for navigation'
+      assert.ok(
+        result.includes(
+          '# Numbers after elements are 1-indexed line numbers for navigation'
+        )
       );
     });
 
     it('should format files without decorative symbols', () => {
       const result = formatter.format(sampleResults);
 
-      expect(result).toContain('/path/to/test.js');
-      expect(result).toContain('/path/to/another.js');
-      expect(result).not.toContain('📁'); // No file emoji
-      expect(result).not.toContain('├─'); // No tree symbols
-      expect(result).not.toContain('└─'); // No tree symbols
+      assert.ok(result.includes('/path/to/test.js'));
+      assert.ok(result.includes('/path/to/another.js'));
+      assert.ok(!result.includes('📁')); // No file emoji
+      assert.ok(!result.includes('├─')); // No tree symbols
+      assert.ok(!result.includes('└─')); // No tree symbols
     });
 
     it('should filter out null outlines', () => {
       const result = formatter.format(sampleResults);
 
-      expect(result).not.toContain('empty.js'); // Should exclude files with null outline
-      expect(result).toContain('test.js');
-      expect(result).toContain('another.js');
+      assert.ok(!result.includes('empty.js')); // Should exclude files with null outline
+      assert.ok(result.includes('test.js'));
+      assert.ok(result.includes('another.js'));
     });
 
     it('should display hierarchical structure with simple indentation', () => {
       const result = formatter.format(sampleResults);
 
       // Should show node types and names with single-space indentation for ultra-compressed format
-      expect(result).toContain('function_declaration_greet 2');
-      expect(result).toContain('class_declaration_Person 6');
-      expect(result).toContain(' method_definition_getName 7');
-      expect(result).toContain('variable_declaration_const config 2');
+      assert.ok(result.includes('function_declaration_greet 2'));
+      assert.ok(result.includes('class_declaration_Person 6'));
+      assert.ok(result.includes(' method_definition_getName 7'));
+      assert.ok(result.includes('variable_declaration_const config 2'));
     });
 
     it('should include position information', () => {
       const result = formatter.format(sampleResults);
 
       // Should contain line numbers as standalone numbers after type_name
-      expect(result).toMatch(/\d+/);
-      expect(result).toContain('function_declaration_greet 2'); // function_declaration greet at line 2
-      expect(result).toContain('class_declaration_Person 6'); // class_declaration Person at line 6
+      assert.match(result, /\d+/);
+      assert.ok(result.includes('function_declaration_greet 2')); // function_declaration greet at line 2
+      assert.ok(result.includes('class_declaration_Person 6')); // class_declaration Person at line 6
     });
 
     it('should handle nodes without names', () => {
@@ -372,17 +378,17 @@ describe('Formatter', () => {
       ];
 
       const result = formatter.format(resultsWithUnnamed);
-      expect(result).toContain('statement_block 3');
-      expect(result).not.toContain(': undefined');
+      assert.ok(result.includes('statement_block 3'));
+      assert.ok(!result.includes(': undefined'));
     });
 
     it('should handle empty results gracefully', () => {
       const result = formatter.format([]);
 
-      expect(result).toContain('<Outline>');
-      expect(result).toContain('</Outline>');
-      expect(result).toContain(
-        '# Ultra-compressed code outline for LLM consumption'
+      assert.ok(result.includes('<Outline>'));
+      assert.ok(result.includes('</Outline>'));
+      assert.ok(
+        result.includes('# Ultra-compressed code outline for LLM consumption')
       );
     });
 
@@ -395,9 +401,9 @@ describe('Formatter', () => {
         (line) => line.includes('/path/to/') && !line.startsWith('#')
       );
 
-      expect(fileLines.length).toBe(2); // Should have 2 file entries
-      expect(fileLines[0]).toContain('/path/to/test.js');
-      expect(fileLines[1]).toContain('/path/to/another.js');
+      assert.strictEqual(fileLines.length, 2); // Should have 2 file entries
+      assert.ok(fileLines[0].includes('/path/to/test.js'));
+      assert.ok(fileLines[1].includes('/path/to/another.js'));
 
       // Find indices of file lines to ensure they're consecutive in structure
       const firstFileIndex = lines.findIndex((line) =>
@@ -407,18 +413,23 @@ describe('Formatter', () => {
         line.includes('/path/to/another.js')
       );
 
-      expect(firstFileIndex).toBeGreaterThan(0);
-      expect(secondFileIndex).toBeGreaterThan(firstFileIndex);
+      assert.ok(firstFileIndex > 0);
+      assert.ok(secondFileIndex > firstFileIndex);
     });
   });
 
   describe('format validation', () => {
     it('should throw error for unknown format', () => {
-      expect(() => new Formatter('unknown' as any)).not.toThrow();
+      assert.doesNotThrow(() => new Formatter('unknown' as any));
 
       const formatter = new Formatter('unknown' as any);
-      expect(() => formatter.format(sampleResults)).toThrow(
-        'Unknown format: unknown'
+      assert.throws(
+        () => formatter.format(sampleResults),
+        (err: unknown) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Unknown format: unknown'));
+          return true;
+        }
       );
     });
 
@@ -432,7 +443,7 @@ describe('Formatter', () => {
 
       formats.forEach((format) => {
         const formatter = new Formatter(format);
-        expect(() => formatter.format(sampleResults)).not.toThrow();
+        assert.doesNotThrow(() => formatter.format(sampleResults));
       });
     });
   });
@@ -465,8 +476,8 @@ describe('Formatter', () => {
       const result = formatter.format(results);
       const parsed = JSON.parse(result);
 
-      expect(parsed[0].file).toBe('src/test.js');
-      expect(parsed[0].absolutePath).toBe(absolutePath);
+      assert.strictEqual(parsed[0].file, 'src/test.js');
+      assert.strictEqual(parsed[0].absolutePath, absolutePath);
     });
 
     it('should add file references to named nodes', () => {
@@ -499,9 +510,9 @@ describe('Formatter', () => {
       const parsed = JSON.parse(result);
 
       // Named node should have file reference
-      expect(parsed[0].outline.children[0].file).toBeTruthy();
+      assert.ok(parsed[0].outline.children[0].file);
       // Unnamed node should not have file reference
-      expect(parsed[0].outline.children[1].file).toBeUndefined();
+      assert.strictEqual(parsed[0].outline.children[1].file, undefined);
     });
 
     it('should show line numbers in ASCII output for navigation', () => {
@@ -528,9 +539,9 @@ describe('Formatter', () => {
       const result = stripAnsi(formatter.format(results));
 
       // Should contain line number format (:line) for navigation (line is 1-indexed, so row 5 becomes line 6)
-      expect(result).toContain(':6');
+      assert.ok(result.includes(':6'));
       // Should contain the file name as the root
-      expect(result).toContain('📁 src/component.tsx');
+      assert.ok(result.includes('📁 src/component.tsx'));
     });
   });
 
@@ -579,12 +590,12 @@ describe('Formatter', () => {
       // All formats should handle deep nesting
       ['json', 'yaml', 'ascii'].forEach((format) => {
         const formatter = new Formatter(format as 'json' | 'yaml' | 'ascii');
-        expect(() => formatter.format(deepResults)).not.toThrow();
+        assert.doesNotThrow(() => formatter.format(deepResults));
 
         const result = formatter.format(deepResults);
-        expect(result.length).toBeGreaterThan(0);
-        expect(result).toContain('OuterClass');
-        expect(result).toContain('deepVariable');
+        assert.ok(result.length > 0);
+        assert.ok(result.includes('OuterClass'));
+        assert.ok(result.includes('deepVariable'));
       });
     });
 
@@ -615,8 +626,8 @@ describe('Formatter', () => {
         const formatter = new Formatter(format as 'json' | 'yaml' | 'ascii');
         const result = formatter.format(specialResults);
 
-        expect(result).toContain('var_with_$pecial_chars & symbols!');
-        expect(result).toContain('func_with_émojis_🚀');
+        assert.ok(result.includes('var_with_$pecial_chars & symbols!'));
+        assert.ok(result.includes('func_with_émojis_🚀'));
       });
     });
   });

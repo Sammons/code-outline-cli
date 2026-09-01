@@ -1,7 +1,6 @@
-name: Deploy Website to GitHub Pages
+name: Deploy Website to Cloudflare Pages
 
 on:
-  # Trigger on pushes to main branch
   push:
     branches:
       - main
@@ -9,55 +8,55 @@ on:
       - 'packages/website/**'
       - '.github/workflows/deploy-website.yml'
 
-  # Allow manual trigger
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: 'pages'
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          node-version: '26'
 
       - name: Build website
         run: pnpm --filter @sammons/website build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      # wrangler is a deploy-time tool, not part of the app, so it is installed
+      # into a scratch directory rather than carried as a dependency, pinned to
+      # an exact version.
+      #
+      # Its esbuild/workerd install scripts stay unrun (--ignore-scripts): they
+      # are only needed for Workers bundling, which a static Pages upload never
+      # touches. Verified end to end -- both `wrangler --version` and
+      # `pages deploy` work with those scripts ignored.
+      #
+      # `pnpm dlx` cannot be used here: it fails with ERR_PNPM_IGNORED_BUILDS.
+      - name: Install wrangler
+        run: |
+          mkdir -p "$RUNNER_TEMP/wrangler"
+          cd "$RUNNER_TEMP/wrangler"
+          echo '{"name":"wrangler-runner","private":true}' > package.json
+          pnpm add --ignore-scripts wrangler@4.127.1
+          ./node_modules/.bin/wrangler --version
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './packages/website/dist'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          "$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler" pages deploy \
+            packages/website/dist \
+            --project-name=code-outline \
+            --branch=main

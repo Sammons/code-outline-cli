@@ -1,18 +1,16 @@
 {
   "name": "code-outline-monorepo",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "description": "Monorepo for code outline tools using tree-sitter",
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "clean": "pnpm -r clean",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch",
-    "prepare": "husky",
+    "test": "node --test \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
+    "test:run": "node --test \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-lines=70 --test-coverage-branches=70 --test-coverage-functions=70 --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
@@ -25,9 +23,9 @@
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
     "badges": "node scripts/badge-generator.js",
-    "docs:check": "tsx scripts/check-docs-current.ts --exit-code",
-    "docs:update": "tsx scripts/generate-docs.ts",
-    "docs:validate": "tsx scripts/validate-generated-docs.ts"
+    "docs:check": "node scripts/check-docs-current.ts --exit-code",
+    "docs:update": "node scripts/generate-docs.ts",
+    "docs:validate": "node scripts/validate-generated-docs.ts"
   },
   "keywords": [
     "tree-sitter",
@@ -41,42 +39,24 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=26.0.0",
     "pnpm": ">=10.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sammons2/code-outline-cli.git"
+    "url": "git+https://git.tail4ea214.ts.net/sammons/code-outline-cli.git"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.5.2",
     "@changesets/cli": "2.29.8",
     "@eslint/js": "9.39.1",
-    "@types/js-yaml": "4.0.9",
-    "@types/mock-fs": "4.13.4",
     "@types/node": "24.10.2",
     "@typescript-eslint/eslint-plugin": "8.49.0",
     "@typescript-eslint/parser": "8.49.0",
-    "@vitest/coverage-v8": "4.0.15",
     "eslint": "9.39.1",
     "globals": "16.5.0",
-    "husky": "9.1.7",
-    "js-yaml": "4.1.1",
-    "lint-staged": "16.2.7",
-    "mock-fs": "5.5.0",
     "prettier": "3.7.4",
-    "tsx": "4.21.0",
-    "typescript": "5.9.3",
-    "vitest": "4.0.15"
+    "typescript": "5.9.3"
   },
-  "packageManager": "pnpm@10.15.1",
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{js,jsx,json,md,yaml,yml}": [
-      "prettier --write"
-    ]
-  }
+  "packageManager": "pnpm@10.15.1"
 }

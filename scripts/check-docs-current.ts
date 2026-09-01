@@ -28,6 +28,7 @@
 
 import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Command line argument parsing
@@ -69,9 +70,12 @@ function checkDocsCurrent(): {
   status: 'current' | 'outdated' | 'error';
   message: string;
 } {
-  const cliPackagePath = resolve(__dirname, '../packages/cli/package.json');
+  const cliPackagePath = resolve(
+    import.meta.dirname,
+    '../packages/cli/package.json'
+  );
   const versionsJsonPath = resolve(
-    __dirname,
+    import.meta.dirname,
     '../packages/website/public/data/versions.json'
   );
 
@@ -159,7 +163,8 @@ function main(): void {
 }
 
 // Run main function if this script is executed directly
-if (require.main === module) {
+// ESM equivalent of `require.main === module`: true when run directly.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();
 }
 

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "lib": ["ES2022"],
+    "target": "ES2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -11,8 +12,12 @@
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "composite": true
+    "composite": true,
+
+    // Source files import siblings with a .ts extension so Node 26 can run them
+    // directly under native type stripping (tests, scripts). On emit, tsc
+    // rewrites those specifiers to .js so the published dist/ resolves.
+    "rewriteRelativeImportExtensions": true
   },
   "exclude": ["node_modules", "dist"]
 }

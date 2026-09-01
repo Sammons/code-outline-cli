@@ -1,15 +1,15 @@
 {
   "name": "@sammons/code-outline-parser",
   "version": "2.1.0",
+  "type": "module",
   "description": "Tree-sitter based parser for JavaScript/TypeScript code analysis",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "clean": "rm -rf dist",
-    "test": "vitest run --config ../../vitest.config.ts src",
-    "test:watch": "vitest --config ../../vitest.config.ts src"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "node --test \"src/*.test.ts\""
   },
   "keywords": [
     "tree-sitter",
@@ -31,5 +31,14 @@
   "devDependencies": {
     "@types/node": "24.10.2",
     "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   }
 }

@@ -1,447 +1,316 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ProcessedFile } from './file-processor';
-
-// Create hoisted mock functions before mocking (vitest 4 requirement)
-const {
-  mockParseArgs,
-  mockFg,
-  mockResolve,
-  mockIsAbsolute,
-  mockExistsSync,
-  mockValidateFormat,
-  mockValidateDepthValue,
-  mockParserParseFile,
-  mockFormatterFormat,
-} = vi.hoisted(() => ({
-  mockParseArgs: vi.fn(),
-  mockFg: vi.fn(),
-  mockResolve: vi.fn(),
-  mockIsAbsolute: vi.fn().mockReturnValue(false),
-  mockExistsSync: vi.fn().mockReturnValue(false),
-  mockValidateFormat: vi.fn(),
-  mockValidateDepthValue: vi.fn(),
-  mockParserParseFile: vi.fn(),
-  mockFormatterFormat: vi.fn(),
-}));
-
-// Mock external dependencies with factory functions
-vi.mock('node:util', () => ({
-  parseArgs: mockParseArgs,
-}));
-vi.mock('fast-glob', () => ({
-  default: mockFg,
-}));
-vi.mock('node:path', () => ({
-  resolve: mockResolve,
-  isAbsolute: mockIsAbsolute,
-}));
-vi.mock('node:fs', () => ({
-  existsSync: mockExistsSync,
-}));
-
-// Mock the parser package
-vi.mock('@sammons/code-outline-parser', () => ({
-  Parser: vi.fn().mockImplementation(function (this: any) {
-    this.parseFile = mockParserParseFile;
-  }),
-  validateFormat: mockValidateFormat,
-  validateDepthValue: mockValidateDepthValue,
-}));
-
-// Mock the formatter package
-vi.mock('@sammons/code-outline-formatter', () => ({
-  Formatter: vi.fn().mockImplementation(function (this: any) {
-    this.format = mockFormatterFormat;
-  }),
-}));
-
-// Mock console methods - but don't implement them at the top level
-let mockConsoleLog: ReturnType<typeof vi.spyOn>;
-let mockConsoleError: ReturnType<typeof vi.spyOn>;
-
-// Import the actual classes for testing (after mocking)
-import { CLIArgumentParser, CLIArgumentError } from './cli-argument-parser.js';
-import { FileProcessor, FileProcessorError } from './file-processor.js';
-import { CLIOutputHandler } from './cli-output-handler.js';
+import { describe, it, beforeEach, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import type { ProcessedFile } from './file-processor.ts';
+import { CLIArgumentParser, CLIArgumentError } from './cli-argument-parser.ts';
+import { FileProcessor, FileProcessorError } from './file-processor.ts';
+import { CLIOutputHandler } from './cli-output-handler.ts';
 import { Parser } from '@sammons/code-outline-parser';
-import { Formatter } from '@sammons/code-outline-formatter';
+import type { NodeInfo } from '@sammons/code-outline-parser';
 
 describe('CLIArgumentParser', () => {
+  let logMessages: string[];
+  let exitCalls: number[];
   let parser: CLIArgumentParser;
 
+  const buildParser = (args: string[]): CLIArgumentParser => {
+    logMessages = [];
+    exitCalls = [];
+    return new CLIArgumentParser(
+      () => ['node', 'cli.js', ...args],
+      (message: string) => {
+        logMessages.push(message);
+      }
+    );
+  };
+
   beforeEach(() => {
-    parser = new CLIArgumentParser();
-    vi.clearAllMocks();
-
-    // Mock console methods freshly each time
-    mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    // Mock process.exit to prevent actual exits during tests
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
+    parser = buildParser([]);
   });
 
   describe('parse', () => {
     it('should parse valid arguments correctly', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'json',
-          depth: '5',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: false,
-          version: false,
-        },
-        positionals: ['src/**/*.ts'],
-      });
-
-      // Mock validation functions to return successful results
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'json' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({ success: true, value: 5 });
+      parser = buildParser(['--format', 'json', '--depth', '5', 'src/**/*.ts']);
 
       const result = parser.parse();
 
-      expect(result.options.format).toBe('json');
-      expect(result.options.depth).toBe(5);
-      expect(result.options.namedOnly).toBe(true);
-      expect(result.options.llmtext).toBe(false);
-      expect(result.pattern).toBe('src/**/*.ts');
+      assert.strictEqual(result.options.format, 'json');
+      assert.strictEqual(result.options.depth, 5);
+      assert.strictEqual(result.options.namedOnly, true);
+      assert.strictEqual(result.options.llmtext, false);
+      assert.strictEqual(result.pattern, 'src/**/*.ts');
     });
 
     it('should throw CLIArgumentError when no pattern is provided', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'ascii',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: false,
-          version: false,
-        },
-        positionals: [],
-      });
+      parser = buildParser([]);
 
-      expect(() => parser.parse()).toThrow(CLIArgumentError);
-      expect(() => parser.parse()).toThrow('No file pattern provided');
+      assert.throws(() => parser.parse(), CLIArgumentError);
+      assert.throws(() => parser.parse(), /No file pattern provided/);
     });
 
     it('should handle help flag and exit', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'ascii',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: true,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
+      const originalExit = process.exit;
+      process.exit = ((code?: number) => {
+        exitCalls.push(code ?? 0);
+        throw new Error(`exit(${code})`);
+      }) as typeof process.exit;
 
-      // Mock validation functions even though they won't be called due to early exit
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'ascii' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
+      try {
+        parser = buildParser(['--help', 'test.js']);
 
-      parser.parse();
+        assert.throws(() => parser.parse());
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('Code Outline CLI')
-      );
-
-      expect(process.exit).toHaveBeenCalledWith(0);
+        assert.ok(
+          logMessages.some((message) => message.includes('Code Outline CLI'))
+        );
+        assert.deepStrictEqual(exitCalls, [0]);
+      } finally {
+        process.exit = originalExit;
+      }
     });
 
     it('should handle version flag and exit', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'ascii',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: false,
-          version: true,
-        },
-        positionals: ['test.js'],
-      });
+      const originalExit = process.exit;
+      process.exit = ((code?: number) => {
+        exitCalls.push(code ?? 0);
+        throw new Error(`exit(${code})`);
+      }) as typeof process.exit;
 
-      // Mock validation functions even though they won't be called due to early exit
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'ascii' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
+      try {
+        parser = buildParser(['--version', 'test.js']);
 
-      parser.parse();
+        assert.throws(() => parser.parse());
 
-      expect(mockConsoleLog).toHaveBeenCalled();
-
-      expect(process.exit).toHaveBeenCalledWith(0);
+        assert.ok(logMessages.length > 0);
+        assert.deepStrictEqual(exitCalls, [0]);
+      } finally {
+        process.exit = originalExit;
+      }
     });
 
     it('should handle invalid format', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'invalid',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: false,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
+      parser = buildParser(['--format', 'invalid', 'test.js']);
 
-      // Mock validation to return error
-      mockValidateFormat.mockReturnValue({
-        success: false,
-        error: 'Invalid format type',
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
-
-      expect(() => parser.parse()).toThrow(CLIArgumentError);
-      expect(() => parser.parse()).toThrow('Invalid format');
+      assert.throws(() => parser.parse(), CLIArgumentError);
+      assert.throws(() => parser.parse(), /Invalid format/);
     });
 
     it('should handle invalid depth', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'json',
-          depth: '0',
-          'named-only': true,
-          all: false,
-          llmtext: false,
-          help: false,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
+      parser = buildParser(['--format', 'json', '--depth', '0', 'test.js']);
 
-      // Mock validation to return error
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'json' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: false,
-        error: 'Depth must be >= 1',
-      });
-
-      expect(() => parser.parse()).toThrow(CLIArgumentError);
-      expect(() => parser.parse()).toThrow('Invalid depth');
+      assert.throws(() => parser.parse(), CLIArgumentError);
+      assert.throws(() => parser.parse(), /Invalid depth/);
     });
 
     it('should handle --all flag correctly', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'json',
-          depth: 'Infinity',
-          'named-only': true,
-          all: true,
-          llmtext: false,
-          help: false,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
-
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'json' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
+      parser = buildParser(['--format', 'json', '--all', 'test.js']);
 
       const result = parser.parse();
 
-      expect(result.options.namedOnly).toBe(false);
+      assert.strictEqual(result.options.namedOnly, false);
     });
 
     it('should handle --llmtext flag correctly', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'json',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: true,
-          help: false,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
-
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'json' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
+      parser = buildParser(['--format', 'json', '--llmtext', 'test.js']);
 
       const result = parser.parse();
 
-      expect(result.options.llmtext).toBe(true);
-      expect(result.options.format).toBe('llmtext'); // Should override format
+      assert.strictEqual(result.options.llmtext, true);
+      assert.strictEqual(result.options.format, 'llmtext'); // Should override format
     });
 
     it('should override format when --llmtext flag is provided', () => {
-      mockParseArgs.mockReturnValue({
-        values: {
-          format: 'yaml',
-          depth: 'Infinity',
-          'named-only': true,
-          all: false,
-          llmtext: true,
-          help: false,
-          version: false,
-        },
-        positionals: ['test.js'],
-      });
-
-      mockValidateFormat.mockReturnValue({
-        success: true,
-        value: 'yaml' as any,
-      });
-      mockValidateDepthValue.mockReturnValue({
-        success: true,
-        value: Infinity,
-      });
+      parser = buildParser(['--format', 'yaml', '--llmtext', 'test.js']);
 
       const result = parser.parse();
 
-      expect(result.options.llmtext).toBe(true);
-      expect(result.options.format).toBe('llmtext'); // Should override original yaml format
+      assert.strictEqual(result.options.llmtext, true);
+      assert.strictEqual(result.options.format, 'llmtext'); // Should override original yaml format
     });
   });
 
   describe('printHelp', () => {
     it('should print help message', () => {
+      parser = buildParser([]);
+
       parser.printHelp();
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('Code Outline CLI')
+      assert.ok(
+        logMessages.some((message) => message.includes('Code Outline CLI'))
       );
     });
   });
 
   describe('printVersion', () => {
     it('should print version', () => {
+      parser = buildParser([]);
+
       parser.printVersion();
 
-      expect(mockConsoleLog).toHaveBeenCalled();
+      assert.ok(logMessages.length > 0);
     });
   });
 });
 
+class FakeGlob {
+  public calls: Array<{ pattern: string; options: unknown }> = [];
+  private result: string[] = [];
+  private shouldThrow: Error | null = null;
+
+  public asFunction = async (
+    pattern: string,
+    options: unknown
+  ): Promise<string[]> => {
+    this.calls.push({ pattern, options });
+    if (this.shouldThrow) {
+      throw this.shouldThrow;
+    }
+    return this.result;
+  };
+
+  public mockResolvedValue(files: string[]): void {
+    this.result = files;
+    this.shouldThrow = null;
+  }
+}
+
+class FakeParser {
+  public parseFile = mock.fn<
+    (
+      filePath: string,
+      maxDepth?: number,
+      namedOnly?: boolean
+    ) => Promise<NodeInfo | null>
+  >(async () => null);
+}
+
 describe('FileProcessor', () => {
+  let fakeGlob: FakeGlob;
   let processor: FileProcessor;
 
   beforeEach(() => {
-    processor = new FileProcessor();
-    vi.clearAllMocks();
-
-    // Mock console methods freshly each time
-    mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    fakeGlob = new FakeGlob();
+    processor = new FileProcessor(
+      new Parser(),
+      fakeGlob.asFunction as unknown as ConstructorParameters<
+        typeof FileProcessor
+      >[1]
+    );
   });
 
   describe('findFiles', () => {
     it('should find files matching pattern', async () => {
       const files = ['/path/to/file1.js', '/path/to/file2.ts'];
-      mockFg.mockResolvedValue(files);
+      fakeGlob.mockResolvedValue(files);
 
       const result = await processor.findFiles('src/**/*.{js,ts}');
 
-      expect(mockFg).toHaveBeenCalledWith('src/**/*.{js,ts}', {
+      assert.deepStrictEqual(fakeGlob.calls[0]?.pattern, 'src/**/*.{js,ts}');
+      assert.deepStrictEqual(fakeGlob.calls[0]?.options, {
         absolute: true,
         ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
       });
-      expect(result).toEqual(files);
+      assert.deepStrictEqual(result, files);
     });
 
     it('should throw FileProcessorError when no files found', async () => {
-      mockFg.mockResolvedValue([]);
+      fakeGlob.mockResolvedValue([]);
 
-      await expect(processor.findFiles('nonexistent/**/*.js')).rejects.toThrow(
+      await assert.rejects(
+        () => processor.findFiles('nonexistent/**/*.js'),
         FileProcessorError
       );
-      await expect(processor.findFiles('nonexistent/**/*.js')).rejects.toThrow(
-        'No files found matching pattern'
+      await assert.rejects(
+        () => processor.findFiles('nonexistent/**/*.js'),
+        /No files found matching pattern/
       );
     });
   });
 
-  // Note: processFiles tests are skipped because vitest 4's module mocking
-  // doesn't work correctly with vitest aliases. The Parser mock isn't applied
-  // when FileProcessor imports from the aliased path. These scenarios are
-  // thoroughly tested in cli.integration.test.ts.
-  describe.skip('processFiles', () => {
+  describe('processFiles', () => {
+    let fakeParser: FakeParser;
+    let errorMessages: unknown[][];
+    let originalConsoleError: typeof console.error;
+
+    beforeEach(() => {
+      fakeParser = new FakeParser();
+      processor = new FileProcessor(
+        fakeParser as unknown as ConstructorParameters<typeof FileProcessor>[0],
+        fakeGlob.asFunction as unknown as ConstructorParameters<
+          typeof FileProcessor
+        >[1]
+      );
+      errorMessages = [];
+      originalConsoleError = console.error;
+      console.error = (...args: unknown[]) => {
+        errorMessages.push(args);
+      };
+    });
+
     it('should process multiple files successfully', async () => {
       const files = ['/path/file1.js', '/path/file2.js'];
-      const mockOutline = { type: 'program', children: [] };
+      const mockOutline: NodeInfo = {
+        type: 'program',
+        start: { row: 0, column: 0 },
+        end: { row: 0, column: 0 },
+        children: [],
+      };
 
-      mockParserParseFile.mockResolvedValue(mockOutline);
-      mockResolve.mockImplementation((path) => `/resolved${path}`);
+      fakeParser.parseFile.mock.mockImplementation(async () => mockOutline);
 
-      const result = await processor.processFiles(files, 5, true);
+      try {
+        const result = await processor.processFiles(files, 5, true);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        file: '/resolved/path/file1.js',
-        outline: mockOutline,
-      });
-      expect(result[1]).toEqual({
-        file: '/resolved/path/file2.js',
-        outline: mockOutline,
-      });
-      expect(mockParserParseFile).toHaveBeenCalledTimes(2);
+        assert.strictEqual(result.length, 2);
+        assert.deepStrictEqual(result[0], {
+          file: files[0],
+          outline: mockOutline,
+        });
+        assert.deepStrictEqual(result[1], {
+          file: files[1],
+          outline: mockOutline,
+        });
+        assert.strictEqual(fakeParser.parseFile.mock.calls.length, 2);
+      } finally {
+        console.error = originalConsoleError;
+      }
     });
 
     it('should handle parsing errors gracefully', async () => {
       const files = ['/path/file1.js', '/path/file2.js'];
+      let callCount = 0;
 
-      mockParserParseFile
-        .mockResolvedValueOnce({ type: 'program', children: [] })
-        .mockRejectedValueOnce(new Error('Parse error'));
+      fakeParser.parseFile.mock.mockImplementation(async () => {
+        callCount += 1;
+        if (callCount === 1) {
+          return {
+            type: 'program',
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+            children: [],
+          };
+        }
+        throw new Error('Parse error');
+      });
 
-      mockResolve.mockImplementation((path) => `/resolved${path}`);
+      try {
+        const result: ProcessedFile[] = await processor.processFiles(
+          files,
+          5,
+          true
+        );
 
-      const result = await processor.processFiles(files, 5, true);
-
-      expect(result).toHaveLength(2);
-      expect(result[0].outline).toBeTruthy();
-      expect(result[1].outline).toBeNull();
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining('Error parsing'),
-        expect.stringMatching(/Parse error|Unknown error occurred/)
-      );
+        assert.strictEqual(result.length, 2);
+        assert.ok(result[0]?.outline);
+        assert.strictEqual(result[1]?.outline, null);
+        assert.ok(
+          errorMessages.some(
+            (call) =>
+              typeof call[0] === 'string' && call[0].includes('Error parsing')
+          )
+        );
+      } finally {
+        console.error = originalConsoleError;
+      }
     });
 
     it('should process files with correct parameters', async () => {
@@ -449,48 +318,64 @@ describe('FileProcessor', () => {
       const depth = 3;
       const namedOnly = false;
 
-      mockParserParseFile.mockResolvedValue({ type: 'program' });
-      mockResolve.mockReturnValue('/resolved/path/file1.js');
+      fakeParser.parseFile.mock.mockImplementation(async () => ({
+        type: 'program',
+        start: { row: 0, column: 0 },
+        end: { row: 0, column: 0 },
+      }));
 
-      await processor.processFiles(files, depth, namedOnly);
+      try {
+        await processor.processFiles(files, depth, namedOnly);
 
-      expect(mockParserParseFile).toHaveBeenCalledWith(
-        '/path/file1.js',
-        depth,
-        namedOnly
-      );
+        assert.deepStrictEqual(fakeParser.parseFile.mock.calls[0]?.arguments, [
+          '/path/file1.js',
+          depth,
+          namedOnly,
+        ]);
+      } finally {
+        console.error = originalConsoleError;
+      }
     });
   });
 });
 
-// Note: CLIOutputHandler tests are skipped because vitest 4's module mocking
-// doesn't work correctly with vitest aliases. The Formatter mock isn't applied
-// when CLIOutputHandler imports from the aliased path. These scenarios are
-// thoroughly tested in cli.integration.test.ts.
-describe.skip('CLIOutputHandler', () => {
-  let handler: CLIOutputHandler;
+describe('CLIOutputHandler', () => {
+  const sampleResults: ProcessedFile[] = [
+    {
+      file: '/path/file1.js',
+      outline: {
+        type: 'program',
+        start: { row: 0, column: 0 },
+        end: { row: 10, column: 0 },
+      },
+    },
+  ];
 
-  beforeEach(() => {
-    handler = new CLIOutputHandler('json' as any);
-    vi.clearAllMocks();
+  // Assert on what each format actually emits rather than merely that the
+  // constructor does not throw: a bug that swapped or dropped the format
+  // argument would still construct fine, and go undetected.
+  it('emits YAML when constructed with the yaml format', () => {
+    const logged: string[] = [];
+    new CLIOutputHandler('yaml', false, (message) => {
+      logged.push(message);
+    }).formatAndOutput(sampleResults);
 
-    // Mock console methods freshly each time
-    mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    assert.strictEqual(logged.length, 1);
+    assert.match(logged[0]!, /^- file: /);
+    assert.ok(!logged[0]!.startsWith('['), 'must not be JSON');
   });
 
-  describe('constructor', () => {
-    it('should create formatter with correct format', () => {
-      new CLIOutputHandler('yaml' as any);
+  it('emits llmtext when constructed with the llmtext flag', () => {
+    const logged: string[] = [];
+    new CLIOutputHandler('llmtext', true, (message) => {
+      logged.push(message);
+    }).formatAndOutput(sampleResults);
 
-      expect(vi.mocked(Formatter)).toHaveBeenCalledWith('yaml', undefined);
-    });
-
-    it('should create formatter with llmtext flag', () => {
-      new CLIOutputHandler('llmtext' as any, true);
-
-      expect(vi.mocked(Formatter)).toHaveBeenCalledWith('llmtext', true);
-    });
+    assert.strictEqual(logged.length, 1);
+    assert.ok(
+      logged[0]!.includes('<Outline>'),
+      `expected llmtext output, got ${logged[0]!.slice(0, 60)}`
+    );
   });
 
   describe('formatAndOutput', () => {
@@ -513,26 +398,31 @@ describe.skip('CLIOutputHandler', () => {
           },
         },
       ];
-      const formattedOutput = '{"formatted": "output"}';
-
-      mockFormatterFormat.mockReturnValue(formattedOutput);
+      const logged: string[] = [];
+      const handler = new CLIOutputHandler('json', false, (message) => {
+        logged.push(message);
+      });
 
       handler.formatAndOutput(results);
 
-      expect(mockFormatterFormat).toHaveBeenCalledWith(results);
-      expect(mockConsoleLog).toHaveBeenCalledWith(formattedOutput);
+      assert.strictEqual(logged.length, 1);
+      const parsed: unknown = JSON.parse(logged[0] ?? '');
+      assert.ok(Array.isArray(parsed));
+      assert.strictEqual((parsed as unknown[]).length, 2);
     });
 
     it('should handle empty results', () => {
       const results: ProcessedFile[] = [];
-      const formattedOutput = '[]';
-
-      mockFormatterFormat.mockReturnValue(formattedOutput);
+      const logged: string[] = [];
+      const handler = new CLIOutputHandler('json', false, (message) => {
+        logged.push(message);
+      });
 
       handler.formatAndOutput(results);
 
-      expect(mockFormatterFormat).toHaveBeenCalledWith(results);
-      expect(mockConsoleLog).toHaveBeenCalledWith(formattedOutput);
+      assert.strictEqual(logged.length, 1);
+      const parsed: unknown = JSON.parse(logged[0] ?? '');
+      assert.deepStrictEqual(parsed, []);
     });
   });
 });

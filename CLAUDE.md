@@ -23,7 +23,7 @@ pnpm lint          # Run ESLint
 pnpm format        # Run Prettier
 
 # Release (CI/CD only - do not publish locally)
-# Releases are automated through GitHub Actions when commits are pushed
+# Releases are automated through Gitea Actions when commits are pushed
 ```
 
 ## Important Technical Details
@@ -37,8 +37,8 @@ pnpm format        # Run Prettier
 
 ### Testing Strategy
 
-- **Vitest** for all testing
-- **342 tests** across the codebase
+- **node:test** + **node:assert/strict** for all testing (no third-party test framework)
+- Tests live beside the source they exercise (`*.test.ts`)
 - Coverage targets: 70% global, 75% parser, 80% formatter
 - Test files co-located with source files (\*.test.ts)
 - Integration tests in `/src/test-scenarios/`
@@ -62,7 +62,7 @@ pnpm format        # Run Prettier
 
 ### Code Standards
 
-- **Node.js 20+** required (tested on 20 and 22)
+- **Node.js 26+** required (native TypeScript type stripping; no transform step)
 - **pnpm 10** for package management
 - **TypeScript strict mode** enabled
 - **ESLint v9 flat config** with strict rules
@@ -74,7 +74,7 @@ pnpm format        # Run Prettier
 
 - Uses **changesets** for version management
 - Fixed versioning across packages
-- Automated through GitHub Actions
+- Automated through Gitea Actions
 - Never publish locally - always through CI/CD
 - Create releases with: `pnpm changeset` → commit → push
 
@@ -118,7 +118,7 @@ pnpm test
 
 ### Debugging CI Failures
 
-1. Check which workflow failed in GitHub Actions
+1. Check which workflow failed in Gitea Actions
 2. Run locally: `pnpm test` or `pnpm lint`
 3. For CLI tests: `pnpm --filter @sammons/code-outline-cli build` first
 4. Check Node version (must be 20+)
@@ -155,7 +155,7 @@ pnpm test
 
 - [Tree-sitter Documentation](https://tree-sitter.github.io/tree-sitter/)
 - [Changesets Documentation](https://github.com/changesets/changesets)
-- [Vitest Documentation](https://vitest.dev/)
+- [node:test Documentation](https://nodejs.org/api/test.html)
 - [pnpm Workspaces](https://pnpm.io/workspaces)
 
 ## Current Status
@@ -168,5 +168,5 @@ pnpm test
 
 ## Contact
 
-Repository: https://github.com/sammons2/code-outline-cli
-Issues: https://github.com/sammons2/code-outline-cli/issues
+Repository: https://git.tail4ea214.ts.net/sammons/code-outline-cli
+Issues: https://git.tail4ea214.ts.net/sammons/code-outline-cli/issues

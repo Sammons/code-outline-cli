@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions, TestFileSystem } from '../common/test-utils.js';
+import { existsSync } from 'node:fs';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
 
 describe('Multiple Files Processing', () => {
   let testFs: TestFileSystem;
@@ -11,21 +13,29 @@ describe('Multiple Files Processing', () => {
 
   beforeEach(() => {
     testFs = new TestFileSystem();
-    testDir = resolve(__dirname, 'temp', 'multiple-files-' + Date.now());
+    testDir = resolve(
+      import.meta.dirname,
+      'temp',
+      'multiple-files-' + Date.now()
+    );
     testFs.createDir(testDir);
 
     // Use the pre-created asset files
-    // Try to find assets relative to __dirname first, then fall back to project root
-    const assetPath1 = resolve(__dirname, 'assets', 'program-file.ts');
+    // Try to find assets relative to import.meta.dirname first, then fall back to project root
+    const assetPath1 = resolve(
+      import.meta.dirname,
+      'assets',
+      'program-file.ts'
+    );
     const assetPath2 = resolve(
       process.cwd(),
       'src/test-scenarios/_01-multiple-files/assets/program-file.ts'
     );
 
-    if (require('fs').existsSync(assetPath1)) {
+    if (existsSync(assetPath1)) {
       programFile = assetPath1;
-      utilityFile = resolve(__dirname, 'assets', 'utility-file.ts');
-    } else if (require('fs').existsSync(assetPath2)) {
+      utilityFile = resolve(import.meta.dirname, 'assets', 'utility-file.ts');
+    } else if (existsSync(assetPath2)) {
       programFile = assetPath2;
       utilityFile = resolve(
         process.cwd(),
@@ -39,7 +49,7 @@ describe('Multiple Files Processing', () => {
         console.error('  Tried:', assetPath2);
       }
       programFile = assetPath1;
-      utilityFile = resolve(__dirname, 'assets', 'utility-file.ts');
+      utilityFile = resolve(import.meta.dirname, 'assets', 'utility-file.ts');
     }
   });
 
@@ -56,9 +66,9 @@ describe('Multiple Files Processing', () => {
       CLIAssertions.expectFilesProcessed(parsed, 1);
 
       const fileResult = parsed[0];
-      expect(fileResult.file).toContain('program-file.ts');
-      expect(fileResult.outline).toBeTruthy();
-      expect(fileResult.outline!.type).toBe('program');
+      assert.ok(fileResult.file.includes('program-file.ts'));
+      assert.ok(fileResult.outline);
+      assert.strictEqual(fileResult.outline!.type, 'program');
 
       // Should contain various TypeScript constructs
       const functionDeclarations = CLIAssertions.findNodesByType(
@@ -78,10 +88,10 @@ describe('Multiple Files Processing', () => {
         'enum_declaration'
       );
 
-      expect(functionDeclarations.length).toBeGreaterThan(0);
-      expect(classDeclarations.length).toBeGreaterThan(0);
-      expect(interfaceDeclarations.length).toBeGreaterThan(0);
-      expect(enumDeclarations.length).toBeGreaterThan(0);
+      assert.ok(functionDeclarations.length > 0);
+      assert.ok(classDeclarations.length > 0);
+      assert.ok(interfaceDeclarations.length > 0);
+      assert.ok(enumDeclarations.length > 0);
     });
 
     it('should process utility file with namespaces and advanced patterns', async () => {
@@ -92,7 +102,7 @@ describe('Multiple Files Processing', () => {
       CLIAssertions.expectFilesProcessed(parsed, 1);
 
       const fileResult = parsed[0];
-      expect(fileResult.file).toContain('utility-file.ts');
+      assert.ok(fileResult.file.includes('utility-file.ts'));
 
       // Should contain various TypeScript constructs
       const classes = CLIAssertions.findNodesByType(
@@ -108,15 +118,15 @@ describe('Multiple Files Processing', () => {
         'function_declaration'
       );
 
-      expect(classes.length).toBeGreaterThan(0);
-      expect(interfaces.length).toBeGreaterThan(0);
-      expect(functions.length).toBeGreaterThan(0);
+      assert.ok(classes.length > 0);
+      assert.ok(interfaces.length > 0);
+      assert.ok(functions.length > 0);
     });
   });
 
   describe('Multiple File Processing with Patterns', () => {
     it('should process both asset files when using glob pattern', async () => {
-      const pattern = resolve(__dirname, 'assets', '*.ts');
+      const pattern = resolve(import.meta.dirname, 'assets', '*.ts');
       const result = await cliRunner.run([pattern, '--format', 'json']);
 
       CLIAssertions.expectSuccess(result);
@@ -125,13 +135,19 @@ describe('Multiple Files Processing', () => {
 
       // Should have both files
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('program-file.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('utility-file.ts'))).toBe(true);
+      assert.strictEqual(
+        files.some((f) => f.includes('program-file.ts')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.includes('utility-file.ts')),
+        true
+      );
 
       // Each file should have valid outline
       for (const fileResult of parsed) {
-        expect(fileResult.outline).toBeTruthy();
-        expect(fileResult.outline!.type).toBe('program');
+        assert.ok(fileResult.outline);
+        assert.strictEqual(fileResult.outline!.type, 'program');
       }
     });
 
@@ -183,8 +199,14 @@ describe('Multiple Files Processing', () => {
 
       // Should process both JS and TSX files
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.endsWith('.js'))).toBe(true);
-      expect(files.some((f) => f.endsWith('.tsx'))).toBe(true);
+      assert.strictEqual(
+        files.some((f) => f.endsWith('.js')),
+        true
+      );
+      assert.strictEqual(
+        files.some((f) => f.endsWith('.tsx')),
+        true
+      );
     });
   });
 
@@ -211,24 +233,28 @@ describe('Multiple Files Processing', () => {
       CLIAssertions.expectValidAscii(asciiResult);
 
       // JSON and YAML should have identical structure
-      expect(jsonParsed).toHaveLength(yamlParsed.length);
-      expect(jsonParsed[0].file).toBe(yamlParsed[0].file);
+      assert.strictEqual(jsonParsed.length, yamlParsed.length);
+      assert.strictEqual(jsonParsed[0].file, yamlParsed[0].file);
 
       if (jsonParsed[0].outline && yamlParsed[0].outline) {
-        expect(jsonParsed[0].outline.type).toBe(yamlParsed[0].outline.type);
-        expect(jsonParsed[0].outline.children?.length).toBe(
+        assert.strictEqual(
+          jsonParsed[0].outline.type,
+          yamlParsed[0].outline.type
+        );
+        assert.strictEqual(
+          jsonParsed[0].outline.children?.length,
           yamlParsed[0].outline.children?.length
         );
       }
 
       // ASCII should contain file information
-      expect(asciiResult.stdout).toContain('program-file.ts');
+      assert.ok(asciiResult.stdout.includes('program-file.ts'));
     });
   });
 
   describe('Performance and Large Files', () => {
     it('should handle processing multiple files efficiently', async () => {
-      const pattern = resolve(__dirname, 'assets', '*.ts');
+      const pattern = resolve(import.meta.dirname, 'assets', '*.ts');
       const startTime = Date.now();
 
       const result = await cliRunner.run([pattern, '--format', 'json']);
@@ -239,7 +265,7 @@ describe('Multiple Files Processing', () => {
       CLIAssertions.expectFilesProcessed(parsed, 2);
 
       // Should complete in reasonable time (under 10 seconds for 2 files)
-      expect(duration).toBeLessThan(10000);
+      assert.ok(duration < 10000);
     });
 
     it('should handle complex nested structures without issues', async () => {
@@ -249,11 +275,11 @@ describe('Multiple Files Processing', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       const fileResult = parsed[0];
-      expect(fileResult.outline).toBeTruthy();
+      assert.ok(fileResult.outline);
 
       // Count total nodes to ensure deep structures are parsed
       const totalNodes = CLIAssertions.countNodes(fileResult.outline!);
-      expect(totalNodes).toBeGreaterThan(20); // Should have many nodes due to nested structures
+      assert.ok(totalNodes > 20); // Should have many nodes due to nested structures
 
       // Should have namespace with nested elements
       const namespaces = CLIAssertions.findNodesByType(
@@ -261,8 +287,8 @@ describe('Multiple Files Processing', () => {
         'namespace_declaration'
       );
       for (const ns of namespaces) {
-        expect(ns.children).toBeTruthy();
-        expect(ns.children!.length).toBeGreaterThan(0);
+        assert.ok(ns.children);
+        assert.ok(ns.children!.length > 0);
       }
     });
   });
@@ -287,15 +313,15 @@ describe('Multiple Files Processing', () => {
       // Should succeed overall
       CLIAssertions.expectSuccess(result);
       const parsed = CLIAssertions.expectValidJson(result);
-      expect(parsed.length).toBe(3); // All files processed
+      assert.strictEqual(parsed.length, 3); // All files processed
 
       // Good files should have outlines, bad file might have null outline
       const goodResults = parsed.filter((p) => p.file.includes('good'));
-      expect(goodResults).toHaveLength(2);
+      assert.strictEqual(goodResults.length, 2);
 
       for (const goodResult of goodResults) {
-        expect(goodResult.outline).toBeTruthy();
-        expect(goodResult.outline!.type).toBe('program');
+        assert.ok(goodResult.outline);
+        assert.strictEqual(goodResult.outline!.type, 'program');
       }
     });
   });
@@ -308,7 +334,7 @@ describe('Multiple Files Processing', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       const fileResult = parsed[0];
-      expect(fileResult.file).toContain('program-file.ts');
+      assert.ok(fileResult.file.includes('program-file.ts'));
     });
 
     it('should handle relative and absolute paths correctly', async () => {
@@ -321,7 +347,7 @@ describe('Multiple Files Processing', () => {
       CLIAssertions.expectSuccess(absoluteResult);
 
       // Test with relative path from asset directory
-      const assetDir = resolve(__dirname, 'assets');
+      const assetDir = resolve(import.meta.dirname, 'assets');
       const relativeResult = await cliRunner.run(
         ['program-file.ts', '--format', 'json'],
         { cwd: assetDir }
@@ -332,11 +358,12 @@ describe('Multiple Files Processing', () => {
       const absoluteParsed = CLIAssertions.expectValidJson(absoluteResult);
       const relativeParsed = CLIAssertions.expectValidJson(relativeResult);
 
-      expect(absoluteParsed).toHaveLength(1);
-      expect(relativeParsed).toHaveLength(1);
+      assert.strictEqual(absoluteParsed.length, 1);
+      assert.strictEqual(relativeParsed.length, 1);
 
       // Structure should be identical
-      expect(absoluteParsed[0].outline?.type).toBe(
+      assert.strictEqual(
+        absoluteParsed[0].outline?.type,
         relativeParsed[0].outline?.type
       );
     });
@@ -361,20 +388,20 @@ describe('Multiple Files Processing', () => {
         'class_declaration'
       );
 
-      expect(interfaces.length).toBeGreaterThan(0);
-      expect(enums.length).toBeGreaterThan(0);
-      expect(classes.length).toBeGreaterThan(0);
+      assert.ok(interfaces.length > 0);
+      assert.ok(enums.length > 0);
+      assert.ok(classes.length > 0);
 
       // Interfaces should have named properties
       for (const iface of interfaces) {
-        expect(iface.name).toBeTruthy();
-        expect(iface.name).toMatch(/Config|Flags/); // Based on our test file content
+        assert.ok(iface.name);
+        assert.match(iface.name, /Config|Flags/); // Based on our test file content
       }
 
       // Enums should have named members
       for (const enumDecl of enums) {
-        expect(enumDecl.name).toBeTruthy();
-        expect(enumDecl.children).toBeTruthy();
+        assert.ok(enumDecl.name);
+        assert.ok(enumDecl.children);
       }
     });
 
@@ -399,9 +426,9 @@ describe('Multiple Files Processing', () => {
         'function_declaration'
       );
 
-      expect(classes.length).toBeGreaterThan(0);
-      expect(interfaces.length).toBeGreaterThan(0);
-      expect(functions.length).toBeGreaterThan(0);
+      assert.ok(classes.length > 0);
+      assert.ok(interfaces.length > 0);
+      assert.ok(functions.length > 0);
 
       // Check for method definitions in classes
       for (const classDecl of classes) {
@@ -410,7 +437,7 @@ describe('Multiple Files Processing', () => {
           'method_definition'
         );
         if (methods.length > 0) {
-          expect(methods[0].name).toBeTruthy();
+          assert.ok(methods[0].name);
         }
       }
     });

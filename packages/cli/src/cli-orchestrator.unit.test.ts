@@ -1,80 +1,72 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, beforeEach, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import { CLIOrchestrator } from './cli-orchestrator.ts';
+import { CLIArgumentError } from './cli-argument-parser.ts';
+import { FileProcessorError } from './file-processor.ts';
+import type { CLIOutputHandler } from './cli-output-handler.ts';
+import type { ParsedArgs } from './cli-argument-parser.ts';
+import type { ProcessedFile } from './file-processor.ts';
 
-// Create hoisted mock instances (vitest 4 requirement)
-const {
-  mockArgumentParser,
-  mockFileProcessor,
-  mockOutputHandler,
-  MockCLIArgumentError,
-  MockFileProcessorError,
-} = vi.hoisted(() => ({
-  mockArgumentParser: {
-    parse: vi.fn(),
-    printHelp: vi.fn(),
-  },
-  mockFileProcessor: {
-    findFiles: vi.fn(),
-    processFiles: vi.fn(),
-  },
-  mockOutputHandler: {
-    formatAndOutput: vi.fn(),
-  },
-  MockCLIArgumentError: class extends Error {
-    name = 'CLIArgumentError';
-  },
-  MockFileProcessorError: class extends Error {
-    name = 'FileProcessorError';
-  },
-}));
+class FakeArgumentParser {
+  public parse = mock.fn<() => ParsedArgs>(() => {
+    throw new Error('parse not stubbed');
+  });
+  public printHelp = mock.fn(() => {});
+  public printVersion = mock.fn(() => {});
+}
 
-// Mock the CLI components before importing - use function syntax for constructors
-vi.mock('./cli-argument-parser.js', () => ({
-  CLIArgumentParser: vi.fn().mockImplementation(function (this: any) {
-    Object.assign(this, mockArgumentParser);
-  }),
-  CLIArgumentError: MockCLIArgumentError,
-}));
+class FakeFileProcessor {
+  public findFiles = mock.fn<(pattern: string) => Promise<string[]>>(
+    async () => []
+  );
+  public processFiles = mock.fn<
+    (
+      files: string[],
+      depth: number,
+      namedOnly: boolean
+    ) => Promise<ProcessedFile[]>
+  >(async () => []);
+}
 
-vi.mock('./file-processor.js', () => ({
-  FileProcessor: vi.fn().mockImplementation(function (this: any) {
-    Object.assign(this, mockFileProcessor);
-  }),
-  FileProcessorError: MockFileProcessorError,
-}));
-
-vi.mock('./cli-output-handler.js', () => ({
-  CLIOutputHandler: vi.fn().mockImplementation(function (this: any) {
-    Object.assign(this, mockOutputHandler);
-  }),
-}));
-
-// Mock console methods
-const mockConsoleError = vi
-  .spyOn(console, 'error')
-  .mockImplementation(() => {});
-
-// Import after mocking
-import { CLIOrchestrator } from './cli-orchestrator.js';
-import { CLIArgumentParser, CLIArgumentError } from './cli-argument-parser.js';
-import { FileProcessor, FileProcessorError } from './file-processor.js';
-import { CLIOutputHandler } from './cli-output-handler.js';
+class FakeOutputHandler {
+  public formatAndOutput = mock.fn((_results: ProcessedFile[]) => {});
+}
 
 describe('CLIOrchestrator', () => {
+  let fakeArgumentParser: FakeArgumentParser;
+  let fakeFileProcessor: FakeFileProcessor;
+  let fakeOutputHandler: FakeOutputHandler;
+  let outputHandlerFactoryCalls: Array<{ format: string; llmtext?: boolean }>;
+  let exitCalls: number[];
+  let errorMessages: string[];
   let orchestrator: CLIOrchestrator;
 
   beforeEach(() => {
-    // Reset mock implementations
-    mockArgumentParser.parse.mockReset();
-    mockArgumentParser.printHelp.mockReset();
-    mockFileProcessor.findFiles.mockReset();
-    mockFileProcessor.processFiles.mockReset();
-    mockOutputHandler.formatAndOutput.mockReset();
+    fakeArgumentParser = new FakeArgumentParser();
+    fakeFileProcessor = new FakeFileProcessor();
+    fakeOutputHandler = new FakeOutputHandler();
+    outputHandlerFactoryCalls = [];
+    exitCalls = [];
+    errorMessages = [];
 
-    orchestrator = new CLIOrchestrator();
-    vi.clearAllMocks();
-
-    // Mock process.exit
-    vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    orchestrator = new CLIOrchestrator(
+      fakeArgumentParser as unknown as ConstructorParameters<
+        typeof CLIOrchestrator
+      >[0],
+      fakeFileProcessor as unknown as ConstructorParameters<
+        typeof CLIOrchestrator
+      >[1],
+      (format, llmtext) => {
+        outputHandlerFactoryCalls.push({ format, llmtext });
+        return fakeOutputHandler as unknown as CLIOutputHandler;
+      },
+      ((code: number) => {
+        exitCalls.push(code);
+      }) as (code: number) => never,
+      (message: string) => {
+        errorMessages.push(message);
+      }
+    );
   });
 
   describe('run', () => {
@@ -89,104 +81,125 @@ describe('CLIOrchestrator', () => {
       };
       const mockPattern = 'src/**/*.ts';
       const mockFiles = ['/path/file1.ts', '/path/file2.ts'];
-      const mockResults = [
-        { file: '/path/file1.ts', outline: { type: 'program' } },
-        { file: '/path/file2.ts', outline: { type: 'program' } },
+      const mockResults: ProcessedFile[] = [
+        {
+          file: '/path/file1.ts',
+          outline: {
+            type: 'program',
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          file: '/path/file2.ts',
+          outline: {
+            type: 'program',
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
       ];
 
-      mockArgumentParser.parse.mockReturnValue({
+      fakeArgumentParser.parse.mock.mockImplementation(() => ({
         options: mockOptions,
         pattern: mockPattern,
-      });
-      mockFileProcessor.findFiles.mockResolvedValue(mockFiles);
-      mockFileProcessor.processFiles.mockResolvedValue(mockResults);
+      }));
+      fakeFileProcessor.findFiles.mock.mockImplementation(
+        async () => mockFiles
+      );
+      fakeFileProcessor.processFiles.mock.mockImplementation(
+        async () => mockResults
+      );
 
       await orchestrator.run();
 
-      expect(mockArgumentParser.parse).toHaveBeenCalled();
-      expect(mockFileProcessor.findFiles).toHaveBeenCalledWith(mockPattern);
-      expect(mockFileProcessor.processFiles).toHaveBeenCalledWith(
-        mockFiles,
-        mockOptions.depth,
-        mockOptions.namedOnly
+      assert.strictEqual(fakeArgumentParser.parse.mock.calls.length, 1);
+      assert.deepStrictEqual(
+        fakeFileProcessor.findFiles.mock.calls[0]?.arguments,
+        [mockPattern]
       );
-      expect(CLIOutputHandler).toHaveBeenCalledWith(
-        mockOptions.format,
-        mockOptions.llmtext
+      assert.deepStrictEqual(
+        fakeFileProcessor.processFiles.mock.calls[0]?.arguments,
+        [mockFiles, mockOptions.depth, mockOptions.namedOnly]
       );
-      expect(mockOutputHandler.formatAndOutput).toHaveBeenCalledWith(
-        mockResults
+      assert.deepStrictEqual(outputHandlerFactoryCalls, [
+        { format: mockOptions.format, llmtext: mockOptions.llmtext },
+      ]);
+      assert.deepStrictEqual(
+        fakeOutputHandler.formatAndOutput.mock.calls[0]?.arguments,
+        [mockResults]
       );
     });
 
     it('should handle CLIArgumentError', async () => {
-      mockArgumentParser.parse.mockImplementation(() => {
-        throw new MockCLIArgumentError('Invalid arguments');
+      fakeArgumentParser.parse.mock.mockImplementation(() => {
+        throw new CLIArgumentError('Invalid arguments');
       });
 
       await orchestrator.run();
 
-      expect(mockConsoleError).toHaveBeenCalledWith('Error: Invalid arguments');
-      expect(mockArgumentParser.printHelp).toHaveBeenCalled();
-
-      expect(process.exit).toHaveBeenCalledWith(1);
+      assert.deepStrictEqual(errorMessages, ['Error: Invalid arguments']);
+      assert.strictEqual(fakeArgumentParser.printHelp.mock.calls.length, 1);
+      assert.deepStrictEqual(exitCalls, [1]);
     });
 
     it('should handle FileProcessorError', async () => {
-      mockArgumentParser.parse.mockReturnValue({
+      fakeArgumentParser.parse.mock.mockImplementation(() => ({
         options: {
           format: 'json' as const,
           depth: 5,
           namedOnly: true,
+          llmtext: false,
           help: false,
           version: false,
         },
         pattern: 'invalid/**/*.js',
-      });
+      }));
 
-      mockFileProcessor.findFiles.mockImplementation(() => {
-        throw new MockFileProcessorError('No files found');
+      fakeFileProcessor.findFiles.mock.mockImplementation(() => {
+        throw new FileProcessorError('No files found');
       });
 
       await orchestrator.run();
 
-      expect(mockConsoleError).toHaveBeenCalledWith('No files found');
-
-      expect(process.exit).toHaveBeenCalledWith(1);
+      assert.deepStrictEqual(errorMessages, ['No files found']);
+      assert.deepStrictEqual(exitCalls, [1]);
     });
 
     it('should re-throw unexpected errors', async () => {
       const unexpectedError = new Error('Unexpected error');
 
-      mockArgumentParser.parse.mockImplementation(() => {
+      fakeArgumentParser.parse.mock.mockImplementation(() => {
         throw unexpectedError;
       });
 
-      await expect(orchestrator.run()).rejects.toThrow('Unexpected error');
+      await assert.rejects(() => orchestrator.run(), /Unexpected error/);
     });
 
     it('should handle async file processing errors', async () => {
-      mockArgumentParser.parse.mockReturnValue({
+      fakeArgumentParser.parse.mock.mockImplementation(() => ({
         options: {
           format: 'json' as const,
           depth: 5,
           namedOnly: true,
+          llmtext: false,
           help: false,
           version: false,
         },
         pattern: 'src/**/*.js',
-      });
+      }));
 
-      mockFileProcessor.findFiles.mockResolvedValue(['/path/file1.js']);
-      mockFileProcessor.processFiles.mockImplementation(() => {
-        throw new MockFileProcessorError('Processing failed');
+      fakeFileProcessor.findFiles.mock.mockImplementation(async () => [
+        '/path/file1.js',
+      ]);
+      fakeFileProcessor.processFiles.mock.mockImplementation(() => {
+        throw new FileProcessorError('Processing failed');
       });
 
       await orchestrator.run();
 
-      expect(mockConsoleError).toHaveBeenCalledWith('Processing failed');
-
-      expect(process.exit).toHaveBeenCalledWith(1);
+      assert.deepStrictEqual(errorMessages, ['Processing failed']);
+      assert.deepStrictEqual(exitCalls, [1]);
     });
   });
 });

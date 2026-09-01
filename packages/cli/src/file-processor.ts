@@ -16,14 +16,16 @@ export class FileProcessorError extends Error {
 }
 
 export class FileProcessor {
-  private parser: Parser;
+  private readonly parser: Parser;
+  private readonly glob: typeof fg;
 
-  constructor() {
-    this.parser = new Parser();
+  constructor(parser: Parser = new Parser(), glob: typeof fg = fg) {
+    this.parser = parser;
+    this.glob = glob;
   }
 
   public async findFiles(pattern: string): Promise<string[]> {
-    const files = await fg(pattern, {
+    const files = await this.glob(pattern, {
       absolute: true,
       ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
     });

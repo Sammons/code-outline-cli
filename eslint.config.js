@@ -1,9 +1,9 @@
-const js = require('@eslint/js');
-const typescript = require('@typescript-eslint/eslint-plugin');
-const typescriptParser = require('@typescript-eslint/parser');
-const globals = require('globals');
+import js from '@eslint/js';
+import typescript from '@typescript-eslint/eslint-plugin';
+import typescriptParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -14,10 +14,11 @@ module.exports = [
         sourceType: 'module',
         project: [
           './tsconfig.json',
-          './packages/*/tsconfig.json',
-          './tsconfig.scripts.json',
+          // Lint-only project: the per-package tsconfigs exclude *.test.ts so
+          // tests stay out of dist/, but type-aware linting needs to see them.
+          './tsconfig.eslint.json',
         ],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,
@@ -84,20 +85,10 @@ module.exports = [
       globals: {
         ...globals.node,
         ...globals.es2022,
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        vi: 'readonly',
-        vitest: 'readonly',
       },
     },
     rules: {
-      // Allow any in test files for mocking
+      // node:test imports every helper explicitly; no test globals needed.
       '@typescript-eslint/no-explicit-any': 'off',
       // Allow non-null assertions in tests
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -107,7 +98,7 @@ module.exports = [
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
-      // Allow unused vars for test utilities like `vi`
+      // Tests bind fakes that are not always read back
       '@typescript-eslint/no-unused-vars': 'off',
       // Allow explicit any in tests
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -115,12 +106,7 @@ module.exports = [
   },
   // Configuration files
   {
-    files: [
-      '*.config.ts',
-      '*.config.js',
-      'vitest.config.ts',
-      'eslint.config.js',
-    ],
+    files: ['*.config.ts', '*.config.js', 'eslint.config.js'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
@@ -147,7 +133,7 @@ module.exports = [
         ecmaVersion: 2022,
         sourceType: 'module',
         project: './tsconfig.scripts.json',
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,
@@ -164,7 +150,7 @@ module.exports = [
     files: ['*.config.js', '**/*.config.js', 'scripts/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },
@@ -181,12 +167,10 @@ module.exports = [
       'coverage/**/*',
       'node_modules/**/*',
       '**/*.d.ts',
-      '.husky/**/*',
       'test/**/*',
       'src/test-scenarios/**/*',
       'packages/*/dist/**/*',
       'packages/website/dist/**/*',
-      'vitest.config.ts',
       'packages/website/vite.config.js',
     ],
   },

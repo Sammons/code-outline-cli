@@ -25,6 +25,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Validation result interface
@@ -135,7 +136,10 @@ function validateDocumentationFiles(): ValidationResult {
     warnings: [],
   };
 
-  const dataDir = resolve(__dirname, '../packages/website/public/data');
+  const dataDir = resolve(
+    import.meta.dirname,
+    '../packages/website/public/data'
+  );
 
   // Validate versions.json
   const versionsPath = resolve(dataDir, 'versions.json');
@@ -262,7 +266,8 @@ function validateGeneratedDocs(): void {
 }
 
 // Run validation if this script is executed directly
-if (require.main === module) {
+// ESM equivalent of `require.main === module`: true when run directly.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   validateGeneratedDocs();
 }
 

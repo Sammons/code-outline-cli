@@ -4,7 +4,7 @@ inputs:
   node-version:
     description: 'Node.js version'
     required: false
-    default: '20'
+    default: '26'
   install-deps:
     description: 'Install dependencies'
     required: false
@@ -26,7 +26,10 @@ runs:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
 
+    # --ignore-scripts blocks dependency lifecycle scripts (postinstall/preinstall),
+    # the primary npm supply-chain execution vector. pnpm's onlyBuiltDependencies
+    # allowlist in pnpm-workspace.yaml covers the native builds we do need.
     - name: Install dependencies
       if: inputs.install-deps == 'true'
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: pnpm install --frozen-lockfile --ignore-scripts
