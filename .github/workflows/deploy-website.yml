@@ -33,13 +33,30 @@ jobs:
       - name: Build website
         run: pnpm --filter @sammons/website build
 
-      # wrangler is invoked via `pnpm dlx` with a pinned version rather than
-      # added as a dependency: it is a deploy-time tool, not part of the app.
+      # wrangler is a deploy-time tool, not part of the app, so it is installed
+      # into a scratch directory rather than carried as a dependency, pinned to
+      # an exact version.
+      #
+      # Its esbuild/workerd install scripts stay unrun (--ignore-scripts): they
+      # are only needed for Workers bundling, which a static Pages upload never
+      # touches. Verified end to end -- both `wrangler --version` and
+      # `pages deploy` work with those scripts ignored.
+      #
+      # `pnpm dlx` cannot be used here: it fails with ERR_PNPM_IGNORED_BUILDS.
+      - name: Install wrangler
+        run: |
+          mkdir -p "$RUNNER_TEMP/wrangler"
+          cd "$RUNNER_TEMP/wrangler"
+          echo '{"name":"wrangler-runner","private":true}' > package.json
+          pnpm add --ignore-scripts wrangler@4.127.1
+          ./node_modules/.bin/wrangler --version
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          pnpm dlx wrangler@4 pages deploy packages/website/dist \
+          "$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler" pages deploy \
+            packages/website/dist \
             --project-name=code-outline \
             --branch=main
