@@ -127,4 +127,35 @@ describe('stringifyYaml', () => {
       });
     }
   });
+
+  // Mutation testing showed three fixes were not pinned by any test: the two
+  // tab-whitespace cases and the |+ chomp indicator. Reverting each left the
+  // suite green. These pin the exact emitted bytes, so a regression in either
+  // the tab handling or the chomp indicator fails here.
+  describe('whitespace-sensitive encodings', () => {
+    const encodings: ReadonlyArray<readonly [string, string, string]> = [
+      [
+        'a\tb: c',
+        '- file: "a\\tb: c"\n',
+        'a colon after a tab opens a mapping',
+      ],
+      ['x\t#y', '- file: "x\\t#y"\n', 'a # after a tab starts a comment'],
+      [
+        'line\n',
+        '- file: |+\n    line\n',
+        'a trailing newline needs |+, not |-',
+      ],
+      [
+        'one\ntwo\n',
+        '- file: |+\n    one\n    two\n',
+        'multiple lines keeping the trailing newline',
+      ],
+    ];
+
+    for (const [value, expected, why] of encodings) {
+      it(`encodes ${JSON.stringify(value)} as ${JSON.stringify(expected)} because ${why}`, () => {
+        assert.strictEqual(stringifyYaml([{ file: value }]), expected);
+      });
+    }
+  });
 });

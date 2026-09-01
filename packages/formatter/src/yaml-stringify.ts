@@ -71,14 +71,15 @@ const needsQuoting = (value: string): boolean => {
   if (value !== value.trim()) {
     return true;
   }
-  // A colon followed by ANY whitespace opens a mapping, and a trailing colon
-  // makes the value look like a key. Tab counts as whitespace here, not just
-  // space -- "X:\tX" parses as a nested mapping.
+  // A colon followed by whitespace opens a mapping, and a trailing colon makes
+  // the value look like a key. The \s covers tab as well as space; a tab also
+  // trips the control-character check below, so either rule alone would quote
+  // "X:\tX" -- \s is kept because it states the YAML rule directly.
   if (/:\s/.test(value) || value.endsWith(':')) {
     return true;
   }
-  // A "#" preceded by ANY whitespace starts a comment, discarding the rest of
-  // the line. Again tab counts: "X\t#" truncates just like "X #".
+  // A "#" preceded by whitespace starts a comment, discarding the rest of the
+  // line. Same overlap with the control-character check for the tab case.
   if (/\s#/.test(value)) {
     return true;
   }
