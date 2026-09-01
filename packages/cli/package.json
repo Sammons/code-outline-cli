@@ -22,7 +22,7 @@
     "build": "tsc",
     "dev": "tsx src/cli.ts",
     "test": "node --test \"src/*.test.ts\"",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist *.tsbuildinfo"
   },
   "keywords": [
     "cli",
