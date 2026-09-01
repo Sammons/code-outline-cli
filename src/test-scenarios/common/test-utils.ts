@@ -1,9 +1,9 @@
 import { writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { expect } from 'vitest';
-import type { ParseResult, NodeInfo } from '@code-outline/parser';
-import type { CLIResult } from './cli-runner.js';
-import yaml from 'js-yaml';
+import assert from 'node:assert/strict';
+import type { ParseResult, NodeInfo } from '@sammons/code-outline-parser';
+import type { CLIResult } from './cli-runner.ts';
+import { parseYamlOutput } from './parse-yaml-output.ts';
 
 /**
  * File system utilities for test setup and cleanup
@@ -59,292 +59,8 @@ export class TestFileSystem {
   }
 }
 
-/**
- * Test asset templates for creating realistic test files
- */
-export const TestAssets = {
-  /**
-   * Complex TypeScript class with various constructs
-   */
-  complexClass: `/* eslint-disable */
-/**
- * Complex class with various TypeScript constructs
- */
-export interface UserConfig {
-  name: string;
-  age?: number;
-  roles: string[];
-}
+export { TestAssets } from './assets/sample-constructs.ts';
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  GUEST = 'guest'
-}
-
-export abstract class BaseUser {
-  constructor(protected config: UserConfig) {}
-  
-  abstract getRole(): UserRole;
-  
-  getName(): string {
-    return this.config.name;
-  }
-}
-
-export class AdminUser extends BaseUser {
-  private permissions: Set<string> = new Set();
-  
-  constructor(config: UserConfig) {
-    super(config);
-  }
-  
-  getRole(): UserRole {
-    return UserRole.ADMIN;
-  }
-  
-  addPermission(permission: string): void {
-    this.permissions.add(permission);
-  }
-  
-  hasPermission(permission: string): boolean {
-    return this.permissions.has(permission);
-  }
-  
-  // Getter
-  get permissionCount(): number {
-    return this.permissions.size;
-  }
-  
-  // Setter
-  set defaultPermissions(perms: string[]) {
-    this.permissions = new Set(perms);
-  }
-  
-  // Static method
-  static fromJSON(json: string): AdminUser {
-    const data = JSON.parse(json);
-    return new AdminUser(data.config);
-  }
-}
-
-// Function declaration
-export function createUser(config: UserConfig): BaseUser {
-  if (config.roles.includes('admin')) {
-    return new AdminUser(config);
-  }
-  throw new Error('Unsupported role configuration');
-}
-
-// Arrow function
-export const validateUser = (user: BaseUser): boolean => {
-  return user.getName().length > 0;
-};
-
-// Namespace
-export namespace UserHelpers {
-  export function isValidRole(role: string): role is UserRole {
-    return Object.values(UserRole).includes(role as UserRole);
-  }
-  
-  export interface UserStats {
-    totalUsers: number;
-    activeUsers: number;
-  }
-}`,
-
-  /**
-   * Simple utility functions
-   */
-  simpleUtils: `/* eslint-disable */
-// Simple utility functions
-export function add(a, b) {
-  return a + b;
-}
-
-export function multiply(x, y) {
-  return x * y;
-}
-
-export const subtract = (a, b) => a - b;
-
-const divide = (x, y) => {
-  if (y === 0) {
-    throw new Error('Division by zero');
-  }
-  return x / y;
-};
-
-export { divide };`,
-
-  /**
-   * React component with TypeScript
-   */
-  reactComponent: `/* eslint-disable */
-import React, { useState, useEffect, useCallback } from 'react';
-
-interface Props {
-  title: string;
-  items: string[];
-  onItemClick?: (item: string) => void;
-}
-
-interface State {
-  selectedItems: Set<string>;
-  searchTerm: string;
-}
-
-export const ItemList: React.FC<Props> = ({ title, items, onItemClick }) => {
-  const [state, setState] = useState<State>({
-    selectedItems: new Set(),
-    searchTerm: ''
-  });
-  
-  useEffect(() => {
-    console.log(\`Items updated: \${items.length}\`);
-  }, [items]);
-  
-  const handleItemClick = useCallback((item: string) => {
-    setState(prev => ({
-      ...prev,
-      selectedItems: new Set([...prev.selectedItems, item])
-    }));
-    onItemClick?.(item);
-  }, [onItemClick]);
-  
-  const filteredItems = items.filter(item =>
-    item.toLowerCase().includes(state.searchTerm.toLowerCase())
-  );
-  
-  return (
-    <div className="item-list">
-      <h2>{title}</h2>
-      <input
-        type="text"
-        placeholder="Search items..."
-        value={state.searchTerm}
-        onChange={(e) => setState(prev => ({ ...prev, searchTerm: e.target.value }))}
-      />
-      <ul>
-        {filteredItems.map(item => (
-          <li
-            key={item}
-            onClick={() => handleItemClick(item)}
-            className={state.selectedItems.has(item) ? 'selected' : ''}
-          >
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default ItemList;`,
-
-  /**
-   * Complex nested structure
-   */
-  nestedStructure: `/* eslint-disable */
-export namespace Database {
-  export interface Connection {
-    host: string;
-    port: number;
-  }
-  
-  export namespace Models {
-    export interface User {
-      id: number;
-      name: string;
-    }
-    
-    export class UserRepository {
-      constructor(private connection: Connection) {}
-      
-      async findById(id: number): Promise<User | null> {
-        // Implementation would go here
-        return null;
-      }
-      
-      async save(user: User): Promise<void> {
-        // Implementation would go here
-      }
-    }
-    
-    export namespace Validators {
-      export function validateUser(user: User): boolean {
-        return user.id > 0 && user.name.length > 0;
-      }
-      
-      export class ValidationError extends Error {
-        constructor(field: string, message: string) {
-          super(\`Validation failed for \${field}: \${message}\`);
-        }
-      }
-    }
-  }
-  
-  export class DatabaseManager {
-    private repositories = new Map<string, any>();
-    
-    constructor(private config: Connection) {}
-    
-    getRepository<T>(type: new (connection: Connection) => T): T {
-      const key = type.name;
-      if (!this.repositories.has(key)) {
-        this.repositories.set(key, new type(this.config));
-      }
-      return this.repositories.get(key);
-    }
-  }
-}`,
-
-  /**
-   * File with syntax errors
-   */
-  syntaxError: `/* eslint-disable */
-// This file intentionally has syntax errors
-function invalidFunction(
-  // Missing closing parenthesis and opening brace
-  
-  const missingVar = 
-  // Missing value
-  
-  class IncompleteClass {
-    constructor() {
-      // Missing closing brace
-  
-  // Invalid object literal
-  const obj = {
-    prop1: 'value1'
-    prop2: 'value2' // Missing comma
-    prop3: {
-      nested: 
-      // Missing value and closing brace
-`,
-
-  /**
-   * Empty file
-   */
-  empty: '/* eslint-disable */\n// This file is intentionally empty\n',
-
-  /**
-   * File with only comments
-   */
-  onlyComments: `/* eslint-disable */
-/**
- * This file contains only comments
- * No actual code constructs
- */
- 
-// Single line comment
-/* Multi-line comment */
-
-/*
- * Another multi-line comment
- * with multiple lines
- */`,
-};
 
 /**
  * Assertion helpers for CLI results
@@ -354,14 +70,14 @@ export class CLIAssertions {
    * Assert that CLI result is successful
    */
   static expectSuccess(result: CLIResult): void {
-    expect(result.exitCode).toBe(0);
+    assert.strictEqual(result.exitCode, 0);
   }
 
   /**
    * Assert that CLI result is a failure
    */
   static expectFailure(result: CLIResult): void {
-    expect(result.exitCode).not.toBe(0);
+    assert.notStrictEqual(result.exitCode, 0);
   }
 
   /**
@@ -369,7 +85,7 @@ export class CLIAssertions {
    */
   static expectErrorMessage(result: CLIResult, message: string): void {
     CLIAssertions.expectFailure(result);
-    expect(result.stderr.toLowerCase()).toContain(message.toLowerCase());
+    assert.ok(result.stderr.toLowerCase().includes(message.toLowerCase()));
   }
 
   /**
@@ -379,11 +95,11 @@ export class CLIAssertions {
     CLIAssertions.expectSuccess(result);
     let parsed: ParseResult[];
 
-    expect(() => {
+    assert.doesNotThrow(() => {
       parsed = JSON.parse(result.stdout);
-    }).not.toThrow();
+    });
 
-    expect(Array.isArray(parsed!)).toBe(true);
+    assert.strictEqual(Array.isArray(parsed!), true);
     return parsed!;
   }
 
@@ -394,11 +110,11 @@ export class CLIAssertions {
     CLIAssertions.expectSuccess(result);
     let parsed: ParseResult[];
 
-    expect(() => {
-      parsed = yaml.load(result.stdout) as ParseResult[];
-    }).not.toThrow();
+    assert.doesNotThrow(() => {
+      parsed = parseYamlOutput(result.stdout) as ParseResult[];
+    });
 
-    expect(Array.isArray(parsed!)).toBe(true);
+    assert.strictEqual(Array.isArray(parsed!), true);
     return parsed!;
   }
 
@@ -409,14 +125,14 @@ export class CLIAssertions {
     CLIAssertions.expectSuccess(result);
 
     // ASCII output should contain file folder icon and structure
-    expect(result.stdout).toContain('📁');
+    assert.ok(result.stdout.includes('📁'));
 
     // Should have some tree structure characters (common patterns)
     const treeChars = ['├─', '└─', '│', '├', '└'];
     const hasTreeStructure = treeChars.some((char) =>
       result.stdout.includes(char)
     );
-    expect(hasTreeStructure).toBe(true);
+    assert.strictEqual(hasTreeStructure, true);
   }
 
   /**
@@ -426,14 +142,14 @@ export class CLIAssertions {
     results: ParseResult[],
     expectedFileCount: number
   ): void {
-    expect(results).toHaveLength(expectedFileCount);
+    assert.strictEqual(results.length, expectedFileCount);
 
     for (const result of results) {
-      expect(result.file).toBeTruthy();
-      expect(typeof result.file).toBe('string');
+      assert.ok(result.file);
+      assert.strictEqual(typeof result.file, 'string');
       // outline can be null for files that couldn't be parsed
       if (result.outline) {
-        expect(result.outline.type).toBeTruthy();
+        assert.ok(result.outline.type);
       }
     }
   }
@@ -446,22 +162,22 @@ export class CLIAssertions {
     expectedType?: string,
     expectedChildCount?: number
   ): void {
-    expect(node.type).toBeTruthy();
-    expect(typeof node.type).toBe('string');
+    assert.ok(node.type);
+    assert.strictEqual(typeof node.type, 'string');
 
     if (expectedType) {
-      expect(node.type).toBe(expectedType);
+      assert.strictEqual(node.type, expectedType);
     }
 
-    expect(node.start).toBeTruthy();
-    expect(node.end).toBeTruthy();
-    expect(typeof node.start.row).toBe('number');
-    expect(typeof node.start.column).toBe('number');
-    expect(typeof node.end.row).toBe('number');
-    expect(typeof node.end.column).toBe('number');
+    assert.ok(node.start);
+    assert.ok(node.end);
+    assert.strictEqual(typeof node.start.row, 'number');
+    assert.strictEqual(typeof node.start.column, 'number');
+    assert.strictEqual(typeof node.end.row, 'number');
+    assert.strictEqual(typeof node.end.column, 'number');
 
     if (expectedChildCount !== undefined) {
-      expect(node.children?.length ?? 0).toBe(expectedChildCount);
+      assert.strictEqual(node.children?.length ?? 0, expectedChildCount);
     }
   }
 
@@ -473,7 +189,7 @@ export class CLIAssertions {
     maxDepth: number,
     currentDepth: number = 0
   ): void {
-    expect(currentDepth).toBeLessThanOrEqual(maxDepth);
+    assert.ok(currentDepth <= maxDepth);
 
     if (node.children) {
       for (const child of node.children) {
@@ -499,7 +215,7 @@ export class CLIAssertions {
         'function_body',
         'export_statement',
       ];
-      expect(allowedUnnamed).toContain(node.type);
+      assert.ok(allowedUnnamed.includes(node.type));
     }
 
     if (node.children) {
@@ -513,8 +229,8 @@ export class CLIAssertions {
    * Assert warning message about unquoted globs
    */
   static expectGlobWarning(result: CLIResult): void {
-    expect(result.stderr).toContain('Warning');
-    expect(result.stderr.toLowerCase()).toContain('glob');
+    assert.ok(result.stderr.includes('Warning'));
+    assert.ok(result.stderr.toLowerCase().includes('glob'));
   }
 
   /**
@@ -579,7 +295,7 @@ export const TestScenarios = {
   createTempDir(baseName: string): { path: string; fs: TestFileSystem } {
     const fs = new TestFileSystem();
     const tempPath = resolve(
-      __dirname,
+      import.meta.dirname,
       '../temp',
       baseName,
       Date.now().toString()
@@ -638,6 +354,6 @@ export const PerformanceUtils = {
    * Assert execution time is within reasonable bounds
    */
   expectReasonablePerformance(duration: number, maxMs: number = 10000): void {
-    expect(duration).toBeLessThan(maxMs);
+    assert.ok(duration < maxMs);
   },
 };

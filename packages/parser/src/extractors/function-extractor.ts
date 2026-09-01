@@ -1,6 +1,6 @@
 import type TreeSitterParser from 'tree-sitter';
-import type { BaseExtractor } from './base-extractor';
-import { NodeUtils } from './base-extractor';
+import type { BaseExtractor } from './base-extractor.ts';
+import { NodeUtils } from './base-extractor.ts';
 
 /**
  * Extractor for function-related nodes (functions, methods, arrow functions)

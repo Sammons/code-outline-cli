@@ -1,11 +1,14 @@
+import { createRequire } from 'node:module';
 import TreeSitterParser from 'tree-sitter';
 import JavaScript from 'tree-sitter-javascript';
-import type { SupportedFileType } from './file-reader';
+import type { SupportedFileType } from './file-reader.ts';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const TypeScript = require('tree-sitter-typescript').typescript;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const TSX = require('tree-sitter-typescript').tsx;
+// tree-sitter-typescript ships CommonJS-only native bindings with no ESM entry,
+// so it is loaded through createRequire. A bare require() would fail: Node runs
+// these sources as ESM (module syntax is present and no package sets "type").
+const requireCjs = createRequire(import.meta.url);
+const TypeScript = requireCjs('tree-sitter-typescript').typescript;
+const TSX = requireCjs('tree-sitter-typescript').tsx;
 
 /**
  * ParserFactory manages tree-sitter parser instances

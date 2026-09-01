@@ -1,10 +1,10 @@
 // Main orchestrator for programmatic usage
-export { CLIOrchestrator } from './cli-orchestrator';
+export { CLIOrchestrator } from './cli-orchestrator.ts';
 
 // Individual components
-export { CLIArgumentParser } from './cli-argument-parser';
-export { FileProcessor } from './file-processor';
-export { CLIOutputHandler } from './cli-output-handler';
+export { CLIArgumentParser } from './cli-argument-parser.ts';
+export { FileProcessor } from './file-processor.ts';
+export { CLIOutputHandler } from './cli-output-handler.ts';
 
 // Convenience function for simple usage
 export async function parseFiles(
@@ -16,7 +16,7 @@ export async function parseFiles(
     output?: string;
   }
 ): Promise<string> {
-  const { FileProcessor } = await import('./file-processor');
+  const { FileProcessor } = await import('./file-processor.ts');
 
   const fileProcessor = new FileProcessor();
   const patternArray = Array.isArray(patterns) ? patterns : [patterns];

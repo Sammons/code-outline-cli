@@ -99,7 +99,7 @@ function writeJsonFile(filePath: string, data: unknown): boolean {
  * Ensure output directory exists
  */
 function ensureOutputDir(): boolean {
-  const outputDir = resolve(__dirname, '../packages/website/public/data');
+  const outputDir = resolve(import.meta.dirname, '../packages/website/public/data');
   try {
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
@@ -119,7 +119,7 @@ function ensureOutputDir(): boolean {
  * Extract CLI version from package.json
  */
 function extractVersionData(): VersionData | null {
-  const cliPackagePath = resolve(__dirname, '../packages/cli/package.json');
+  const cliPackagePath = resolve(import.meta.dirname, '../packages/cli/package.json');
   const packageData = readJsonFile<PackageJson>(cliPackagePath);
 
   if (!packageData?.version) {
@@ -136,7 +136,7 @@ function extractVersionData(): VersionData | null {
  * Extract supported file types from parser source code
  */
 function extractSupportedFiles(): string[] | null {
-  const filePath = resolve(__dirname, '../packages/parser/src/file-reader.ts');
+  const filePath = resolve(import.meta.dirname, '../packages/parser/src/file-reader.ts');
   const content = readTextFile(filePath);
 
   if (!content) {
@@ -159,7 +159,7 @@ function extractSupportedFiles(): string[] | null {
  * Extract output formats from types.ts
  */
 function extractOutputFormats(): string[] | null {
-  const filePath = resolve(__dirname, '../packages/parser/src/types.ts');
+  const filePath = resolve(import.meta.dirname, '../packages/parser/src/types.ts');
   const content = readTextFile(filePath);
 
   if (!content) {
@@ -197,7 +197,7 @@ function generateInstallCommands(): InstallCommands {
  * Execute CLI help command safely
  */
 function extractHelpText(): string | null {
-  const cliPath = resolve(__dirname, '../packages/cli/dist/cli.js');
+  const cliPath = resolve(import.meta.dirname, '../packages/cli/dist/cli.js');
 
   if (!existsSync(cliPath)) {
     console.error(`CLI not found at ${cliPath}. Run 'pnpm build' first.`);
@@ -206,7 +206,7 @@ function extractHelpText(): string | null {
 
   try {
     const helpText = execSync(
-      `cd ${resolve(__dirname, '../packages/cli')} && node dist/cli.js --help`,
+      `cd ${resolve(import.meta.dirname, '../packages/cli')} && node dist/cli.js --help`,
       {
         encoding: 'utf-8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -234,7 +234,7 @@ async function generateDocs(): Promise<void> {
     process.exit(1);
   }
 
-  const outputDir = resolve(__dirname, '../packages/website/public/data');
+  const outputDir = resolve(import.meta.dirname, '../packages/website/public/data');
   let successCount = 0;
   const totalTasks = 4;
 

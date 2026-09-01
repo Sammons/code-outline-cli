@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
@@ -7,9 +8,9 @@ import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 function runCLI(
   args: string[]
 ): Promise<{ stdout: string; stderr: string; exitCode: number | null }> {
-  return new Promise((resolve) => {
-    const cliPath = require.resolve('./cli.ts');
-    const child = spawn('tsx', [cliPath, ...args], {
+  const cliPath = resolve(import.meta.dirname, '../dist/cli.js');
+  return new Promise((settle) => {
+    const child = spawn(process.execPath, [cliPath, ...args], {
       stdio: 'pipe',
     });
 
@@ -25,13 +26,13 @@ function runCLI(
     });
 
     child.on('close', (code) => {
-      resolve({ stdout, stderr, exitCode: code });
+      settle({ stdout, stderr, exitCode: code });
     });
   });
 }
 
 describe('CLI', () => {
-  const testDir = resolve(__dirname, '../../../test/temp');
+  const testDir = resolve(import.meta.dirname, '../../../test/temp');
   const testFile = resolve(testDir, 'test.js');
 
   beforeEach(() => {
@@ -68,29 +69,29 @@ export { greet, Person };
     it('should show help when --help flag is used', async () => {
       const result = await runCLI(['--help']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Code Outline CLI');
-      expect(result.stdout).toContain('Usage:');
-      expect(result.stdout).toContain('Options:');
-      expect(result.stdout).toContain('--format');
-      expect(result.stdout).toContain('--depth');
-      expect(result.stdout).toContain('--named-only');
-      expect(result.stdout).toContain('--llmtext');
-      expect(result.stdout).toContain('llmtext');
+      assert.strictEqual(result.exitCode, 0);
+      assert.ok(result.stdout.includes('Code Outline CLI'));
+      assert.ok(result.stdout.includes('Usage:'));
+      assert.ok(result.stdout.includes('Options:'));
+      assert.ok(result.stdout.includes('--format'));
+      assert.ok(result.stdout.includes('--depth'));
+      assert.ok(result.stdout.includes('--named-only'));
+      assert.ok(result.stdout.includes('--llmtext'));
+      assert.ok(result.stdout.includes('llmtext'));
     });
 
     it('should show version when --version flag is used', async () => {
       const result = await runCLI(['--version']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toMatch(/\d+\.\d+\.\d+/); // Version number pattern
+      assert.strictEqual(result.exitCode, 0);
+      assert.match(result.stdout, /\d+\.\d+\.\d+/); // Version number pattern
     });
 
     it('should show error when no pattern is provided', async () => {
       const result = await runCLI([]);
 
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('No file pattern provided');
+      assert.strictEqual(result.exitCode, 1);
+      assert.ok(result.stderr.includes('No file pattern provided'));
     });
 
     it('should accept valid format options', async () => {
@@ -98,15 +99,15 @@ export { greet, Person };
 
       for (const format of formats) {
         const result = await runCLI([testFile, '--format', format]);
-        expect(result.exitCode).toBe(0);
+        assert.strictEqual(result.exitCode, 0);
       }
     });
 
     it('should reject invalid format options', async () => {
       const result = await runCLI([testFile, '--format', 'invalid']);
 
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('Invalid format');
+      assert.strictEqual(result.exitCode, 1);
+      assert.ok(result.stderr.includes('Invalid format'));
     });
 
     it('should accept valid depth options', async () => {
@@ -114,7 +115,7 @@ export { greet, Person };
 
       for (const depth of depths) {
         const result = await runCLI([testFile, '--depth', depth]);
-        expect(result.exitCode).toBe(0);
+        assert.strictEqual(result.exitCode, 0);
       }
     });
 
@@ -123,20 +124,20 @@ export { greet, Person };
 
       for (const depth of invalidDepths) {
         const result = await runCLI([testFile, '--depth', depth]);
-        expect(result.exitCode).toBe(1);
+        assert.strictEqual(result.exitCode, 1);
         // The error message might vary depending on the invalid input
-        expect(result.stderr.length).toBeGreaterThan(0);
+        assert.ok(result.stderr.length > 0);
       }
     });
 
     it('should handle named-only and all flags correctly', async () => {
       // Test --named-only (default behavior)
       const namedOnlyResult = await runCLI([testFile, '--named-only']);
-      expect(namedOnlyResult.exitCode).toBe(0);
+      assert.strictEqual(namedOnlyResult.exitCode, 0);
 
       // Test --all flag
       const allResult = await runCLI([testFile, '--all']);
-      expect(allResult.exitCode).toBe(0);
+      assert.strictEqual(allResult.exitCode, 0);
 
       // Both should work, but --all should generally produce more output
       // (though this depends on the specific file content)
@@ -145,25 +146,25 @@ export { greet, Person };
     it('should handle --llmtext flag correctly', async () => {
       const result = await runCLI([testFile, '--llmtext']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('<Outline>');
-      expect(result.stdout).toContain('</Outline>');
-      expect(result.stdout).toContain(
+      assert.strictEqual(result.exitCode, 0);
+      assert.ok(result.stdout.includes('<Outline>'));
+      assert.ok(result.stdout.includes('</Outline>'));
+      assert.ok(result.stdout.includes(
         '# Ultra-compressed code outline for LLM consumption'
-      );
-      expect(result.stdout).toContain('function_declaration_greet 1');
+      ));
+      assert.ok(result.stdout.includes('function_declaration_greet 1'));
     });
 
     it('should override format when --llmtext flag is provided', async () => {
       // Test that --llmtext overrides --format
       const result = await runCLI([testFile, '--format', 'json', '--llmtext']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       // Should produce llmtext format, not JSON
-      expect(result.stdout).toContain('<Outline>');
-      expect(result.stdout).toContain('</Outline>');
+      assert.ok(result.stdout.includes('<Outline>'));
+      assert.ok(result.stdout.includes('</Outline>'));
       // Should not be valid JSON
-      expect(() => JSON.parse(result.stdout)).toThrow();
+      assert.throws(() => JSON.parse(result.stdout));
     });
   });
 
@@ -171,15 +172,15 @@ export { greet, Person };
     it('should parse a single JavaScript file correctly', async () => {
       const result = await runCLI([testFile, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
+      assert.strictEqual(result.exitCode, 0);
+      assert.doesNotThrow(() => JSON.parse(result.stdout));
 
       const output = JSON.parse(result.stdout);
-      expect(Array.isArray(output)).toBe(true);
-      expect(output).toHaveLength(1);
-      expect(output[0].file).toContain('test.js');
-      expect(output[0].outline).toBeTruthy();
-      expect(output[0].outline.type).toBe('program');
+      assert.strictEqual(Array.isArray(output), true);
+      assert.strictEqual(output.length, 1);
+      assert.ok(output[0].file.includes('test.js'));
+      assert.ok(output[0].outline);
+      assert.strictEqual(output[0].outline.type, 'program');
     });
 
     it('should handle glob patterns correctly', async () => {
@@ -193,16 +194,16 @@ export { greet, Person };
       const pattern = resolve(testDir, '**/*.js');
       const result = await runCLI([pattern, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       const output = JSON.parse(result.stdout);
-      expect(output.length).toBeGreaterThanOrEqual(2);
+      assert.ok(output.length >= 2);
     });
 
     it('should handle non-existent file patterns gracefully', async () => {
       const result = await runCLI(['nonexistent/*.js']);
 
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('No files found matching pattern');
+      assert.strictEqual(result.exitCode, 1);
+      assert.ok(result.stderr.includes('No files found matching pattern'));
     });
 
     it('should handle files that cannot be parsed', async () => {
@@ -213,10 +214,10 @@ export { greet, Person };
       const result = await runCLI([invalidFile, '--format', 'json']);
 
       // Should still exit with 0 but might log parsing errors
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
 
       // The output should still be valid JSON, possibly with null outline
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
+      assert.doesNotThrow(() => JSON.parse(result.stdout));
     });
   });
 
@@ -224,49 +225,49 @@ export { greet, Person };
     it('should produce valid JSON output', async () => {
       const result = await runCLI([testFile, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
+      assert.strictEqual(result.exitCode, 0);
+      assert.doesNotThrow(() => JSON.parse(result.stdout));
 
       const output = JSON.parse(result.stdout);
-      expect(Array.isArray(output)).toBe(true);
-      expect(output[0]).toHaveProperty('file');
-      expect(output[0]).toHaveProperty('outline');
+      assert.strictEqual(Array.isArray(output), true);
+      assert.ok('file' in output[0]);
+      assert.ok('outline' in output[0]);
     });
 
     it('should produce YAML output', async () => {
       const result = await runCLI([testFile, '--format', 'yaml']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('file:');
-      expect(result.stdout).toContain('outline:');
-      expect(result.stdout).toMatch(/^-/m); // YAML array indicator
+      assert.strictEqual(result.exitCode, 0);
+      assert.ok(result.stdout.includes('file:'));
+      assert.ok(result.stdout.includes('outline:'));
+      assert.match(result.stdout, /^-/m); // YAML array indicator
     });
 
     it('should produce ASCII tree output', async () => {
       const result = await runCLI([testFile, '--format', 'ascii']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('📁');
-      expect(result.stdout).toContain('test.js');
-      expect(result.stdout).toContain('function_declaration'); // program is now implicit as the file root
+      assert.strictEqual(result.exitCode, 0);
+      assert.ok(result.stdout.includes('📁'));
+      assert.ok(result.stdout.includes('test.js'));
+      assert.ok(result.stdout.includes('function_declaration')); // program is now implicit as the file root
     });
 
     it('should produce LLMText output', async () => {
       const result = await runCLI([testFile, '--format', 'llmtext']);
 
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('<Outline>');
-      expect(result.stdout).toContain('</Outline>');
-      expect(result.stdout).toContain(
+      assert.strictEqual(result.exitCode, 0);
+      assert.ok(result.stdout.includes('<Outline>'));
+      assert.ok(result.stdout.includes('</Outline>'));
+      assert.ok(result.stdout.includes(
         '# Ultra-compressed code outline for LLM consumption'
-      );
-      expect(result.stdout).toContain('test/temp/test.js (15L)');
-      expect(result.stdout).toContain('function_declaration_greet 1');
-      expect(result.stdout).toContain('class_declaration_Person 5');
+      ));
+      assert.ok(result.stdout.includes('test/temp/test.js (15L)'));
+      assert.ok(result.stdout.includes('function_declaration_greet 1'));
+      assert.ok(result.stdout.includes('class_declaration_Person 5'));
       // Should not contain decorative symbols
-      expect(result.stdout).not.toContain('📁');
-      expect(result.stdout).not.toContain('├─');
-      expect(result.stdout).not.toContain('└─');
+      assert.ok(!result.stdout.includes('📁'));
+      assert.ok(!result.stdout.includes('├─'));
+      assert.ok(!result.stdout.includes('└─'));
     });
   });
 
@@ -280,7 +281,7 @@ export { greet, Person };
         '--depth',
         '1',
       ]);
-      expect(shallowResult.exitCode).toBe(0);
+      assert.strictEqual(shallowResult.exitCode, 0);
 
       // Test with depth 3
       const deepResult = await runCLI([
@@ -290,14 +291,14 @@ export { greet, Person };
         '--depth',
         '3',
       ]);
-      expect(deepResult.exitCode).toBe(0);
+      assert.strictEqual(deepResult.exitCode, 0);
 
       const shallowOutput = JSON.parse(shallowResult.stdout);
       const deepOutput = JSON.parse(deepResult.stdout);
 
       // Both should be valid
-      expect(shallowOutput).toHaveLength(1);
-      expect(deepOutput).toHaveLength(1);
+      assert.strictEqual(shallowOutput.length, 1);
+      assert.strictEqual(deepOutput.length, 1);
     });
 
     it('should handle infinite depth', async () => {
@@ -309,8 +310,8 @@ export { greet, Person };
         'Infinity',
       ]);
 
-      expect(result.exitCode).toBe(0);
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
+      assert.strictEqual(result.exitCode, 0);
+      assert.doesNotThrow(() => JSON.parse(result.stdout));
     });
   });
 
@@ -318,17 +319,17 @@ export { greet, Person };
     it('should work in named-only mode by default', async () => {
       const result = await runCLI([testFile, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       const output = JSON.parse(result.stdout);
-      expect(output[0].outline).toBeTruthy();
+      assert.ok(output[0].outline);
     });
 
     it('should work with --all flag', async () => {
       const result = await runCLI([testFile, '--format', 'json', '--all']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       const output = JSON.parse(result.stdout);
-      expect(output[0].outline).toBeTruthy();
+      assert.ok(output[0].outline);
     });
 
     it('should respect explicit --named-only flag', async () => {
@@ -339,9 +340,9 @@ export { greet, Person };
         '--named-only',
       ]);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       const output = JSON.parse(result.stdout);
-      expect(output[0].outline).toBeTruthy();
+      assert.ok(output[0].outline);
     });
   });
 
@@ -349,8 +350,8 @@ export { greet, Person };
     it('should handle file system errors gracefully', async () => {
       const result = await runCLI(['/nonexistent/path/*.js']);
 
-      expect(result.exitCode).toBe(1);
-      expect(result.stderr).toContain('No files found');
+      assert.strictEqual(result.exitCode, 1);
+      assert.ok(result.stderr.includes('No files found'));
     });
 
     it('should handle permission errors gracefully', async () => {
@@ -359,7 +360,7 @@ export { greet, Person };
       const result = await runCLI(['/root/protected/*.js']);
 
       // Should exit with error but not crash
-      expect(typeof result.exitCode).toBe('number');
+      assert.strictEqual(typeof result.exitCode, 'number');
     });
 
     it('should continue processing other files if one fails', async () => {
@@ -373,11 +374,11 @@ export { greet, Person };
       const pattern = resolve(testDir, '*.js');
       const result = await runCLI([pattern, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
 
       const output = JSON.parse(result.stdout);
       // Should have results for files that could be parsed
-      expect(output.length).toBeGreaterThan(0);
+      assert.ok(output.length > 0);
     });
   });
 
@@ -385,15 +386,15 @@ export { greet, Person };
     it('should correctly integrate parser and formatter', async () => {
       const result = await runCLI([testFile, '--format', 'json']);
 
-      expect(result.exitCode).toBe(0);
+      assert.strictEqual(result.exitCode, 0);
       const output = JSON.parse(result.stdout);
 
       // Should have valid structure from parser
-      expect(output[0].outline.type).toBe('program');
-      expect(output[0].outline.children).toBeDefined();
+      assert.strictEqual(output[0].outline.type, 'program');
+      assert.notStrictEqual(output[0].outline.children, undefined);
 
       // Should have proper formatting
-      expect(output[0].file).toContain('test.js');
+      assert.ok(output[0].file.includes('test.js'));
     });
 
     it('should work with different TypeScript file types', async () => {
@@ -424,11 +425,11 @@ export { greet, Person };
 
       for (const file of [tsFile, tsxFile]) {
         const result = await runCLI([file, '--format', 'json']);
-        expect(result.exitCode).toBe(0);
+        assert.strictEqual(result.exitCode, 0);
 
         const output = JSON.parse(result.stdout);
-        expect(output).toHaveLength(1);
-        expect(output[0].outline.type).toBe('program');
+        assert.strictEqual(output.length, 1);
+        assert.strictEqual(output[0].outline.type, 'program');
       }
     });
   });

@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions, TestFileSystem } from '../common/test-utils.js';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
 
 describe('Error Handling Scenarios', () => {
-  const syntaxErrorFile = resolve(__dirname, 'assets', 'syntax-error.js');
-  const emptyFile = resolve(__dirname, 'assets', 'empty-file.ts');
+  const syntaxErrorFile = resolve(import.meta.dirname, 'assets', 'syntax-error.js');
+  const emptyFile = resolve(import.meta.dirname, 'assets', 'empty-file.ts');
 
   let testFs: TestFileSystem;
 
@@ -23,7 +23,7 @@ describe('Error Handling Scenarios', () => {
 
   describe('File System Errors', () => {
     it('should handle non-existent files gracefully', async () => {
-      const nonExistentFile = resolve(__dirname, 'nonexistent-file.ts');
+      const nonExistentFile = resolve(import.meta.dirname, 'nonexistent-file.ts');
       const result = await cliRunner.runExpectFailure([nonExistentFile]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -31,7 +31,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle non-existent directories in patterns', async () => {
       const nonExistentPattern = resolve(
-        __dirname,
+        import.meta.dirname,
         'nonexistent-directory',
         '*.ts'
       );
@@ -41,7 +41,7 @@ describe('Error Handling Scenarios', () => {
     });
 
     it('should handle patterns that match no files', async () => {
-      const noMatchPattern = resolve(__dirname, 'assets', '*.nonexistent');
+      const noMatchPattern = resolve(import.meta.dirname, 'assets', '*.nonexistent');
       const result = await cliRunner.runExpectFailure([noMatchPattern]);
 
       CLIAssertions.expectErrorMessage(result, 'No files found');
@@ -97,7 +97,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should continue processing other files when one has syntax errors', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'mixed-files-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'mixed-files-' + Date.now());
       testFs.createDir(testDir);
 
       // Create mix of good and bad files
@@ -156,7 +156,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle files that are partially parseable', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'partial-parse-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'partial-parse-' + Date.now());
       testFs.createDir(testDir);
 
       const partialFile = resolve(testDir, 'partial.js');
@@ -226,7 +226,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle files with only comments', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'comments-only-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'comments-only-' + Date.now());
       testFs.createDir(testDir);
 
       const commentsFile = resolve(testDir, 'comments.ts');
@@ -268,7 +268,7 @@ describe('Error Handling Scenarios', () => {
     it('should handle files with only whitespace', async () => {
       testFs = new TestFileSystem();
       const testDir = resolve(
-        __dirname,
+        import.meta.dirname,
         'temp',
         'whitespace-only-' + Date.now()
       );
@@ -351,7 +351,7 @@ describe('Error Handling Scenarios', () => {
   describe('Resource and Performance Edge Cases', () => {
     it('should handle very long file paths', async () => {
       testFs = new TestFileSystem();
-      const longDir = resolve(__dirname, 'temp', 'a'.repeat(100));
+      const longDir = resolve(import.meta.dirname, 'temp', 'a'.repeat(100));
       testFs.createDir(longDir);
 
       const longFile = resolve(longDir, 'b'.repeat(100) + '.ts');
@@ -368,7 +368,7 @@ describe('Error Handling Scenarios', () => {
 
     it('should handle large files gracefully', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'large-file-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'large-file-' + Date.now());
       testFs.createDir(testDir);
 
       // Create a large file with many functions
@@ -415,7 +415,7 @@ describe('Error Handling Scenarios', () => {
     it('should handle timeout scenarios', async () => {
       // Test with very short timeout to simulate timeout scenario
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'timeout-test-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'timeout-test-' + Date.now());
       testFs.createDir(testDir);
 
       const testFile = resolve(testDir, 'test.ts');
@@ -442,7 +442,7 @@ describe('Error Handling Scenarios', () => {
     it('should handle mix of valid and invalid files in glob patterns', async () => {
       testFs = new TestFileSystem();
       const testDir = resolve(
-        __dirname,
+        import.meta.dirname,
         'temp',
         'mixed-validity-' + Date.now()
       );
@@ -514,7 +514,7 @@ describe('Error Handling Scenarios', () => {
   describe('Recovery and Graceful Degradation', () => {
     it('should recover from parser errors and continue', async () => {
       testFs = new TestFileSystem();
-      const testDir = resolve(__dirname, 'temp', 'recovery-test-' + Date.now());
+      const testDir = resolve(import.meta.dirname, 'temp', 'recovery-test-' + Date.now());
       testFs.createDir(testDir);
 
       // Create files that progressively get more problematic

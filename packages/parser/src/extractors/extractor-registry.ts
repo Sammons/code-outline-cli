@@ -1,9 +1,9 @@
-import type { BaseExtractor } from './base-extractor';
-import { FunctionExtractor } from './function-extractor';
-import { ClassExtractor } from './class-extractor';
-import { VariableExtractor } from './variable-extractor';
-import { ImportExportExtractor } from './import-export-extractor';
-import { TypeExtractor } from './type-extractor';
+import type { BaseExtractor } from './base-extractor.ts';
+import { FunctionExtractor } from './function-extractor.ts';
+import { ClassExtractor } from './class-extractor.ts';
+import { VariableExtractor } from './variable-extractor.ts';
+import { ImportExportExtractor } from './import-export-extractor.ts';
+import { TypeExtractor } from './type-extractor.ts';
 
 /**
  * Registry for mapping node types to their appropriate extractors

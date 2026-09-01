@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions } from '../common/test-utils.js';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions } from '../common/test-utils.ts';
 
 describe('Depth and Filtering Options', () => {
-  const nestedFile = resolve(__dirname, 'assets', 'nested-structure.ts');
+  const nestedFile = resolve(import.meta.dirname, 'assets', 'nested-structure.ts');
 
   beforeAll(async () => {
     // Ensure CLI is accessible

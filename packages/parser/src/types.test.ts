@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
 import {
   // Type guards
   isNamedNode,
@@ -29,7 +30,7 @@ import {
   type NodeInfo,
   type OutputFormat,
   type ValidationResult,
-} from './types';
+} from './types.ts';
 
 describe('types.ts', () => {
   describe('Type Guards', () => {
@@ -42,11 +43,11 @@ describe('types.ts', () => {
           end: { row: 5, column: 1 },
         };
 
-        expect(isNamedNode(namedNode)).toBe(true);
+        assert.strictEqual(isNamedNode(namedNode), true);
 
         // Type assertion should work
         if (isNamedNode(namedNode)) {
-          expect(namedNode.name).toBe('myFunction');
+          assert.strictEqual(namedNode.name, 'myFunction');
         }
       });
 
@@ -58,7 +59,7 @@ describe('types.ts', () => {
           end: { row: 0, column: 10 },
         };
 
-        expect(isNamedNode(nodeWithEmptyName)).toBe(true);
+        assert.strictEqual(isNamedNode(nodeWithEmptyName), true);
       });
 
       it('should return false for nodes without a name', () => {
@@ -68,7 +69,7 @@ describe('types.ts', () => {
           end: { row: 5, column: 1 },
         };
 
-        expect(isNamedNode(unnamedNode)).toBe(false);
+        assert.strictEqual(isNamedNode(unnamedNode), false);
       });
 
       it('should return false for nodes with undefined name', () => {
@@ -79,7 +80,7 @@ describe('types.ts', () => {
           end: { row: 3, column: 1 },
         };
 
-        expect(isNamedNode(nodeWithUndefinedName)).toBe(false);
+        assert.strictEqual(isNamedNode(nodeWithUndefinedName), false);
       });
     });
 
@@ -91,11 +92,11 @@ describe('types.ts', () => {
           end: { row: 5, column: 1 },
         };
 
-        expect(isUnnamedNode(unnamedNode)).toBe(true);
+        assert.strictEqual(isUnnamedNode(unnamedNode), true);
 
         // Type assertion should work
         if (isUnnamedNode(unnamedNode)) {
-          expect(unnamedNode.name).toBeUndefined();
+          assert.strictEqual(unnamedNode.name, undefined);
         }
       });
 
@@ -107,7 +108,7 @@ describe('types.ts', () => {
           end: { row: 3, column: 1 },
         };
 
-        expect(isUnnamedNode(nodeWithUndefinedName)).toBe(true);
+        assert.strictEqual(isUnnamedNode(nodeWithUndefinedName), true);
       });
 
       it('should return false for nodes with a name', () => {
@@ -118,7 +119,7 @@ describe('types.ts', () => {
           end: { row: 5, column: 1 },
         };
 
-        expect(isUnnamedNode(namedNode)).toBe(false);
+        assert.strictEqual(isUnnamedNode(namedNode), false);
       });
 
       it('should return false for nodes with empty string name', () => {
@@ -129,14 +130,14 @@ describe('types.ts', () => {
           end: { row: 0, column: 10 },
         };
 
-        expect(isUnnamedNode(nodeWithEmptyName)).toBe(false);
+        assert.strictEqual(isUnnamedNode(nodeWithEmptyName), false);
       });
     });
 
     describe('isContainerType', () => {
       it('should return true for valid container types', () => {
         CONTAINER_TYPES.forEach((containerType) => {
-          expect(isContainerType(containerType)).toBe(true);
+          assert.strictEqual(isContainerType(containerType), true);
         });
       });
 
@@ -152,25 +153,25 @@ describe('types.ts', () => {
         ];
 
         nonContainerTypes.forEach((type) => {
-          expect(isContainerType(type)).toBe(false);
+          assert.strictEqual(isContainerType(type), false);
         });
       });
 
       it('should return false for empty string', () => {
-        expect(isContainerType('')).toBe(false);
+        assert.strictEqual(isContainerType(''), false);
       });
 
       it('should be case sensitive', () => {
-        expect(isContainerType('PROGRAM')).toBe(false);
-        expect(isContainerType('Program')).toBe(false);
-        expect(isContainerType('program')).toBe(true);
+        assert.strictEqual(isContainerType('PROGRAM'), false);
+        assert.strictEqual(isContainerType('Program'), false);
+        assert.strictEqual(isContainerType('program'), true);
       });
     });
 
     describe('isStructuralType', () => {
       it('should return true for valid structural types', () => {
         STRUCTURAL_TYPES.forEach((structuralType) => {
-          expect(isStructuralType(structuralType)).toBe(true);
+          assert.strictEqual(isStructuralType(structuralType), true);
         });
       });
 
@@ -184,25 +185,25 @@ describe('types.ts', () => {
         ];
 
         nonStructuralTypes.forEach((type) => {
-          expect(isStructuralType(type)).toBe(false);
+          assert.strictEqual(isStructuralType(type), false);
         });
       });
 
       it('should return false for empty string', () => {
-        expect(isStructuralType('')).toBe(false);
+        assert.strictEqual(isStructuralType(''), false);
       });
 
       it('should be case sensitive', () => {
-        expect(isStructuralType('PROGRAM')).toBe(false);
-        expect(isStructuralType('Program')).toBe(false);
-        expect(isStructuralType('program')).toBe(true);
+        assert.strictEqual(isStructuralType('PROGRAM'), false);
+        assert.strictEqual(isStructuralType('Program'), false);
+        assert.strictEqual(isStructuralType('program'), true);
       });
     });
 
     describe('isInsignificantType', () => {
       it('should return true for valid insignificant types', () => {
         INSIGNIFICANT_TYPES.forEach((insignificantType) => {
-          expect(isInsignificantType(insignificantType)).toBe(true);
+          assert.strictEqual(isInsignificantType(insignificantType), true);
         });
       });
 
@@ -216,35 +217,35 @@ describe('types.ts', () => {
         ];
 
         significantTypes.forEach((type) => {
-          expect(isInsignificantType(type)).toBe(false);
+          assert.strictEqual(isInsignificantType(type), false);
         });
       });
 
       it('should return false for empty string', () => {
-        expect(isInsignificantType('')).toBe(false);
+        assert.strictEqual(isInsignificantType(''), false);
       });
 
       it('should handle special character types', () => {
-        expect(isInsignificantType(',')).toBe(true);
-        expect(isInsignificantType(';')).toBe(true);
-        expect(isInsignificantType('{')).toBe(true);
-        expect(isInsignificantType('}')).toBe(true);
-        expect(isInsignificantType('(')).toBe(true);
-        expect(isInsignificantType(')')).toBe(true);
-        expect(isInsignificantType('[')).toBe(true);
-        expect(isInsignificantType(']')).toBe(true);
+        assert.strictEqual(isInsignificantType(','), true);
+        assert.strictEqual(isInsignificantType(';'), true);
+        assert.strictEqual(isInsignificantType('{'), true);
+        assert.strictEqual(isInsignificantType('}'), true);
+        assert.strictEqual(isInsignificantType('('), true);
+        assert.strictEqual(isInsignificantType(')'), true);
+        assert.strictEqual(isInsignificantType('['), true);
+        assert.strictEqual(isInsignificantType(']'), true);
       });
 
       it('should handle ERROR type', () => {
-        expect(isInsignificantType('ERROR')).toBe(true);
-        expect(isInsignificantType('error')).toBe(false); // case sensitive
+        assert.strictEqual(isInsignificantType('ERROR'), true);
+        assert.strictEqual(isInsignificantType('error'), false); // case sensitive
       });
     });
 
     describe('isValidOutputFormat', () => {
       it('should return true for valid output formats', () => {
         OUTPUT_FORMATS.forEach((format) => {
-          expect(isValidOutputFormat(format)).toBe(true);
+          assert.strictEqual(isValidOutputFormat(format), true);
         });
       });
 
@@ -252,23 +253,23 @@ describe('types.ts', () => {
         const invalidFormats = ['xml', 'html', 'csv', 'txt', 'markdown', ''];
 
         invalidFormats.forEach((format) => {
-          expect(isValidOutputFormat(format)).toBe(false);
+          assert.strictEqual(isValidOutputFormat(format), false);
         });
       });
 
       it('should be case sensitive', () => {
-        expect(isValidOutputFormat('JSON')).toBe(false);
-        expect(isValidOutputFormat('Json')).toBe(false);
-        expect(isValidOutputFormat('YAML')).toBe(false);
-        expect(isValidOutputFormat('Yaml')).toBe(false);
-        expect(isValidOutputFormat('ASCII')).toBe(false);
-        expect(isValidOutputFormat('Ascii')).toBe(false);
+        assert.strictEqual(isValidOutputFormat('JSON'), false);
+        assert.strictEqual(isValidOutputFormat('Json'), false);
+        assert.strictEqual(isValidOutputFormat('YAML'), false);
+        assert.strictEqual(isValidOutputFormat('Yaml'), false);
+        assert.strictEqual(isValidOutputFormat('ASCII'), false);
+        assert.strictEqual(isValidOutputFormat('Ascii'), false);
       });
 
       it('should handle exact matches only', () => {
-        expect(isValidOutputFormat('json ')).toBe(false); // trailing space
-        expect(isValidOutputFormat(' json')).toBe(false); // leading space
-        expect(isValidOutputFormat('json\n')).toBe(false); // with newline
+        assert.strictEqual(isValidOutputFormat('json '), false); // trailing space
+        assert.strictEqual(isValidOutputFormat(' json'), false); // leading space
+        assert.strictEqual(isValidOutputFormat('json\n'), false); // with newline
       });
     });
   });
@@ -276,89 +277,115 @@ describe('types.ts', () => {
   describe('Validation Functions', () => {
     describe('validateDepth', () => {
       it('should return Infinity for "Infinity" string', () => {
-        expect(validateDepth('Infinity')).toBe(Infinity);
+        assert.strictEqual(validateDepth('Infinity'), Infinity);
       });
 
       it('should parse and return valid positive integers', () => {
-        expect(validateDepth('1')).toBe(1);
-        expect(validateDepth('5')).toBe(5);
-        expect(validateDepth('100')).toBe(100);
-        expect(validateDepth('999')).toBe(999);
+        assert.strictEqual(validateDepth('1'), 1);
+        assert.strictEqual(validateDepth('5'), 5);
+        assert.strictEqual(validateDepth('100'), 100);
+        assert.strictEqual(validateDepth('999'), 999);
       });
 
       it('should parse string numbers with leading zeros', () => {
-        expect(validateDepth('01')).toBe(1);
-        expect(validateDepth('007')).toBe(7);
-        expect(validateDepth('0010')).toBe(10);
+        assert.strictEqual(validateDepth('01'), 1);
+        assert.strictEqual(validateDepth('007'), 7);
+        assert.strictEqual(validateDepth('0010'), 10);
       });
 
       it('should throw error for zero', () => {
-        expect(() => validateDepth('0')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth('0'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
       });
 
       it('should throw error for negative numbers', () => {
-        expect(() => validateDepth('-1')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('-10')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('-999')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth('-1'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('-10'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('-999'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
       });
 
       it('should throw error for non-numeric strings', () => {
-        expect(() => validateDepth('abc')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth('abc'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
         // parseInt('1abc', 10) returns 1, so this should actually work
-        expect(validateDepth('1abc')).toBe(1);
-        expect(() => validateDepth('abc1')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.strictEqual(validateDepth('1abc'), 1);
+        assert.throws(() => validateDepth('abc1'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
         // parseInt('1.5', 10) returns 1, so this should actually work
-        expect(validateDepth('1.5')).toBe(1);
+        assert.strictEqual(validateDepth('1.5'), 1);
       });
 
       it('should throw error for empty string', () => {
-        expect(() => validateDepth('')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth(''), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
       });
 
       it('should throw error for whitespace strings', () => {
-        expect(() => validateDepth(' ')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('\n')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('\t')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth(' '), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('\n'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('\t'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
       });
 
       it('should handle mixed valid/invalid strings (parseInt behavior)', () => {
         // parseInt is lenient and parses leading numbers, ignoring trailing characters
-        expect(validateDepth('5 ')).toBe(5); // parseInt('5 ', 10) = 5
-        expect(validateDepth(' 5')).toBe(5); // parseInt(' 5', 10) = 5
-        expect(validateDepth('5\n')).toBe(5); // parseInt('5\n', 10) = 5
-        expect(validateDepth('123abc')).toBe(123); // parseInt('123abc', 10) = 123
+        assert.strictEqual(validateDepth('5 '), 5); // parseInt('5 ', 10) = 5
+        assert.strictEqual(validateDepth(' 5'), 5); // parseInt(' 5', 10) = 5
+        assert.strictEqual(validateDepth('5\n'), 5); // parseInt('5\n', 10) = 5
+        assert.strictEqual(validateDepth('123abc'), 123); // parseInt('123abc', 10) = 123
       });
 
       it('should be case sensitive for Infinity', () => {
-        expect(() => validateDepth('infinity')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('INFINITY')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
-        expect(() => validateDepth('InFiNiTy')).toThrow(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.throws(() => validateDepth('infinity'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('INFINITY'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
+        assert.throws(() => validateDepth('InFiNiTy'), (err) => {
+          assert.ok(err instanceof Error);
+          assert.ok(err.message.includes('Depth must be a positive number or "Infinity"'));
+          return true;
+        });
       });
     });
 
@@ -366,9 +393,9 @@ describe('types.ts', () => {
       it('should return success result for valid formats', () => {
         OUTPUT_FORMATS.forEach((format) => {
           const result = validateFormat(format);
-          expect(result.success).toBe(true);
-          expect(result.value).toBe(format);
-          expect(result.error).toBeUndefined();
+          assert.strictEqual(result.success, true);
+          assert.strictEqual(result.value, format);
+          assert.strictEqual(result.error, undefined);
         });
       });
 
@@ -386,9 +413,9 @@ describe('types.ts', () => {
 
         nonStringInputs.forEach((input) => {
           const result = validateFormat(input);
-          expect(result.success).toBe(false);
-          expect(result.value).toBeUndefined();
-          expect(result.error).toBe('Format must be a string');
+          assert.strictEqual(result.success, false);
+          assert.strictEqual(result.value, undefined);
+          assert.strictEqual(result.error, 'Format must be a string');
         });
       });
 
@@ -408,11 +435,9 @@ describe('types.ts', () => {
 
         invalidFormats.forEach((format) => {
           const result = validateFormat(format);
-          expect(result.success).toBe(false);
-          expect(result.value).toBeUndefined();
-          expect(result.error).toBe(
-            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
-          );
+          assert.strictEqual(result.success, false);
+          assert.strictEqual(result.value, undefined);
+          assert.strictEqual(result.error, `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`);
         });
       });
 
@@ -427,11 +452,9 @@ describe('types.ts', () => {
 
         whitespaceFormats.forEach((format) => {
           const result = validateFormat(format);
-          expect(result.success).toBe(false);
-          expect(result.value).toBeUndefined();
-          expect(result.error).toBe(
-            `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`
-          );
+          assert.strictEqual(result.success, false);
+          assert.strictEqual(result.value, undefined);
+          assert.strictEqual(result.error, `Invalid format "${format}". Must be one of: json, yaml, ascii, llmtext`);
         });
       });
     });
@@ -442,14 +465,14 @@ describe('types.ts', () => {
 
         validDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
-          expect(result.success).toBe(true);
-          expect(result.value).toBeDefined();
-          expect(result.error).toBeUndefined();
+          assert.strictEqual(result.success, true);
+          assert.notStrictEqual(result.value, undefined);
+          assert.strictEqual(result.error, undefined);
 
           if (depth === 'Infinity') {
-            expect(result.value).toBe(Infinity);
+            assert.strictEqual(result.value, Infinity);
           } else {
-            expect(result.value).toBe(parseInt(depth, 10));
+            assert.strictEqual(result.value, parseInt(depth, 10));
           }
         });
       });
@@ -468,9 +491,9 @@ describe('types.ts', () => {
 
         nonStringInputs.forEach((input) => {
           const result = validateDepthValue(input);
-          expect(result.success).toBe(false);
-          expect(result.value).toBeUndefined();
-          expect(result.error).toBe('Depth must be a string');
+          assert.strictEqual(result.success, false);
+          assert.strictEqual(result.value, undefined);
+          assert.strictEqual(result.error, 'Depth must be a string');
         });
       });
 
@@ -491,11 +514,9 @@ describe('types.ts', () => {
 
         invalidDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
-          expect(result.success).toBe(false);
-          expect(result.value).toBeUndefined();
-          expect(result.error).toBe(
-            'Depth must be a positive number or "Infinity"'
-          );
+          assert.strictEqual(result.success, false);
+          assert.strictEqual(result.value, undefined);
+          assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
         });
       });
 
@@ -504,29 +525,25 @@ describe('types.ts', () => {
 
         parseableDepths.forEach((depth) => {
           const result = validateDepthValue(depth);
-          expect(result.success).toBe(true);
-          expect(result.value).toBeDefined();
-          expect(result.error).toBeUndefined();
+          assert.strictEqual(result.success, true);
+          assert.notStrictEqual(result.value, undefined);
+          assert.strictEqual(result.error, undefined);
         });
       });
 
       it('should handle errors from validateDepth function', () => {
         // Test that it properly wraps validateDepth errors
         const result = validateDepthValue('0');
-        expect(result.success).toBe(false);
-        expect(result.error).toBe(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.strictEqual(result.success, false);
+        assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
       });
 
       it('should handle non-Error exceptions (edge case)', () => {
         // This tests the fallback error handling
         // We can't easily mock validateDepth to throw a non-Error, so this tests the code path
         const result = validateDepthValue('not-a-number');
-        expect(result.success).toBe(false);
-        expect(result.error).toBe(
-          'Depth must be a positive number or "Infinity"'
-        );
+        assert.strictEqual(result.success, false);
+        assert.strictEqual(result.error, 'Depth must be a positive number or "Infinity"');
       });
     });
   });
@@ -537,11 +554,11 @@ describe('types.ts', () => {
         const message = 'Parse failed';
         const error = new ParserError(message);
 
-        expect(error).toBeInstanceOf(Error);
-        expect(error).toBeInstanceOf(ParserError);
-        expect(error.name).toBe('ParserError');
-        expect(error.message).toBe(message);
-        expect(error.filePath).toBeUndefined();
+        assert.ok(error instanceof Error);
+        assert.ok(error instanceof ParserError);
+        assert.strictEqual(error.name, 'ParserError');
+        assert.strictEqual(error.message, message);
+        assert.strictEqual(error.filePath, undefined);
       });
 
       it('should create error with message and file path', () => {
@@ -549,39 +566,39 @@ describe('types.ts', () => {
         const filePath = '/path/to/file.ts';
         const error = new ParserError(message, filePath);
 
-        expect(error).toBeInstanceOf(Error);
-        expect(error).toBeInstanceOf(ParserError);
-        expect(error.name).toBe('ParserError');
-        expect(error.message).toBe(message);
-        expect(error.filePath).toBe(filePath);
+        assert.ok(error instanceof Error);
+        assert.ok(error instanceof ParserError);
+        assert.strictEqual(error.name, 'ParserError');
+        assert.strictEqual(error.message, message);
+        assert.strictEqual(error.filePath, filePath);
       });
 
       it('should be throwable and catchable', () => {
         const message = 'Test error';
         const filePath = '/test/path.ts';
 
-        expect(() => {
+        assert.throws(() => {
           throw new ParserError(message, filePath);
-        }).toThrow(ParserError);
+        }, ParserError);
 
         try {
           throw new ParserError(message, filePath);
         } catch (error) {
-          expect(error).toBeInstanceOf(ParserError);
-          expect((error as ParserError).message).toBe(message);
-          expect((error as ParserError).filePath).toBe(filePath);
+          assert.ok(error instanceof ParserError);
+          assert.strictEqual((error as ParserError).message, message);
+          assert.strictEqual((error as ParserError).filePath, filePath);
         }
       });
 
       it('should handle empty message', () => {
         const error = new ParserError('');
-        expect(error.message).toBe('');
-        expect(error.name).toBe('ParserError');
+        assert.strictEqual(error.message, '');
+        assert.strictEqual(error.name, 'ParserError');
       });
 
       it('should handle empty file path', () => {
         const error = new ParserError('message', '');
-        expect(error.filePath).toBe('');
+        assert.strictEqual(error.filePath, '');
       });
     });
 
@@ -591,45 +608,45 @@ describe('types.ts', () => {
         const filePath = '/path/to/missing.ts';
         const error = new FileReaderError(message, filePath);
 
-        expect(error).toBeInstanceOf(Error);
-        expect(error).toBeInstanceOf(FileReaderError);
-        expect(error.name).toBe('FileReaderError');
-        expect(error.message).toBe(message);
-        expect(error.filePath).toBe(filePath);
+        assert.ok(error instanceof Error);
+        assert.ok(error instanceof FileReaderError);
+        assert.strictEqual(error.name, 'FileReaderError');
+        assert.strictEqual(error.message, message);
+        assert.strictEqual(error.filePath, filePath);
       });
 
       it('should be throwable and catchable', () => {
         const message = 'Permission denied';
         const filePath = '/restricted/file.ts';
 
-        expect(() => {
+        assert.throws(() => {
           throw new FileReaderError(message, filePath);
-        }).toThrow(FileReaderError);
+        }, FileReaderError);
 
         try {
           throw new FileReaderError(message, filePath);
         } catch (error) {
-          expect(error).toBeInstanceOf(FileReaderError);
-          expect((error as FileReaderError).message).toBe(message);
-          expect((error as FileReaderError).filePath).toBe(filePath);
+          assert.ok(error instanceof FileReaderError);
+          assert.strictEqual((error as FileReaderError).message, message);
+          assert.strictEqual((error as FileReaderError).filePath, filePath);
         }
       });
 
       it('should handle empty values', () => {
         const error = new FileReaderError('', '');
-        expect(error.message).toBe('');
-        expect(error.filePath).toBe('');
-        expect(error.name).toBe('FileReaderError');
+        assert.strictEqual(error.message, '');
+        assert.strictEqual(error.filePath, '');
+        assert.strictEqual(error.name, 'FileReaderError');
       });
 
       it('should be distinguishable from other error types', () => {
         const fileError = new FileReaderError('File error', '/path');
         const parserError = new ParserError('Parser error');
 
-        expect(fileError).toBeInstanceOf(FileReaderError);
-        expect(fileError).not.toBeInstanceOf(ParserError);
-        expect(parserError).toBeInstanceOf(ParserError);
-        expect(parserError).not.toBeInstanceOf(FileReaderError);
+        assert.ok(fileError instanceof FileReaderError);
+        assert.ok(!(fileError instanceof ParserError));
+        assert.ok(parserError instanceof ParserError);
+        assert.ok(!(parserError instanceof FileReaderError));
       });
     });
 
@@ -639,12 +656,10 @@ describe('types.ts', () => {
         const supportedTypes = ['js', 'ts', 'jsx', 'tsx'];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
 
-        expect(error).toBeInstanceOf(Error);
-        expect(error).toBeInstanceOf(UnsupportedFileTypeError);
-        expect(error.name).toBe('UnsupportedFileTypeError');
-        expect(error.message).toBe(
-          'Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx'
-        );
+        assert.ok(error instanceof Error);
+        assert.ok(error instanceof UnsupportedFileTypeError);
+        assert.strictEqual(error.name, 'UnsupportedFileTypeError');
+        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.py. Supported types: js, ts, jsx, tsx');
       });
 
       it('should handle empty supported types array', () => {
@@ -652,9 +667,7 @@ describe('types.ts', () => {
         const supportedTypes: string[] = [];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
 
-        expect(error.message).toBe(
-          'Unsupported file type for /path/to/file.unknown. Supported types: '
-        );
+        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.unknown. Supported types: ');
       });
 
       it('should handle single supported type', () => {
@@ -662,35 +675,31 @@ describe('types.ts', () => {
         const supportedTypes = ['js'];
         const error = new UnsupportedFileTypeError(filePath, supportedTypes);
 
-        expect(error.message).toBe(
-          'Unsupported file type for /path/to/file.py. Supported types: js'
-        );
+        assert.strictEqual(error.message, 'Unsupported file type for /path/to/file.py. Supported types: js');
       });
 
       it('should be throwable and catchable', () => {
         const filePath = '/path/to/file.rb';
         const supportedTypes = ['js', 'ts'];
 
-        expect(() => {
+        assert.throws(() => {
           throw new UnsupportedFileTypeError(filePath, supportedTypes);
-        }).toThrow(UnsupportedFileTypeError);
+        }, UnsupportedFileTypeError);
 
         try {
           throw new UnsupportedFileTypeError(filePath, supportedTypes);
         } catch (error: unknown) {
-          expect(error).toBeInstanceOf(UnsupportedFileTypeError);
+          assert.ok(error instanceof UnsupportedFileTypeError);
           if (error instanceof UnsupportedFileTypeError) {
-            expect(error.message).toContain(filePath);
-            expect(error.message).toContain('js, ts');
+            assert.ok(error.message.includes(filePath));
+            assert.ok(error.message.includes('js, ts'));
           }
         }
       });
 
       it('should handle empty file path', () => {
         const error = new UnsupportedFileTypeError('', ['js']);
-        expect(error.message).toBe(
-          'Unsupported file type for . Supported types: js'
-        );
+        assert.strictEqual(error.message, 'Unsupported file type for . Supported types: js');
       });
 
       it('should be distinguishable from other error types', () => {
@@ -698,9 +707,9 @@ describe('types.ts', () => {
         const fileError = new FileReaderError('File error', '/path');
         const parserError = new ParserError('Parser error');
 
-        expect(unsupportedError).toBeInstanceOf(UnsupportedFileTypeError);
-        expect(unsupportedError).not.toBeInstanceOf(FileReaderError);
-        expect(unsupportedError).not.toBeInstanceOf(ParserError);
+        assert.ok(unsupportedError instanceof UnsupportedFileTypeError);
+        assert.ok(!(unsupportedError instanceof FileReaderError));
+        assert.ok(!(unsupportedError instanceof ParserError));
       });
     });
   });
@@ -708,8 +717,8 @@ describe('types.ts', () => {
   describe('Constants', () => {
     describe('NODE_TYPES', () => {
       it('should be a readonly array', () => {
-        expect(Array.isArray(NODE_TYPES)).toBe(true);
-        expect(NODE_TYPES.length).toBeGreaterThan(0);
+        assert.strictEqual(Array.isArray(NODE_TYPES), true);
+        assert.ok(NODE_TYPES.length > 0);
       });
 
       it('should contain expected node types', () => {
@@ -722,27 +731,27 @@ describe('types.ts', () => {
         ];
 
         expectedTypes.forEach((type) => {
-          expect(NODE_TYPES).toContain(type as any);
+          assert.ok(NODE_TYPES.includes(type as any));
         });
       });
 
       it('should not contain duplicates', () => {
         const uniqueTypes = new Set(NODE_TYPES);
-        expect(uniqueTypes.size).toBe(NODE_TYPES.length);
+        assert.strictEqual(uniqueTypes.size, NODE_TYPES.length);
       });
 
       it('should contain only string values', () => {
         NODE_TYPES.forEach((type) => {
-          expect(typeof type).toBe('string');
-          expect(type.length).toBeGreaterThan(0);
+          assert.strictEqual(typeof type, 'string');
+          assert.ok(type.length > 0);
         });
       });
     });
 
     describe('CONTAINER_TYPES', () => {
       it('should be a readonly array', () => {
-        expect(Array.isArray(CONTAINER_TYPES)).toBe(true);
-        expect(CONTAINER_TYPES.length).toBeGreaterThan(0);
+        assert.strictEqual(Array.isArray(CONTAINER_TYPES), true);
+        assert.ok(CONTAINER_TYPES.length > 0);
       });
 
       it('should contain expected container types', () => {
@@ -754,26 +763,26 @@ describe('types.ts', () => {
         ];
 
         expectedTypes.forEach((type) => {
-          expect(CONTAINER_TYPES).toContain(type as any);
+          assert.ok(CONTAINER_TYPES.includes(type as any));
         });
       });
 
       it('should not contain duplicates', () => {
         const uniqueTypes = new Set(CONTAINER_TYPES);
-        expect(uniqueTypes.size).toBe(CONTAINER_TYPES.length);
+        assert.strictEqual(uniqueTypes.size, CONTAINER_TYPES.length);
       });
 
       it('should be a subset of NODE_TYPES', () => {
         CONTAINER_TYPES.forEach((containerType) => {
-          expect(NODE_TYPES).toContain(containerType as any);
+          assert.ok(NODE_TYPES.includes(containerType as any));
         });
       });
     });
 
     describe('STRUCTURAL_TYPES', () => {
       it('should be a readonly array', () => {
-        expect(Array.isArray(STRUCTURAL_TYPES)).toBe(true);
-        expect(STRUCTURAL_TYPES.length).toBeGreaterThan(0);
+        assert.strictEqual(Array.isArray(STRUCTURAL_TYPES), true);
+        assert.ok(STRUCTURAL_TYPES.length > 0);
       });
 
       it('should contain expected structural types', () => {
@@ -787,26 +796,26 @@ describe('types.ts', () => {
         ];
 
         expectedTypes.forEach((type) => {
-          expect(STRUCTURAL_TYPES).toContain(type as any);
+          assert.ok(STRUCTURAL_TYPES.includes(type as any));
         });
       });
 
       it('should not contain duplicates', () => {
         const uniqueTypes = new Set(STRUCTURAL_TYPES);
-        expect(uniqueTypes.size).toBe(STRUCTURAL_TYPES.length);
+        assert.strictEqual(uniqueTypes.size, STRUCTURAL_TYPES.length);
       });
 
       it('should be a subset of CONTAINER_TYPES', () => {
         STRUCTURAL_TYPES.forEach((structuralType) => {
-          expect(CONTAINER_TYPES).toContain(structuralType as any);
+          assert.ok(CONTAINER_TYPES.includes(structuralType as any));
         });
       });
     });
 
     describe('INSIGNIFICANT_TYPES', () => {
       it('should be a readonly array', () => {
-        expect(Array.isArray(INSIGNIFICANT_TYPES)).toBe(true);
-        expect(INSIGNIFICANT_TYPES.length).toBeGreaterThan(0);
+        assert.strictEqual(Array.isArray(INSIGNIFICANT_TYPES), true);
+        assert.ok(INSIGNIFICANT_TYPES.length > 0);
       });
 
       it('should contain expected insignificant types', () => {
@@ -824,45 +833,45 @@ describe('types.ts', () => {
         ];
 
         expectedTypes.forEach((type) => {
-          expect(INSIGNIFICANT_TYPES).toContain(type as any);
+          assert.ok(INSIGNIFICANT_TYPES.includes(type as any));
         });
       });
 
       it('should not contain duplicates', () => {
         const uniqueTypes = new Set(INSIGNIFICANT_TYPES);
-        expect(uniqueTypes.size).toBe(INSIGNIFICANT_TYPES.length);
+        assert.strictEqual(uniqueTypes.size, INSIGNIFICANT_TYPES.length);
       });
 
       it('should contain punctuation and special types', () => {
         const punctuationTypes = [',', ';', '{', '}', '(', ')', '[', ']'];
         punctuationTypes.forEach((type) => {
-          expect(INSIGNIFICANT_TYPES).toContain(type as any);
+          assert.ok(INSIGNIFICANT_TYPES.includes(type as any));
         });
 
-        expect(INSIGNIFICANT_TYPES).toContain('comment' as any);
-        expect(INSIGNIFICANT_TYPES).toContain('ERROR' as any);
+        assert.ok(INSIGNIFICANT_TYPES.includes('comment' as any));
+        assert.ok(INSIGNIFICANT_TYPES.includes('ERROR' as any));
       });
     });
 
     describe('OUTPUT_FORMATS', () => {
       it('should be a readonly array', () => {
-        expect(Array.isArray(OUTPUT_FORMATS)).toBe(true);
-        expect(OUTPUT_FORMATS.length).toBe(4);
+        assert.strictEqual(Array.isArray(OUTPUT_FORMATS), true);
+        assert.strictEqual(OUTPUT_FORMATS.length, 4);
       });
 
       it('should contain expected output formats', () => {
-        expect(OUTPUT_FORMATS).toEqual(['json', 'yaml', 'ascii', 'llmtext']);
+        assert.deepStrictEqual(OUTPUT_FORMATS, ['json', 'yaml', 'ascii', 'llmtext']);
       });
 
       it('should not contain duplicates', () => {
         const uniqueFormats = new Set(OUTPUT_FORMATS);
-        expect(uniqueFormats.size).toBe(OUTPUT_FORMATS.length);
+        assert.strictEqual(uniqueFormats.size, OUTPUT_FORMATS.length);
       });
 
       it('should contain only string values', () => {
         OUTPUT_FORMATS.forEach((format) => {
-          expect(typeof format).toBe('string');
-          expect(format.length).toBeGreaterThan(0);
+          assert.strictEqual(typeof format, 'string');
+          assert.ok(format.length > 0);
         });
       });
     });
@@ -887,10 +896,10 @@ describe('types.ts', () => {
       const namedNodes = nodes.filter(isNamedNode);
       const unnamedNodes = nodes.filter(isUnnamedNode);
 
-      expect(namedNodes).toHaveLength(1);
-      expect(unnamedNodes).toHaveLength(1);
-      expect(namedNodes[0].name).toBe('myFunction');
-      expect(unnamedNodes[0].name).toBeUndefined();
+      assert.strictEqual(namedNodes.length, 1);
+      assert.strictEqual(unnamedNodes.length, 1);
+      assert.strictEqual(namedNodes[0].name, 'myFunction');
+      assert.strictEqual(unnamedNodes[0].name, undefined);
     });
 
     it('should handle validation result success vs error cases', () => {
@@ -898,13 +907,13 @@ describe('types.ts', () => {
       const invalidFormat = validateFormat('xml');
 
       if (validFormat.success) {
-        expect(validFormat.value).toBe('json');
-        expect(validFormat.error).toBeUndefined();
+        assert.strictEqual(validFormat.value, 'json');
+        assert.strictEqual(validFormat.error, undefined);
       }
 
       if (!invalidFormat.success) {
-        expect(invalidFormat.value).toBeUndefined();
-        expect(invalidFormat.error).toContain('Invalid format');
+        assert.strictEqual(invalidFormat.value, undefined);
+        assert.ok(invalidFormat.error.includes('Invalid format'));
       }
     });
   });
@@ -912,11 +921,11 @@ describe('types.ts', () => {
   describe('Edge Cases and Boundary Conditions', () => {
     it('should handle extremely large depth values', () => {
       const largeDepth = '999999999';
-      expect(validateDepth(largeDepth)).toBe(999999999);
+      assert.strictEqual(validateDepth(largeDepth), 999999999);
 
       const result = validateDepthValue(largeDepth);
-      expect(result.success).toBe(true);
-      expect(result.value).toBe(999999999);
+      assert.strictEqual(result.success, true);
+      assert.strictEqual(result.value, 999999999);
     });
 
     it('should handle node info with all optional fields', () => {
@@ -926,8 +935,8 @@ describe('types.ts', () => {
         end: { row: 100, column: 0 },
       };
 
-      expect(isUnnamedNode(minimalNode)).toBe(true);
-      expect(isNamedNode(minimalNode)).toBe(false);
+      assert.strictEqual(isUnnamedNode(minimalNode), true);
+      assert.strictEqual(isNamedNode(minimalNode), false);
     });
 
     it('should handle node info with children array', () => {
@@ -946,8 +955,8 @@ describe('types.ts', () => {
         ],
       };
 
-      expect(isNamedNode(nodeWithChildren)).toBe(true);
-      expect(nodeWithChildren.children).toHaveLength(1);
+      assert.strictEqual(isNamedNode(nodeWithChildren), true);
+      assert.strictEqual(nodeWithChildren.children.length, 1);
     });
 
     it('should handle zero position values', () => {
@@ -957,10 +966,10 @@ describe('types.ts', () => {
         end: { row: 0, column: 0 },
       };
 
-      expect(nodeAtOrigin.start.row).toBe(0);
-      expect(nodeAtOrigin.start.column).toBe(0);
-      expect(nodeAtOrigin.end.row).toBe(0);
-      expect(nodeAtOrigin.end.column).toBe(0);
+      assert.strictEqual(nodeAtOrigin.start.row, 0);
+      assert.strictEqual(nodeAtOrigin.start.column, 0);
+      assert.strictEqual(nodeAtOrigin.end.row, 0);
+      assert.strictEqual(nodeAtOrigin.end.column, 0);
     });
   });
 });

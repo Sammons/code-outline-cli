@@ -84,20 +84,10 @@ module.exports = [
       globals: {
         ...globals.node,
         ...globals.es2022,
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        vi: 'readonly',
-        vitest: 'readonly',
       },
     },
     rules: {
-      // Allow any in test files for mocking
+      // node:test imports every helper explicitly; no test globals needed.
       '@typescript-eslint/no-explicit-any': 'off',
       // Allow non-null assertions in tests
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -107,7 +97,7 @@ module.exports = [
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
-      // Allow unused vars for test utilities like `vi`
+      // Tests bind fakes that are not always read back
       '@typescript-eslint/no-unused-vars': 'off',
       // Allow explicit any in tests
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -118,7 +108,6 @@ module.exports = [
     files: [
       '*.config.ts',
       '*.config.js',
-      'vitest.config.ts',
       'eslint.config.js',
     ],
     rules: {
@@ -181,12 +170,10 @@ module.exports = [
       'coverage/**/*',
       'node_modules/**/*',
       '**/*.d.ts',
-      '.husky/**/*',
       'test/**/*',
       'src/test-scenarios/**/*',
       'packages/*/dist/**/*',
       'packages/website/dist/**/*',
-      'vitest.config.ts',
       'packages/website/vite.config.js',
     ],
   },

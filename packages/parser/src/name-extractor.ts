@@ -1,5 +1,5 @@
 import type TreeSitterParser from 'tree-sitter';
-import { ExtractorRegistry } from './extractors/extractor-registry';
+import { ExtractorRegistry } from './extractors/extractor-registry.ts';
 
 /**
  * NameExtractor handles extraction of names from AST nodes using the Strategy pattern

@@ -39,3 +39,5 @@ test/temp/
 
 # Generated documentation files
 packages/website/public/data/*.json
+# Agent worktree scratch (not repo content)
+worktree-description.md

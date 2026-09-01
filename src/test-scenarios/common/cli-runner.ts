@@ -47,16 +47,16 @@ export class CLIRunner {
     defaultTimeout: number = 30000 // 30 seconds
   ) {
     // Default to the built CLI path
-    // In tests, __dirname might be in dist folder, so we need to resolve from project root
-    const defaultPath = resolve(__dirname, '../../../packages/cli/dist/cli.js');
+    // In tests, import.meta.dirname might be in dist folder, so we need to resolve from project root
+    const defaultPath = resolve(import.meta.dirname, '../../../packages/cli/dist/cli.js');
 
     // Try multiple possible locations for the CLI
     const possiblePaths = [
       defaultPath,
       resolve(process.cwd(), 'packages/cli/dist/cli.js'),
       resolve(process.cwd(), '../../../packages/cli/dist/cli.js'),
-      resolve(__dirname, '../../../../packages/cli/dist/cli.js'),
-      resolve(__dirname, '../../packages/cli/dist/cli.js'),
+      resolve(import.meta.dirname, '../../../../packages/cli/dist/cli.js'),
+      resolve(import.meta.dirname, '../../packages/cli/dist/cli.js'),
     ];
 
     if (cliPath) {
@@ -78,7 +78,7 @@ export class CLIRunner {
             `  ${p}: ${require('fs').existsSync(p) ? 'EXISTS' : 'NOT FOUND'}`
           );
         });
-        console.error('__dirname:', __dirname);
+        console.error('import.meta.dirname:', import.meta.dirname);
         console.error('process.cwd():', process.cwd());
       }
       */

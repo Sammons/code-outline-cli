@@ -212,21 +212,21 @@ export interface ParserConfig {
 
 // Error types for better error handling
 export class ParserError extends Error {
-  constructor(
-    message: string,
-    public readonly filePath?: string
-  ) {
+  public readonly filePath?: string;
+
+  constructor(message: string, filePath?: string) {
     super(message);
+    this.filePath = filePath;
     this.name = 'ParserError';
   }
 }
 
 export class FileReaderError extends Error {
-  constructor(
-    message: string,
-    public readonly filePath: string
-  ) {
+  public readonly filePath: string;
+
+  constructor(message: string, filePath: string) {
     super(message);
+    this.filePath = filePath;
     this.name = 'FileReaderError';
   }
 }

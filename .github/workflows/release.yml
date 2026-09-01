@@ -30,10 +30,20 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '20'
+          node-version: '26'
+
+      - name: Verify npm token is configured
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "NPM_TOKEN is not set on this repo. Set it with:"
+            echo "  pnpm gitea-admin secrets set --repo sammons/code-outline-cli --name NPM_TOKEN --value-file <path>"
+            exit 1
+          fi
 
       - name: Configure npm registry
-        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+        run: pnpm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
 
       - name: Build packages
         run: pnpm build
@@ -47,7 +57,6 @@ jobs:
           version: pnpm version-packages
           commit: 'chore: release packages'
           title: 'chore: release packages'
-          createGithubReleases: true
         env:
           # Use RELEASE_TOKEN if available for PR creation, otherwise GITHUB_TOKEN
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}

@@ -69,9 +69,9 @@ function checkDocsCurrent(): {
   status: 'current' | 'outdated' | 'error';
   message: string;
 } {
-  const cliPackagePath = resolve(__dirname, '../packages/cli/package.json');
+  const cliPackagePath = resolve(import.meta.dirname, '../packages/cli/package.json');
   const versionsJsonPath = resolve(
-    __dirname,
+    import.meta.dirname,
     '../packages/website/public/data/versions.json'
   );
 

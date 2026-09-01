@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, before } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions } from '../common/test-utils.js';
-import yaml from 'js-yaml';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions } from '../common/test-utils.ts';
 
 describe('Output Formats', () => {
-  const sampleFile = resolve(__dirname, 'assets', 'sample-code.ts');
+  const sampleFile = resolve(import.meta.dirname, 'assets', 'sample-code.ts');
 
-  beforeAll(async () => {
+  before(async () => {
     // Ensure CLI is accessible
     const isAccessible = await cliRunner.testAccess();
-    expect(isAccessible).toBe(true);
+    assert.strictEqual(isAccessible, true);
   });
 
   describe('JSON Format', () => {
@@ -27,14 +27,14 @@ describe('Output Formats', () => {
       CLIAssertions.expectFilesProcessed(parsed, 1);
 
       const fileResult = parsed[0];
-      expect(fileResult.file).toContain('sample-code.ts');
-      expect(fileResult.outline).toBeTruthy();
-      expect(fileResult.outline!.type).toBe('program');
+      assert.ok(fileResult.file.includes('sample-code.ts'));
+      assert.ok(fileResult.outline);
+      assert.strictEqual(fileResult.outline!.type, 'program');
 
       // Should have proper JSON structure
-      expect(typeof fileResult.file).toBe('string');
-      expect(typeof fileResult.outline!.type).toBe('string');
-      expect(Array.isArray(fileResult.outline!.children)).toBe(true);
+      assert.strictEqual(typeof fileResult.file, 'string');
+      assert.strictEqual(typeof fileResult.outline!.type, 'string');
+      assert.strictEqual(Array.isArray(fileResult.outline!.children), true);
     });
 
     it('should include all required fields in JSON output', async () => {
@@ -44,27 +44,27 @@ describe('Output Formats', () => {
       const fileResult = parsed[0];
 
       // Top-level structure
-      expect(fileResult).toHaveProperty('file');
-      expect(fileResult).toHaveProperty('outline');
+      assert.ok('file' in fileResult);
+      assert.ok('outline' in fileResult);
 
       const outline = fileResult.outline!;
 
       // Node structure requirements
-      expect(outline).toHaveProperty('type');
-      expect(outline).toHaveProperty('start');
-      expect(outline).toHaveProperty('end');
+      assert.ok('type' in outline);
+      assert.ok('start' in outline);
+      assert.ok('end' in outline);
 
       // Position structure
-      expect(outline.start).toHaveProperty('row');
-      expect(outline.start).toHaveProperty('column');
-      expect(outline.end).toHaveProperty('row');
-      expect(outline.end).toHaveProperty('column');
+      assert.ok('row' in outline.start);
+      assert.ok('column' in outline.start);
+      assert.ok('row' in outline.end);
+      assert.ok('column' in outline.end);
 
       // Position values should be numbers
-      expect(typeof outline.start.row).toBe('number');
-      expect(typeof outline.start.column).toBe('number');
-      expect(typeof outline.end.row).toBe('number');
-      expect(typeof outline.end.column).toBe('number');
+      assert.strictEqual(typeof outline.start.row, 'number');
+      assert.strictEqual(typeof outline.start.column, 'number');
+      assert.strictEqual(typeof outline.end.row, 'number');
+      assert.strictEqual(typeof outline.end.column, 'number');
     });
 
     it('should handle complex nested structures in JSON', async () => {
@@ -91,19 +91,19 @@ describe('Output Formats', () => {
         'type_alias_declaration'
       );
 
-      expect(interfaces.length).toBeGreaterThan(0);
-      expect(classes.length).toBeGreaterThan(0);
-      expect(enums.length).toBeGreaterThan(0);
-      expect(functions.length).toBeGreaterThan(0);
-      expect(typeAliases.length).toBeGreaterThan(0);
+      assert.ok(interfaces.length > 0);
+      assert.ok(classes.length > 0);
+      assert.ok(enums.length > 0);
+      assert.ok(functions.length > 0);
+      assert.ok(typeAliases.length > 0);
 
       // Named nodes should have names
       const namedNodes = CLIAssertions.findNamedNodes(outline);
-      expect(namedNodes.length).toBeGreaterThan(5);
+      assert.ok(namedNodes.length > 5);
 
       for (const node of namedNodes) {
-        expect(node.name).toBeTruthy();
-        expect(typeof node.name).toBe('string');
+        assert.ok(node.name);
+        assert.strictEqual(typeof node.name, 'string');
       }
     });
 
@@ -112,16 +112,16 @@ describe('Output Formats', () => {
       CLIAssertions.expectSuccess(result);
 
       // Should be valid JSON without extra whitespace
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
+      assert.doesNotThrow(() => JSON.parse(result.stdout));
 
       // JSON should be valid regardless of formatting
       const parsed = JSON.parse(result.stdout);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed.length).toBe(1);
+      assert.strictEqual(Array.isArray(parsed), true);
+      assert.strictEqual(parsed.length, 1);
 
       // Should have proper structure
-      expect(parsed[0]).toHaveProperty('file');
-      expect(parsed[0]).toHaveProperty('outline');
+      assert.ok('file' in parsed[0]);
+      assert.ok('outline' in parsed[0]);
     });
   });
 
@@ -134,9 +134,9 @@ describe('Output Formats', () => {
       CLIAssertions.expectFilesProcessed(parsed, 1);
 
       const fileResult = parsed[0];
-      expect(fileResult.file).toContain('sample-code.ts');
-      expect(fileResult.outline).toBeTruthy();
-      expect(fileResult.outline!.type).toBe('program');
+      assert.ok(fileResult.file.includes('sample-code.ts'));
+      assert.ok(fileResult.outline);
+      assert.strictEqual(fileResult.outline!.type, 'program');
     });
 
     it('should have proper YAML structure and formatting', async () => {
@@ -144,16 +144,16 @@ describe('Output Formats', () => {
       CLIAssertions.expectSuccess(result);
 
       // Should contain YAML indicators
-      expect(result.stdout).toContain('- file:');
-      expect(result.stdout).toContain('  outline:');
-      expect(result.stdout).toContain('    type:');
-      expect(result.stdout).toContain('    start:');
-      expect(result.stdout).toContain('    end:');
+      assert.ok(result.stdout.includes('- file:'));
+      assert.ok(result.stdout.includes('  outline:'));
+      assert.ok(result.stdout.includes('    type:'));
+      assert.ok(result.stdout.includes('    start:'));
+      assert.ok(result.stdout.includes('    end:'));
 
       // Should have proper indentation
       const lines = result.stdout.split('\n');
       const indentedLines = lines.filter((line) => line.startsWith('  '));
-      expect(indentedLines.length).toBeGreaterThan(0);
+      assert.ok(indentedLines.length > 0);
     });
 
     it('should preserve all data from JSON in YAML format', async () => {
@@ -164,25 +164,19 @@ describe('Output Formats', () => {
       const yamlParsed = CLIAssertions.expectValidYaml(yamlResult);
 
       // Should have same number of files
-      expect(yamlParsed.length).toBe(jsonParsed.length);
+      assert.strictEqual(yamlParsed.length, jsonParsed.length);
 
       // Should have same file path
-      expect(yamlParsed[0].file).toBe(jsonParsed[0].file);
+      assert.strictEqual(yamlParsed[0].file, jsonParsed[0].file);
 
       // Should have same outline structure
       if (jsonParsed[0].outline && yamlParsed[0].outline) {
-        expect(yamlParsed[0].outline.type).toBe(jsonParsed[0].outline.type);
-        expect(yamlParsed[0].outline.children?.length).toBe(
-          jsonParsed[0].outline.children?.length
-        );
+        assert.strictEqual(yamlParsed[0].outline.type, jsonParsed[0].outline.type);
+        assert.strictEqual(yamlParsed[0].outline.children?.length, jsonParsed[0].outline.children?.length);
 
         // Position data should match
-        expect(yamlParsed[0].outline.start.row).toBe(
-          jsonParsed[0].outline.start.row
-        );
-        expect(yamlParsed[0].outline.start.column).toBe(
-          jsonParsed[0].outline.start.column
-        );
+        assert.strictEqual(yamlParsed[0].outline.start.row, jsonParsed[0].outline.start.row);
+        assert.strictEqual(yamlParsed[0].outline.start.column, jsonParsed[0].outline.start.column);
       }
     });
 
@@ -199,12 +193,12 @@ describe('Output Formats', () => {
 
       for (const node of namedNodes) {
         // Names should be preserved correctly
-        expect(node.name).toBeTruthy();
-        expect(typeof node.name).toBe('string');
+        assert.ok(node.name);
+        assert.strictEqual(typeof node.name, 'string');
 
         // Names should not have YAML escaping artifacts
-        expect(node.name).not.toContain('\\n');
-        expect(node.name).not.toContain('\\"');
+        assert.ok(!node.name.includes('\\n'));
+        assert.ok(!node.name.includes('\\"'));
       }
     });
   });
@@ -215,16 +209,16 @@ describe('Output Formats', () => {
       CLIAssertions.expectValidAscii(result);
 
       // Should contain file name
-      expect(result.stdout).toContain('sample-code.ts');
+      assert.ok(result.stdout.includes('sample-code.ts'));
 
       // Should contain folder icon
-      expect(result.stdout).toContain('📁');
+      assert.ok(result.stdout.includes('📁'));
 
       // Should have tree structure
       const hasTreeChars = ['├─', '└─', '│'].some((char) =>
         result.stdout.includes(char)
       );
-      expect(hasTreeChars).toBe(true);
+      assert.strictEqual(hasTreeChars, true);
     });
 
     it('should show hierarchical structure clearly', async () => {
@@ -236,17 +230,17 @@ describe('Output Formats', () => {
       const indentedLines = lines.filter(
         (line) => line.includes('└─') || line.includes('├─')
       );
-      expect(indentedLines.length).toBeGreaterThan(5);
+      assert.ok(indentedLines.length > 5);
 
       // Should contain construct types
-      expect(result.stdout).toContain('interface_declaration');
-      expect(result.stdout).toContain('class_declaration');
-      expect(result.stdout).toContain('enum_declaration');
-      expect(result.stdout).toContain('function_declaration');
+      assert.ok(result.stdout.includes('interface_declaration'));
+      assert.ok(result.stdout.includes('class_declaration'));
+      assert.ok(result.stdout.includes('enum_declaration'));
+      assert.ok(result.stdout.includes('function_declaration'));
 
       // Should show named entities
-      expect(result.stdout).toMatch(/Product/); // Interface name
-      expect(result.stdout).toMatch(/ProductService/); // Class name
+      assert.match(result.stdout, /Product/); // Interface name
+      assert.match(result.stdout, /ProductService/); // Class name
     });
 
     it('should handle deep nesting in ASCII format', async () => {
@@ -268,7 +262,7 @@ describe('Output Formats', () => {
       }
 
       // Should have at least 3 levels of nesting
-      expect(indentationLevels.size).toBeGreaterThanOrEqual(3);
+      assert.ok(indentationLevels.size >= 3);
     });
 
     it('should not break with special characters in names', async () => {
@@ -281,14 +275,14 @@ describe('Output Formats', () => {
       // Each line should be properly formed (no broken Unicode, etc.)
       // Filter out empty lines which are normal in ASCII output
       const nonEmptyLines = lines.filter((line) => line.trim().length > 0);
-      expect(nonEmptyLines.length).toBeGreaterThan(0);
+      assert.ok(nonEmptyLines.length > 0);
 
       for (const line of nonEmptyLines) {
-        expect(line.trim().length).toBeGreaterThan(0); // Should not be empty after filtering
+        assert.ok(line.trim().length > 0); // Should not be empty after filtering
 
         // If line has tree characters, should have proper structure
         if (line.includes('├─') || line.includes('└─')) {
-          expect(line.trim().length).toBeGreaterThan(2); // More than just tree char
+          assert.ok(line.trim().length > 2); // More than just tree char
         }
       }
     });
@@ -310,7 +304,7 @@ describe('Output Formats', () => {
       for (const format of validFormats) {
         const result = await cliRunner.run([sampleFile, '--format', format]);
         CLIAssertions.expectSuccess(result);
-        expect(result.stdout.length).toBeGreaterThan(0);
+        assert.ok(result.stdout.length > 0);
       }
     });
 
@@ -323,7 +317,7 @@ describe('Output Formats', () => {
   describe('Format-Specific Edge Cases', () => {
     it('should handle empty files consistently across formats', async () => {
       const emptyFile = resolve(
-        __dirname,
+        import.meta.dirname,
         '../_05-error-scenarios/assets/empty-file.ts'
       );
 
@@ -337,7 +331,7 @@ describe('Output Formats', () => {
 
         // Should not crash on empty file
         if (result.exitCode === 0) {
-          expect(result.stdout.length).toBeGreaterThan(0);
+          assert.ok(result.stdout.length > 0);
         }
         // If it fails, should fail gracefully with meaningful error
       }
@@ -354,12 +348,12 @@ describe('Output Formats', () => {
       const jsonChildren = jsonParsed[0].outline?.children || [];
       const yamlChildren = yamlParsed[0].outline?.children || [];
 
-      expect(jsonChildren.length).toBe(yamlChildren.length);
+      assert.strictEqual(jsonChildren.length, yamlChildren.length);
 
       for (let i = 0; i < jsonChildren.length; i++) {
-        expect(jsonChildren[i].type).toBe(yamlChildren[i].type);
+        assert.strictEqual(jsonChildren[i].type, yamlChildren[i].type);
         if (jsonChildren[i].name && yamlChildren[i].name) {
-          expect(jsonChildren[i].name).toBe(yamlChildren[i].name);
+          assert.strictEqual(jsonChildren[i].name, yamlChildren[i].name);
         }
       }
     });
@@ -373,8 +367,8 @@ describe('Output Formats', () => {
         const duration = Date.now() - startTime;
 
         CLIAssertions.expectSuccess(result);
-        expect(result.stdout.length).toBeGreaterThan(100); // Should have substantial content
-        expect(duration).toBeLessThan(5000); // Should complete quickly
+        assert.ok(result.stdout.length > 100); // Should have substantial content
+        assert.ok(duration < 5000); // Should complete quickly
       }
     });
   });
@@ -386,7 +380,7 @@ describe('Output Formats', () => {
       const yamlParsed = CLIAssertions.expectValidYaml(yamlResult);
 
       // Deep comparison of data structures
-      expect(json).toEqual(yamlParsed);
+      assert.deepStrictEqual(json, yamlParsed);
     });
 
     it('should handle position information consistently', async () => {
@@ -400,18 +394,18 @@ describe('Output Formats', () => {
       const yamlOutline = yamlParsed[0].outline!;
 
       // Position data should be identical
-      expect(jsonOutline.start).toEqual(yamlOutline.start);
-      expect(jsonOutline.end).toEqual(yamlOutline.end);
+      assert.deepStrictEqual(jsonOutline.start, yamlOutline.start);
+      assert.deepStrictEqual(jsonOutline.end, yamlOutline.end);
 
       // Recursively check children positions
       function comparePositions(nodeA: any, nodeB: any) {
         if (nodeA.start && nodeB.start) {
-          expect(nodeA.start).toEqual(nodeB.start);
-          expect(nodeA.end).toEqual(nodeB.end);
+          assert.deepStrictEqual(nodeA.start, nodeB.start);
+          assert.deepStrictEqual(nodeA.end, nodeB.end);
         }
 
         if (nodeA.children && nodeB.children) {
-          expect(nodeA.children.length).toBe(nodeB.children.length);
+          assert.strictEqual(nodeA.children.length, nodeB.children.length);
           for (let i = 0; i < nodeA.children.length; i++) {
             comparePositions(nodeA.children[i], nodeB.children[i]);
           }

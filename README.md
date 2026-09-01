@@ -209,7 +209,7 @@ Each parsed node contains:
 
 ```bash
 # Clone the repository
-git clone https://github.com/sammons2/code-outline-cli.git
+git clone https://git.tail4ea214.ts.net/sammons/code-outline-cli.git
 cd glance-with-tree-sitter
 
 # Install dependencies
@@ -285,7 +285,7 @@ This project maintains high code quality standards:
 - **ESLint**: Linting with TypeScript rules
 - **Prettier**: Code formatting
 - **Husky**: Git hooks for pre-commit checks
-- **Vitest**: Unit and integration testing
+- **node:test**: Unit and integration testing (Node built-in, zero dependencies)
 - **100% test coverage**: All code paths tested
 
 ## 📚 Examples
@@ -330,7 +330,7 @@ MIT © [Sammons Software LLC](https://github.com/sammons2)
 
 ## 🐛 Issues & Support
 
-Found a bug or have a feature request? Please check our [issue tracker](https://github.com/sammons2/code-outline-cli/issues).
+Found a bug or have a feature request? Please check our [issue tracker](https://git.tail4ea214.ts.net/sammons/code-outline-cli/issues).
 
 ## 🙏 Acknowledgments
 

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { resolve } from 'node:path';
-import { cliRunner } from '../common/cli-runner.js';
-import { CLIAssertions, TestFileSystem } from '../common/test-utils.js';
+import { cliRunner } from '../common/cli-runner.ts';
+import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
 
 describe('Glob Pattern Matching', () => {
-  const assetsDir = resolve(__dirname, 'assets');
+  const assetsDir = resolve(import.meta.dirname, 'assets');
   const file1Path = resolve(assetsDir, 'file1.ts');
   const file2Path = resolve(assetsDir, 'file2.js');
   const file3Path = resolve(assetsDir, 'subdir', 'file3.tsx');
@@ -207,7 +207,7 @@ describe('Glob Pattern Matching', () => {
       // Test with a pattern that looks like it should be globbed but isn't quoted
       testFs = new TestFileSystem();
       const testDir = resolve(
-        __dirname,
+        import.meta.dirname,
         'temp',
         'pattern-warning-' + Date.now()
       );

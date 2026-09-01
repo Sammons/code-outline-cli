@@ -1,6 +1,35 @@
-import { describe, it, expect } from 'vitest';
-import { TreeUtils } from './tree-utils';
-import type { NodeInfo, TreeVisitor, NodePredicate } from './tree-utils';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { TreeUtils } from './tree-utils.ts';
+import type { NodeInfo, TreeVisitor, NodePredicate } from './tree-utils.ts';
+
+// vitest's `toEqual` performs a recursive equality check that treats an
+// object property explicitly set to `undefined` as equivalent to that
+// property being absent. `assert.deepStrictEqual` does not: it treats
+// `{ name: undefined }` and `{}` as different. This helper reproduces
+// vitest's `toEqual` semantics exactly by stripping `undefined`-valued
+// properties (recursively) from both sides before the strict deep compare,
+// so ports of `expect(a).toEqual(b)` keep the original assertion's meaning
+// when either side may carry explicit `undefined` fields.
+function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefined(item)) as unknown as T;
+  }
+  if (value !== null && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (val !== undefined) {
+        result[key] = stripUndefined(val);
+      }
+    }
+    return result as T;
+  }
+  return value;
+}
+
+function assertVitestEqual(actual: unknown, expected: unknown): void {
+  assert.deepStrictEqual(stripUndefined(actual), stripUndefined(expected));
+}
 
 // Test helper to create nodes
 function createNode(
@@ -73,32 +102,32 @@ describe('TreeUtils', () => {
       const tree = createSimpleTree();
       const methods = TreeUtils.findNodesByType(tree, 'method_definition');
 
-      expect(methods).toHaveLength(2);
-      expect(methods[0].name).toBe('constructor');
-      expect(methods[1].name).toBe('getValue');
+      assert.strictEqual(methods.length, 2);
+      assert.strictEqual(methods[0].name, 'constructor');
+      assert.strictEqual(methods[1].name, 'getValue');
     });
 
     it('should return empty array when no nodes match', () => {
       const tree = createSimpleTree();
       const results = TreeUtils.findNodesByType(tree, 'nonexistent_type');
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should find root node if it matches type', () => {
       const tree = createSimpleTree();
       const programs = TreeUtils.findNodesByType(tree, 'program');
 
-      expect(programs).toHaveLength(1);
-      expect(programs[0]).toBe(tree);
+      assert.strictEqual(programs.length, 1);
+      assert.strictEqual(programs[0], tree);
     });
 
     it('should handle nodes without children', () => {
       const leaf = createNode('function_declaration', 'test');
       const results = TreeUtils.findNodesByType(leaf, 'function_declaration');
 
-      expect(results).toHaveLength(1);
-      expect(results[0]).toBe(leaf);
+      assert.strictEqual(results.length, 1);
+      assert.strictEqual(results[0], leaf);
     });
 
     it('should handle empty children array', () => {
@@ -108,15 +137,18 @@ describe('TreeUtils', () => {
         'function_declaration'
       );
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should handle complex nested structures', () => {
       const tree = createComplexTree();
       const methods = TreeUtils.findNodesByType(tree, 'method_definition');
 
-      expect(methods).toHaveLength(2);
-      expect(methods.map((m) => m.name)).toEqual(['getUser', 'createUser']);
+      assert.strictEqual(methods.length, 2);
+      assert.deepStrictEqual(
+        methods.map((m) => m.name),
+        ['getUser', 'createUser']
+      );
     });
   });
 
@@ -125,16 +157,16 @@ describe('TreeUtils', () => {
       const tree = createComplexTree();
       const parameters = TreeUtils.findNodesByName(tree, 'id');
 
-      expect(parameters).toHaveLength(2);
-      expect(parameters[0].type).toBe('property');
-      expect(parameters[1].type).toBe('parameter');
+      assert.strictEqual(parameters.length, 2);
+      assert.strictEqual(parameters[0].type, 'property');
+      assert.strictEqual(parameters[1].type, 'parameter');
     });
 
     it('should return empty array when no nodes match name', () => {
       const tree = createSimpleTree();
       const results = TreeUtils.findNodesByName(tree, 'nonexistent');
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should handle nodes without names (undefined)', () => {
@@ -143,22 +175,22 @@ describe('TreeUtils', () => {
       ]);
       const results = TreeUtils.findNodesByName(tree, 'undefined');
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should find root node if name matches', () => {
       const tree = createNode('function_declaration', 'testFunction');
       const results = TreeUtils.findNodesByName(tree, 'testFunction');
 
-      expect(results).toHaveLength(1);
-      expect(results[0]).toBe(tree);
+      assert.strictEqual(results.length, 1);
+      assert.strictEqual(results[0], tree);
     });
 
     it('should be case sensitive', () => {
       const tree = createNode('class_declaration', 'MyClass');
       const results = TreeUtils.findNodesByName(tree, 'myclass');
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
   });
 
@@ -169,8 +201,9 @@ describe('TreeUtils', () => {
         node.type === 'method_definition';
       const results = TreeUtils.filterNodes(tree, predicate);
 
-      expect(results).toHaveLength(2);
-      expect(results.every((node) => node.type === 'method_definition')).toBe(
+      assert.strictEqual(results.length, 2);
+      assert.strictEqual(
+        results.every((node) => node.type === 'method_definition'),
         true
       );
     });
@@ -186,9 +219,12 @@ describe('TreeUtils', () => {
 
       TreeUtils.filterNodes(tree, predicate);
 
-      expect(calls[0]).toEqual({ depth: 0, hasParent: false }); // root
-      expect(calls[1]).toEqual({ depth: 1, hasParent: true }); // first child
-      expect(calls.some((call) => call.depth === 2)).toBe(true); // nested child
+      assert.deepStrictEqual(calls[0], { depth: 0, hasParent: false }); // root
+      assert.deepStrictEqual(calls[1], { depth: 1, hasParent: true }); // first child
+      assert.strictEqual(
+        calls.some((call) => call.depth === 2),
+        true
+      ); // nested child
     });
 
     it('should handle empty results', () => {
@@ -196,7 +232,7 @@ describe('TreeUtils', () => {
       const predicate: NodePredicate = () => false;
       const results = TreeUtils.filterNodes(tree, predicate);
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should include all nodes when predicate always returns true', () => {
@@ -205,7 +241,7 @@ describe('TreeUtils', () => {
       const results = TreeUtils.filterNodes(tree, predicate);
 
       const totalNodes = TreeUtils.countNodes(tree);
-      expect(results).toHaveLength(totalNodes);
+      assert.strictEqual(results.length, totalNodes);
     });
   });
 
@@ -222,10 +258,10 @@ describe('TreeUtils', () => {
 
       const results = TreeUtils.traverseTree(tree, visitor);
 
-      expect(results).toHaveLength(6);
-      expect(visited[0]).toBe('program:unnamed');
-      expect(visited).toContain('function_declaration:foo');
-      expect(visited).toContain('class_declaration:Bar');
+      assert.strictEqual(results.length, 6);
+      assert.strictEqual(visited[0], 'program:unnamed');
+      assert.ok(visited.includes('function_declaration:foo'));
+      assert.ok(visited.includes('class_declaration:Bar'));
     });
 
     it('should handle visitor returning undefined', () => {
@@ -239,8 +275,8 @@ describe('TreeUtils', () => {
 
       const results = TreeUtils.traverseTree(tree, visitor);
 
-      expect(callCount).toBeGreaterThan(0);
-      expect(results).toEqual([]);
+      assert.ok(callCount > 0);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should pass correct depth and parent to visitor', () => {
@@ -253,15 +289,17 @@ describe('TreeUtils', () => {
 
       TreeUtils.traverseTree(tree, visitor);
 
-      expect(calls[0]).toEqual({ depth: 0, parentType: undefined });
-      expect(
-        calls.find((call) => call.depth === 1 && call.parentType === 'program')
-      ).toBeDefined();
-      expect(
+      assert.deepStrictEqual(calls[0], { depth: 0, parentType: undefined });
+      assert.notStrictEqual(
+        calls.find((call) => call.depth === 1 && call.parentType === 'program'),
+        undefined
+      );
+      assert.notStrictEqual(
         calls.find(
           (call) => call.depth === 2 && call.parentType === 'class_declaration'
-        )
-      ).toBeDefined();
+        ),
+        undefined
+      );
     });
   });
 
@@ -271,16 +309,16 @@ describe('TreeUtils', () => {
       const classNode = tree.children![1]; // Bar class
       const methodNode = classNode.children![0]; // constructor method
 
-      expect(TreeUtils.getNodeDepth(tree, tree)).toBe(0);
-      expect(TreeUtils.getNodeDepth(tree, classNode)).toBe(1);
-      expect(TreeUtils.getNodeDepth(tree, methodNode)).toBe(2);
+      assert.strictEqual(TreeUtils.getNodeDepth(tree, tree), 0);
+      assert.strictEqual(TreeUtils.getNodeDepth(tree, classNode), 1);
+      assert.strictEqual(TreeUtils.getNodeDepth(tree, methodNode), 2);
     });
 
     it('should return null for non-existent nodes', () => {
       const tree = createSimpleTree();
       const otherNode = createNode('other', 'test');
 
-      expect(TreeUtils.getNodeDepth(tree, otherNode)).toBeNull();
+      assert.strictEqual(TreeUtils.getNodeDepth(tree, otherNode), null);
     });
 
     it('should handle deep nesting', () => {
@@ -288,7 +326,7 @@ describe('TreeUtils', () => {
       let currentNode = tree;
 
       for (let i = 0; i <= 5; i++) {
-        expect(TreeUtils.getNodeDepth(tree, currentNode)).toBe(i);
+        assert.strictEqual(TreeUtils.getNodeDepth(tree, currentNode), i);
         if (currentNode.children && currentNode.children.length > 0) {
           currentNode = currentNode.children[0];
         }
@@ -302,27 +340,27 @@ describe('TreeUtils', () => {
       const leaves = TreeUtils.getAllLeaves(tree);
 
       // Leaves should be: foo, constructor, getValue, x
-      expect(leaves).toHaveLength(4);
-      expect(leaves.map((leaf) => leaf.name)).toContain('foo');
-      expect(leaves.map((leaf) => leaf.name)).toContain('constructor');
-      expect(leaves.map((leaf) => leaf.name)).toContain('getValue');
-      expect(leaves.map((leaf) => leaf.name)).toContain('x');
+      assert.strictEqual(leaves.length, 4);
+      assert.ok(leaves.map((leaf) => leaf.name).includes('foo'));
+      assert.ok(leaves.map((leaf) => leaf.name).includes('constructor'));
+      assert.ok(leaves.map((leaf) => leaf.name).includes('getValue'));
+      assert.ok(leaves.map((leaf) => leaf.name).includes('x'));
     });
 
     it('should return the node itself if it has no children', () => {
       const leaf = createNode('function_declaration', 'test');
       const leaves = TreeUtils.getAllLeaves(leaf);
 
-      expect(leaves).toHaveLength(1);
-      expect(leaves[0]).toBe(leaf);
+      assert.strictEqual(leaves.length, 1);
+      assert.strictEqual(leaves[0], leaf);
     });
 
     it('should handle empty children array', () => {
       const nodeWithEmptyChildren = createNode('program', undefined, []);
       const leaves = TreeUtils.getAllLeaves(nodeWithEmptyChildren);
 
-      expect(leaves).toHaveLength(1);
-      expect(leaves[0]).toBe(nodeWithEmptyChildren);
+      assert.strictEqual(leaves.length, 1);
+      assert.strictEqual(leaves[0], nodeWithEmptyChildren);
     });
 
     it('should handle complex tree structures', () => {
@@ -330,9 +368,10 @@ describe('TreeUtils', () => {
       const leaves = TreeUtils.getAllLeaves(tree);
 
       // All nodes without children should be returned
-      expect(leaves.length).toBeGreaterThan(0);
+      assert.ok(leaves.length > 0);
       leaves.forEach((leaf) => {
-        expect(leaf.children === undefined || leaf.children.length === 0).toBe(
+        assert.strictEqual(
+          leaf.children === undefined || leaf.children.length === 0,
           true
         );
       });
@@ -344,28 +383,28 @@ describe('TreeUtils', () => {
       const tree = createSimpleTree();
       const maxDepth = TreeUtils.getMaxDepth(tree);
 
-      expect(maxDepth).toBe(3); // program -> class -> method
+      assert.strictEqual(maxDepth, 3); // program -> class -> method
     });
 
     it('should return 1 for leaf nodes', () => {
       const leaf = createNode('function_declaration', 'test');
       const maxDepth = TreeUtils.getMaxDepth(leaf);
 
-      expect(maxDepth).toBe(1);
+      assert.strictEqual(maxDepth, 1);
     });
 
     it('should handle deep nesting', () => {
       const tree = createDeepTree(10);
       const maxDepth = TreeUtils.getMaxDepth(tree);
 
-      expect(maxDepth).toBe(11); // 10 levels + root
+      assert.strictEqual(maxDepth, 11); // 10 levels + root
     });
 
     it('should handle empty children array', () => {
       const nodeWithEmptyChildren = createNode('program', undefined, []);
       const maxDepth = TreeUtils.getMaxDepth(nodeWithEmptyChildren);
 
-      expect(maxDepth).toBe(1);
+      assert.strictEqual(maxDepth, 1);
     });
   });
 
@@ -374,36 +413,36 @@ describe('TreeUtils', () => {
       const tree = createSimpleTree();
 
       const depthZero = TreeUtils.getNodesAtDepth(tree, 0);
-      expect(depthZero).toHaveLength(1);
-      expect(depthZero[0]).toBe(tree);
+      assert.strictEqual(depthZero.length, 1);
+      assert.strictEqual(depthZero[0], tree);
 
       const depthOne = TreeUtils.getNodesAtDepth(tree, 1);
-      expect(depthOne).toHaveLength(3); // foo, Bar, x
+      assert.strictEqual(depthOne.length, 3); // foo, Bar, x
 
       const depthTwo = TreeUtils.getNodesAtDepth(tree, 2);
-      expect(depthTwo).toHaveLength(2); // constructor, getValue
+      assert.strictEqual(depthTwo.length, 2); // constructor, getValue
     });
 
     it('should return empty array for non-existent depth', () => {
       const tree = createSimpleTree();
       const results = TreeUtils.getNodesAtDepth(tree, 10);
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should handle negative depth', () => {
       const tree = createSimpleTree();
       const results = TreeUtils.getNodesAtDepth(tree, -1);
 
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
     });
 
     it('should work with custom currentDepth parameter', () => {
       const tree = createSimpleTree();
       const results = TreeUtils.getNodesAtDepth(tree, 5, 5); // target=5, current=5
 
-      expect(results).toHaveLength(1);
-      expect(results[0]).toBe(tree);
+      assert.strictEqual(results.length, 1);
+      assert.strictEqual(results[0], tree);
     });
   });
 
@@ -413,26 +452,26 @@ describe('TreeUtils', () => {
         createNode('function_declaration', 'test'),
       ]);
 
-      expect(TreeUtils.hasChildren(nodeWithChildren)).toBe(true);
+      assert.strictEqual(TreeUtils.hasChildren(nodeWithChildren), true);
     });
 
     it('should return false for nodes without children', () => {
       const leaf = createNode('function_declaration', 'test');
 
-      expect(TreeUtils.hasChildren(leaf)).toBe(false);
+      assert.strictEqual(TreeUtils.hasChildren(leaf), false);
     });
 
     it('should return false for nodes with empty children array', () => {
       const nodeWithEmptyChildren = createNode('program', undefined, []);
 
-      expect(TreeUtils.hasChildren(nodeWithEmptyChildren)).toBe(false);
+      assert.strictEqual(TreeUtils.hasChildren(nodeWithEmptyChildren), false);
     });
 
     it('should return false for nodes with undefined children', () => {
       const node = createNode('function_declaration', 'test');
       node.children = undefined;
 
-      expect(TreeUtils.hasChildren(node)).toBe(false);
+      assert.strictEqual(TreeUtils.hasChildren(node), false);
     });
   });
 
@@ -440,7 +479,7 @@ describe('TreeUtils', () => {
     it('should return true for leaf nodes', () => {
       const leaf = createNode('function_declaration', 'test');
 
-      expect(TreeUtils.isLeaf(leaf)).toBe(true);
+      assert.strictEqual(TreeUtils.isLeaf(leaf), true);
     });
 
     it('should return false for nodes with children', () => {
@@ -448,13 +487,13 @@ describe('TreeUtils', () => {
         createNode('function_declaration', 'test'),
       ]);
 
-      expect(TreeUtils.isLeaf(nodeWithChildren)).toBe(false);
+      assert.strictEqual(TreeUtils.isLeaf(nodeWithChildren), false);
     });
 
     it('should return true for nodes with empty children array', () => {
       const nodeWithEmptyChildren = createNode('program', undefined, []);
 
-      expect(TreeUtils.isLeaf(nodeWithEmptyChildren)).toBe(true);
+      assert.strictEqual(TreeUtils.isLeaf(nodeWithEmptyChildren), true);
     });
 
     it('should be opposite of hasChildren', () => {
@@ -465,7 +504,10 @@ describe('TreeUtils', () => {
       ];
 
       nodes.forEach((node) => {
-        expect(TreeUtils.isLeaf(node)).toBe(!TreeUtils.hasChildren(node));
+        assert.strictEqual(
+          TreeUtils.isLeaf(node),
+          !TreeUtils.hasChildren(node)
+        );
       });
     });
   });
@@ -477,9 +519,9 @@ describe('TreeUtils', () => {
         node.type === 'method_definition';
       const result = TreeUtils.findFirst(tree, predicate);
 
-      expect(result).toBeTruthy();
-      expect(result!.type).toBe('method_definition');
-      expect(result!.name).toBe('getUser'); // Should be first one found
+      assert.ok(result);
+      assert.strictEqual(result!.type, 'method_definition');
+      assert.strictEqual(result!.name, 'getUser'); // Should be first one found
     });
 
     it('should return null when no node matches', () => {
@@ -488,7 +530,7 @@ describe('TreeUtils', () => {
         node.type === 'nonexistent_type';
       const result = TreeUtils.findFirst(tree, predicate);
 
-      expect(result).toBeNull();
+      assert.strictEqual(result, null);
     });
 
     it('should return root node if it matches', () => {
@@ -496,7 +538,7 @@ describe('TreeUtils', () => {
       const predicate: NodePredicate = (node) => node.type === 'program';
       const result = TreeUtils.findFirst(tree, predicate);
 
-      expect(result).toBe(tree);
+      assert.strictEqual(result, tree);
     });
 
     it('should pass correct parameters to predicate', () => {
@@ -517,9 +559,9 @@ describe('TreeUtils', () => {
 
       TreeUtils.findFirst(tree, predicate);
 
-      expect(predicateCall).toBeTruthy();
-      expect(predicateCall!.depth).toBe(1);
-      expect(predicateCall!.parent?.type).toBe('program');
+      assert.ok(predicateCall);
+      assert.strictEqual(predicateCall!.depth, 1);
+      assert.strictEqual(predicateCall!.parent?.type, 'program');
     });
   });
 
@@ -531,18 +573,18 @@ describe('TreeUtils', () => {
 
       const path = TreeUtils.getPath(tree, methodNode);
 
-      expect(path).toHaveLength(3);
-      expect(path![0]).toBe(tree);
-      expect(path![1]).toBe(classNode);
-      expect(path![2]).toBe(methodNode);
+      assert.strictEqual(path!.length, 3);
+      assert.strictEqual(path![0], tree);
+      assert.strictEqual(path![1], classNode);
+      assert.strictEqual(path![2], methodNode);
     });
 
     it('should return single-node path for root', () => {
       const tree = createSimpleTree();
       const path = TreeUtils.getPath(tree, tree);
 
-      expect(path).toHaveLength(1);
-      expect(path![0]).toBe(tree);
+      assert.strictEqual(path!.length, 1);
+      assert.strictEqual(path![0], tree);
     });
 
     it('should return null for non-existent node', () => {
@@ -550,7 +592,7 @@ describe('TreeUtils', () => {
       const otherNode = createNode('other', 'test');
       const path = TreeUtils.getPath(tree, otherNode);
 
-      expect(path).toBeNull();
+      assert.strictEqual(path, null);
     });
 
     it('should work with deep nesting', () => {
@@ -564,9 +606,9 @@ describe('TreeUtils', () => {
 
       const path = TreeUtils.getPath(tree, deepestNode);
 
-      expect(path).toHaveLength(6); // root + 5 levels
-      expect(path![0]).toBe(tree);
-      expect(path![path!.length - 1]).toBe(deepestNode);
+      assert.strictEqual(path!.length, 6); // root + 5 levels
+      assert.strictEqual(path![0], tree);
+      assert.strictEqual(path![path!.length - 1], deepestNode);
     });
   });
 
@@ -582,9 +624,10 @@ describe('TreeUtils', () => {
 
       const result = TreeUtils.mapTree(tree, mapper);
 
-      expect(result.type).toBe('PROGRAM');
-      expect(result).toHaveProperty('mapped', true);
-      expect(result).toHaveProperty('children');
+      assert.strictEqual(result.type, 'PROGRAM');
+      assert.ok('mapped' in result);
+      assert.strictEqual((result as any).mapped, true);
+      assert.ok('children' in result);
     });
 
     it('should preserve tree structure when mapping to similar objects', () => {
@@ -597,21 +640,22 @@ describe('TreeUtils', () => {
 
       const result = TreeUtils.mapTree(tree, mapper);
 
-      expect(result).toHaveProperty('children');
+      assert.ok('children' in result);
       // Type guard to ensure children exists and is an array
       if ('children' in result && Array.isArray(result.children)) {
-        expect(result.children).toHaveLength(3);
-        expect(result.children[0]).toHaveProperty('transformed', true);
-        expect(result.children[1]).toHaveProperty('children');
+        assert.strictEqual(result.children.length, 3);
+        assert.ok('transformed' in result.children[0]);
+        assert.strictEqual((result.children[0] as any).transformed, true);
+        assert.ok('children' in result.children[1]);
         // Additional type guard for nested children
         const secondChild = result.children[1];
         if ('children' in secondChild && Array.isArray(secondChild.children)) {
-          expect(secondChild.children).toHaveLength(2);
+          assert.strictEqual(secondChild.children.length, 2);
         } else {
-          expect.fail('Second child should have children array');
+          assert.fail('Second child should have children array');
         }
       } else {
-        expect.fail('Result should have children array');
+        assert.fail('Result should have children array');
       }
     });
 
@@ -622,8 +666,8 @@ describe('TreeUtils', () => {
 
       const result = TreeUtils.mapTree(tree, mapper);
 
-      expect(result).toBe('program');
-      expect(typeof result).toBe('string');
+      assert.strictEqual(result, 'program');
+      assert.strictEqual(typeof result, 'string');
     });
 
     it('should pass correct depth and parent to mapper', () => {
@@ -637,13 +681,15 @@ describe('TreeUtils', () => {
 
       TreeUtils.mapTree(tree, mapper);
 
-      expect(calls[0]).toEqual({ depth: 0, hasParent: false });
-      expect(
-        calls.find((call) => call.depth === 1 && call.hasParent)
-      ).toBeDefined();
-      expect(
-        calls.find((call) => call.depth === 2 && call.hasParent)
-      ).toBeDefined();
+      assert.deepStrictEqual(calls[0], { depth: 0, hasParent: false });
+      assert.notStrictEqual(
+        calls.find((call) => call.depth === 1 && call.hasParent),
+        undefined
+      );
+      assert.notStrictEqual(
+        calls.find((call) => call.depth === 2 && call.hasParent),
+        undefined
+      );
     });
   });
 
@@ -652,9 +698,9 @@ describe('TreeUtils', () => {
       const tree = createSimpleTree();
       const clone = TreeUtils.cloneTree(tree);
 
-      expect(clone).toEqual(tree);
-      expect(clone).not.toBe(tree);
-      expect(clone.children).not.toBe(tree.children);
+      assertVitestEqual(clone, tree);
+      assert.notStrictEqual(clone, tree);
+      assert.notStrictEqual(clone.children, tree.children);
     });
 
     it('should clone all nested children', () => {
@@ -662,11 +708,12 @@ describe('TreeUtils', () => {
       const clone = TreeUtils.cloneTree(tree);
 
       // Verify structure is the same
-      expect(clone.children).toHaveLength(tree.children!.length);
+      assert.strictEqual(clone.children!.length, tree.children!.length);
 
       // Verify objects are different instances
-      expect(clone.children![0]).not.toBe(tree.children![0]);
-      expect(clone.children![2].children![0]).not.toBe(
+      assert.notStrictEqual(clone.children![0], tree.children![0]);
+      assert.notStrictEqual(
+        clone.children![2].children![0],
         tree.children![2].children![0]
       );
     });
@@ -675,17 +722,17 @@ describe('TreeUtils', () => {
       const leaf = createNode('function_declaration', 'test');
       const clone = TreeUtils.cloneTree(leaf);
 
-      expect(clone).toEqual(leaf);
-      expect(clone).not.toBe(leaf);
+      assertVitestEqual(clone, leaf);
+      assert.notStrictEqual(clone, leaf);
     });
 
     it('should handle nodes with undefined name', () => {
       const node = createNode('program');
       const clone = TreeUtils.cloneTree(node);
 
-      expect(clone.name).toBeUndefined();
-      expect(clone).toEqual(node);
-      expect(clone).not.toBe(node);
+      assert.strictEqual(clone.name, undefined);
+      assertVitestEqual(clone, node);
+      assert.notStrictEqual(clone, node);
     });
 
     it('should clone position objects', () => {
@@ -695,18 +742,18 @@ describe('TreeUtils', () => {
 
       const clone = TreeUtils.cloneTree(tree);
 
-      expect(clone.start).toEqual(tree.start);
-      expect(clone.start).not.toBe(tree.start);
-      expect(clone.end).toEqual(tree.end);
-      expect(clone.end).not.toBe(tree.end);
+      assert.deepStrictEqual(clone.start, tree.start);
+      assert.notStrictEqual(clone.start, tree.start);
+      assert.deepStrictEqual(clone.end, tree.end);
+      assert.notStrictEqual(clone.end, tree.end);
     });
 
     it('should handle empty children array', () => {
       const node = createNode('program', undefined, []);
       const clone = TreeUtils.cloneTree(node);
 
-      expect(clone.children).toEqual([]);
-      expect(clone.children).not.toBe(node.children);
+      assert.deepStrictEqual(clone.children, []);
+      assert.notStrictEqual(clone.children, node.children);
     });
   });
 
@@ -718,8 +765,8 @@ describe('TreeUtils', () => {
       const leaves = TreeUtils.getAllLeaves(tree);
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeLessThan(50); // Should be fast
-      expect(leaves).toHaveLength(1);
+      assert.ok(endTime - startTime < 50); // Should be fast
+      assert.strictEqual(leaves.length, 1);
     });
 
     it('should handle wide trees efficiently', () => {
@@ -732,8 +779,8 @@ describe('TreeUtils', () => {
       const functions = TreeUtils.findNodesByType(tree, 'function_declaration');
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeLessThan(50); // Should be fast
-      expect(functions).toHaveLength(1000);
+      assert.ok(endTime - startTime < 50); // Should be fast
+      assert.strictEqual(functions.length, 1000);
     });
 
     it('should handle nodes with mixed children types', () => {
@@ -746,7 +793,7 @@ describe('TreeUtils', () => {
       ]);
 
       const allNodes = TreeUtils.filterNodes(tree, () => true);
-      expect(allNodes).toHaveLength(5); // program + 3 direct children + 1 method
+      assert.strictEqual(allNodes.length, 5); // program + 3 direct children + 1 method
     });
   });
 
@@ -770,8 +817,8 @@ describe('TreeUtils', () => {
 
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeLessThan(20);
-      expect(clone).toEqual(complexTree);
+      assert.ok(endTime - startTime < 20);
+      assertVitestEqual(clone, complexTree);
     });
   });
 });

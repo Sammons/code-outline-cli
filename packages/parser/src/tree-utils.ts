@@ -2,10 +2,10 @@
  * Tree traversal utilities for working with NodeInfo trees
  */
 
-import type { NodeInfo } from './types';
+import type { NodeInfo } from './types.ts';
 
 // Re-export NodeInfo for convenience
-export type { NodeInfo } from './types';
+export type { NodeInfo } from './types.ts';
 
 /**
  * Visitor function type for tree traversal

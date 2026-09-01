@@ -1,12 +1,12 @@
 import type TreeSitterParser from 'tree-sitter';
-import type { NodeInfo } from './types';
+import type { NodeInfo } from './types.ts';
 import {
   isContainerType,
   isStructuralType,
   isInsignificantType,
-} from './types';
-import { NameExtractor } from './name-extractor';
-import { TreeUtils } from './tree-utils';
+} from './types.ts';
+import { NameExtractor } from './name-extractor.ts';
+import { TreeUtils } from './tree-utils.ts';
 
 /**
  * Configuration options for AST traversal

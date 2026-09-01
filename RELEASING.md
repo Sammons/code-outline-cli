@@ -4,7 +4,7 @@ This repository uses [changesets](https://github.com/changesets/changesets) for 
 
 ## Overview
 
-- **Automated Releases**: When changes are merged to `main`, GitHub Actions automatically creates a release PR or publishes to NPM
+- **Automated Releases**: When changes are merged to `main`, Gitea Actions automatically creates a release PR or publishes to NPM
 - **Badge Updates**: Tests run on every push to `main` and automatically update coverage and status badges
 - **Semantic Versioning**: Changesets ensures proper version bumping based on the type of changes
 
@@ -109,7 +109,7 @@ The CLI package is configured with:
 
 ### Badges Not Updating
 
-- Check GitHub Actions permissions allow writing to the repository
+- Check Gitea Actions permissions allow writing to the repository
 - Verify the badge generator script has no errors
 - Ensure coverage data is being generated
 

@@ -1,14 +1,34 @@
-import { CLIArgumentParser, CLIArgumentError } from './cli-argument-parser.js';
-import { FileProcessor, FileProcessorError } from './file-processor.js';
-import { CLIOutputHandler } from './cli-output-handler.js';
+import { CLIArgumentParser, CLIArgumentError } from './cli-argument-parser.ts';
+import { FileProcessor, FileProcessorError } from './file-processor.ts';
+import { CLIOutputHandler } from './cli-output-handler.ts';
+import type { OutputFormat } from '@sammons/code-outline-parser';
 
 export class CLIOrchestrator {
-  private argumentParser: CLIArgumentParser;
-  private fileProcessor: FileProcessor;
+  private readonly argumentParser: CLIArgumentParser;
+  private readonly fileProcessor: FileProcessor;
+  private readonly outputHandlerFactory: (
+    format: OutputFormat,
+    llmtext?: boolean
+  ) => CLIOutputHandler;
+  private readonly exit: (code: number) => never;
+  private readonly logError: (message: string) => void;
 
-  constructor() {
-    this.argumentParser = new CLIArgumentParser();
-    this.fileProcessor = new FileProcessor();
+  constructor(
+    argumentParser: CLIArgumentParser = new CLIArgumentParser(),
+    fileProcessor: FileProcessor = new FileProcessor(),
+    outputHandlerFactory: (
+      format: OutputFormat,
+      llmtext?: boolean
+    ) => CLIOutputHandler = (format, llmtext) =>
+      new CLIOutputHandler(format, llmtext),
+    exit: (code: number) => never = (code) => process.exit(code),
+    logError: (message: string) => void = (message) => console.error(message)
+  ) {
+    this.argumentParser = argumentParser;
+    this.fileProcessor = fileProcessor;
+    this.outputHandlerFactory = outputHandlerFactory;
+    this.exit = exit;
+    this.logError = logError;
   }
 
   public async run(): Promise<void> {
@@ -27,19 +47,19 @@ export class CLIOrchestrator {
       );
 
       // Format and output results
-      const outputHandler = new CLIOutputHandler(
+      const outputHandler = this.outputHandlerFactory(
         options.format,
         options.llmtext
       );
       outputHandler.formatAndOutput(results);
     } catch (error: unknown) {
       if (error instanceof CLIArgumentError) {
-        console.error(`Error: ${error.message}`);
+        this.logError(`Error: ${error.message}`);
         this.argumentParser.printHelp();
-        process.exit(1);
+        this.exit(1);
       } else if (error instanceof FileProcessorError) {
-        console.error(error.message);
-        process.exit(1);
+        this.logError(error.message);
+        this.exit(1);
       } else {
         throw error; // Re-throw unexpected errors
       }
