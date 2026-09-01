@@ -28,6 +28,7 @@
 
 import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Command line argument parsing
@@ -159,7 +160,8 @@ function main(): void {
 }
 
 // Run main function if this script is executed directly
-if (require.main === module) {
+// ESM equivalent of `require.main === module`: true when run directly.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();
 }
 

@@ -28,6 +28,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { execSync } from 'child_process';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Type definitions for generated documentation data
@@ -327,7 +328,8 @@ async function generateDocs(): Promise<void> {
 }
 
 // Run the generation if this script is executed directly
-if (require.main === module) {
+// ESM equivalent of `require.main === module`: true when run directly.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   generateDocs().catch((error) => {
     console.error('Fatal error in documentation generation:', error);
     process.exit(1);

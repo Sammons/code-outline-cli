@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { describe, it, before, afterEach } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { cliRunner } from '../common/cli-runner.ts';
 import { CLIAssertions, TestFileSystem } from '../common/test-utils.ts';
@@ -11,10 +12,10 @@ describe('Glob Pattern Matching', () => {
 
   let testFs: TestFileSystem;
 
-  beforeAll(async () => {
+  before(async () => {
     // Ensure CLI is accessible
     const isAccessible = await cliRunner.testAccess();
-    expect(isAccessible).toBe(true);
+    assert.strictEqual(isAccessible, true);
   });
 
   afterEach(() => {
@@ -32,12 +33,12 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match both file1.ts and file2.js (but not subdir files)
-      expect(parsed.length).toBe(2);
+      assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file2.js'))).toBe(true);
-      expect(files.some((f) => f.includes('file3.tsx'))).toBe(false); // In subdir
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
+      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), false); // In subdir
     });
 
     it('should match TypeScript files with *.ts pattern', async () => {
@@ -49,7 +50,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file1.ts
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file1.ts');
+      assert.ok((parsed[0].file).includes('file1.ts'));
     });
 
     it('should match JavaScript files with *.js pattern', async () => {
@@ -61,7 +62,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file2.js
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file2.js');
+      assert.ok((parsed[0].file).includes('file2.js'));
     });
 
     it('should match multiple extensions with brace pattern', async () => {
@@ -72,11 +73,11 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match both file1.ts and file2.js
-      expect(parsed.length).toBe(2);
+      assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file2.js'))).toBe(true);
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
     });
   });
 
@@ -89,12 +90,12 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match all three files including in subdirectory
-      expect(parsed.length).toBe(3);
+      assert.strictEqual(parsed.length, 3);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file2.js'))).toBe(true);
-      expect(files.some((f) => f.includes('file3.tsx'))).toBe(true);
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
+      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
     });
 
     it('should match TypeScript files recursively with **/*.ts pattern', async () => {
@@ -106,7 +107,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file1.ts (not .tsx files)
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file1.ts');
+      assert.ok((parsed[0].file).includes('file1.ts'));
     });
 
     it('should match TSX files with **/*.tsx pattern', async () => {
@@ -118,7 +119,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file3.tsx
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file3.tsx');
+      assert.ok((parsed[0].file).includes('file3.tsx'));
     });
 
     it('should match multiple extensions recursively', async () => {
@@ -129,12 +130,12 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match all three files
-      expect(parsed.length).toBe(3);
+      assert.strictEqual(parsed.length, 3);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file2.js'))).toBe(true);
-      expect(files.some((f) => f.includes('file3.tsx'))).toBe(true);
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
+      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
     });
   });
 
@@ -148,8 +149,8 @@ describe('Glob Pattern Matching', () => {
 
       // Should only match file3.tsx from subdir
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file3.tsx');
-      expect(parsed[0].file).toContain('subdir');
+      assert.ok((parsed[0].file).includes('file3.tsx'));
+      assert.ok((parsed[0].file).includes('subdir'));
     });
 
     it('should match with directory wildcard', async () => {
@@ -161,7 +162,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should match files that are exactly two levels deep
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file3.tsx');
+      assert.ok((parsed[0].file).includes('file3.tsx'));
     });
   });
 
@@ -180,7 +181,7 @@ describe('Glob Pattern Matching', () => {
       // Should either succeed with no files or fail gracefully
       if (result.exitCode === 0) {
         const parsed = CLIAssertions.expectValidJson(result);
-        expect(parsed.length).toBe(0); // No files match, just directories
+        assert.strictEqual(parsed.length, 0); // No files match, just directories
       } else {
         CLIAssertions.expectErrorMessage(result, 'No files found');
       }
@@ -194,11 +195,11 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match file1.ts and file2.js (but not file3.tsx since it's in subdir)
-      expect(parsed.length).toBe(2);
+      assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file2.js'))).toBe(true);
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file2.js')), true);
     });
   });
 
@@ -237,7 +238,7 @@ describe('Glob Pattern Matching', () => {
       CLIAssertions.expectSuccess(result);
 
       // Should not contain warning for legitimate file path
-      expect(result.stderr).not.toContain('Warning');
+      assert.ok(!result.stderr.includes('Warning'));
     });
 
     it('should handle complex legitimate patterns', async () => {
@@ -248,11 +249,11 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should match file1.ts and file3.tsx
-      expect(parsed.length).toBe(2);
+      assert.strictEqual(parsed.length, 2);
 
       const files = parsed.map((p) => p.file);
-      expect(files.some((f) => f.includes('file1.ts'))).toBe(true);
-      expect(files.some((f) => f.includes('file3.tsx'))).toBe(true);
+      assert.strictEqual(files.some((f) => f.includes('file1.ts')), true);
+      assert.strictEqual(files.some((f) => f.includes('file3.tsx')), true);
     });
   });
 
@@ -266,7 +267,7 @@ describe('Glob Pattern Matching', () => {
 
       // Should work regardless of platform
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file1.ts');
+      assert.ok((parsed[0].file).includes('file1.ts'));
     });
 
     it('should handle patterns with mixed separators', async () => {
@@ -278,7 +279,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       CLIAssertions.expectFilesProcessed(parsed, 1);
-      expect(parsed[0].file).toContain('file3.tsx');
+      assert.ok((parsed[0].file).includes('file3.tsx'));
     });
   });
 
@@ -296,8 +297,8 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should complete quickly even with recursive pattern
-      expect(duration).toBeLessThan(5000); // 5 seconds max
-      expect(parsed.length).toBe(3); // Our known files
+      assert.ok((duration) < (5000)); // 5 seconds max
+      assert.strictEqual(parsed.length, 3); // Our known files
     });
 
     it('should handle multiple pattern combinations', async () => {
@@ -315,7 +316,7 @@ describe('Glob Pattern Matching', () => {
         const duration = Date.now() - startTime;
 
         CLIAssertions.expectSuccess(result);
-        expect(duration).toBeLessThan(3000); // Each should be quick
+        assert.ok((duration) < (3000)); // Each should be quick
       }
     });
   });
@@ -329,7 +330,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       const fileResult = parsed[0];
-      expect(fileResult.outline).toBeTruthy();
+      assert.ok(fileResult.outline);
 
       // Should find TypeScript-specific constructs
       const interfaces = CLIAssertions.findNodesByType(
@@ -341,8 +342,8 @@ describe('Glob Pattern Matching', () => {
         'class_declaration'
       );
 
-      expect(interfaces.length).toBeGreaterThan(0);
-      expect(classes.length).toBeGreaterThan(0);
+      assert.ok((interfaces.length) > (0));
+      assert.ok((classes.length) > (0));
     });
 
     it('should correctly parse matched JavaScript files', async () => {
@@ -353,7 +354,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       const fileResult = parsed[0];
-      expect(fileResult.outline).toBeTruthy();
+      assert.ok(fileResult.outline);
 
       // Should find JavaScript constructs
       const classes = CLIAssertions.findNodesByType(
@@ -365,8 +366,8 @@ describe('Glob Pattern Matching', () => {
         'function_declaration'
       );
 
-      expect(classes.length).toBeGreaterThan(0);
-      expect(functions.length).toBeGreaterThan(0);
+      assert.ok((classes.length) > (0));
+      assert.ok((functions.length) > (0));
     });
 
     it('should correctly parse matched TSX files', async () => {
@@ -377,7 +378,7 @@ describe('Glob Pattern Matching', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       const fileResult = parsed[0];
-      expect(fileResult.outline).toBeTruthy();
+      assert.ok(fileResult.outline);
 
       // Should find React/TypeScript constructs
       const functions = CLIAssertions.findNodesByType(
@@ -389,8 +390,8 @@ describe('Glob Pattern Matching', () => {
         'lexical_declaration' // Modern TypeScript uses lexical_declaration for const/let
       );
 
-      expect(functions.length).toBeGreaterThan(0);
-      expect(variables.length).toBeGreaterThan(0);
+      assert.ok((functions.length) > (0));
+      assert.ok((variables.length) > (0));
     });
   });
 
@@ -409,12 +410,12 @@ describe('Glob Pattern Matching', () => {
       const parsed2 = CLIAssertions.expectValidJson(result2);
 
       // Should have same files regardless of pattern order
-      expect(parsed1.length).toBe(parsed2.length);
+      assert.strictEqual(parsed1.length, parsed2.length);
 
       const files1 = parsed1.map((p) => p.file).sort();
       const files2 = parsed2.map((p) => p.file).sort();
 
-      expect(files1).toEqual(files2);
+      assert.deepStrictEqual(files1, files2);
     });
   });
 });

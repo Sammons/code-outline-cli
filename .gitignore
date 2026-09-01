@@ -41,3 +41,7 @@ test/temp/
 packages/website/public/data/*.json
 # Agent worktree scratch (not repo content)
 worktree-description.md
+
+# Test scratch directories (created and torn down by the suite)
+test/temp/
+src/test-scenarios/*/temp/

@@ -1,8 +1,9 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { resolve } from 'node:path';
+import { resolve, relative } from 'node:path';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
 // Test utilities
 function runCLI(
@@ -31,14 +32,17 @@ function runCLI(
   });
 }
 
-// concurrency: 1 because every test in this file shares one on-disk fixture
-// directory that afterEach deletes wholesale. Interleaved runs let one test's
-// cleanup remove files another test's spawned CLI is still reading.
-describe('CLI', { concurrency: 1 }, () => {
-  const testDir = resolve(import.meta.dirname, '../../../test/temp');
-  const testFile = resolve(testDir, 'test.js');
+describe('CLI', () => {
+  // Each test gets its own fixture directory. A single shared path let one
+  // test's afterEach cleanup delete files another test's spawned CLI was still
+  // reading, which surfaced as intermittent "No files found matching pattern".
+  const tempRoot = resolve(import.meta.dirname, '../../../test/temp');
+  let testDir = tempRoot;
+  let testFile = resolve(tempRoot, 'test.js');
 
   beforeEach(() => {
+    testDir = resolve(tempRoot, `cli-${process.pid}-${randomUUID()}`);
+    testFile = resolve(testDir, 'test.js');
     // Create temp directory and test file
     mkdirSync(testDir, { recursive: true });
     writeFileSync(
@@ -264,7 +268,10 @@ export { greet, Person };
       assert.ok(result.stdout.includes(
         '# Ultra-compressed code outline for LLM consumption'
       ));
-      assert.ok(result.stdout.includes('test/temp/test.js (15L)'));
+      // The CLI prints a path relative to cwd; derive it rather than hardcoding
+      // the fixture directory, which is now unique per test.
+      const relativeTestFile = relative(process.cwd(), testFile);
+      assert.ok(result.stdout.includes(`${relativeTestFile} (15L)`));
       assert.ok(result.stdout.includes('function_declaration_greet 1'));
       assert.ok(result.stdout.includes('class_declaration_Person 5'));
       // Should not contain decorative symbols

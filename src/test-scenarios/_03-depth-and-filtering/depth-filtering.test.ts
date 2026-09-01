@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, before } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { cliRunner } from '../common/cli-runner.ts';
 import { CLIAssertions } from '../common/test-utils.ts';
@@ -6,10 +7,10 @@ import { CLIAssertions } from '../common/test-utils.ts';
 describe('Depth and Filtering Options', () => {
   const nestedFile = resolve(import.meta.dirname, 'assets', 'nested-structure.ts');
 
-  beforeAll(async () => {
+  before(async () => {
     // Ensure CLI is accessible
     const isAccessible = await cliRunner.testAccess();
-    expect(isAccessible).toBe(true);
+    assert.strictEqual(isAccessible, true);
   });
 
   describe('Depth Limiting', () => {
@@ -48,13 +49,13 @@ describe('Depth and Filtering Options', () => {
       const outline = parsed[0].outline!;
 
       // At depth 1, should only see direct children of program
-      expect(outline.children).toBeTruthy();
-      expect(outline.children!.length).toBeGreaterThan(0);
+      assert.ok(outline.children);
+      assert.ok((outline.children!.length) > (0));
 
       // No child should have children at depth 1
       for (const child of outline.children!) {
         if (child.children) {
-          expect(child.children.length).toBe(0);
+          assert.strictEqual(child.children.length, 0);
         }
       }
     });
@@ -83,7 +84,7 @@ describe('Depth and Filtering Options', () => {
       const depth3Count = CLIAssertions.countNodes(depth3Parsed[0].outline!);
 
       // Depth 3 should have more nodes than depth 1
-      expect(depth3Count).toBeGreaterThan(depth1Count);
+      assert.ok((depth3Count) > (depth1Count));
     });
 
     it('should handle infinite depth correctly', async () => {
@@ -117,7 +118,7 @@ describe('Depth and Filtering Options', () => {
         depth100Parsed[0].outline!
       );
 
-      expect(infiniteCount).toBe(depth100Count);
+      assert.strictEqual(infiniteCount, depth100Count);
     });
 
     it('should reject invalid depth values', async () => {
@@ -148,13 +149,13 @@ describe('Depth and Filtering Options', () => {
 
       // Should have named constructs like interfaces, classes, functions
       const namedNodes = CLIAssertions.findNamedNodes(outline);
-      expect(namedNodes.length).toBeGreaterThan(5);
+      assert.ok((namedNodes.length) > (5));
 
       // Should contain specific named constructs from our test file
       const nodeNames = namedNodes.map((n) => n.name).join(' ');
-      expect(nodeNames).toContain('Level1');
-      expect(nodeNames).toContain('TopLevelInterface');
-      expect(nodeNames).toContain('TopLevelClass');
+      assert.ok((nodeNames).includes('Level1'));
+      assert.ok((nodeNames).includes('TopLevelInterface'));
+      assert.ok((nodeNames).includes('TopLevelClass'));
     });
 
     it('should respect explicit --named-only flag', async () => {
@@ -183,7 +184,7 @@ describe('Depth and Filtering Options', () => {
       );
       const defaultCount = CLIAssertions.countNodes(defaultParsed[0].outline!);
 
-      expect(namedOnlyCount).toBe(defaultCount);
+      assert.strictEqual(namedOnlyCount, defaultCount);
     });
 
     it('should include all nodes when --all flag is used', async () => {
@@ -213,7 +214,7 @@ describe('Depth and Filtering Options', () => {
       const allCount = CLIAssertions.countNodes(allParsed[0].outline!);
 
       // --all should include more nodes than named-only
-      expect(allCount).toBeGreaterThan(namedOnlyCount);
+      assert.ok((allCount) > (namedOnlyCount));
 
       // --all should include unnamed constructs
       const allOutline = allParsed[0].outline!;
@@ -242,7 +243,7 @@ describe('Depth and Filtering Options', () => {
       }
 
       // Should have some unnamed nodes when using --all
-      expect(hasUnnamedNodes(allOutline)).toBe(true);
+      assert.strictEqual(hasUnnamedNodes(allOutline), true);
     });
 
     it('should handle --all flag overriding --named-only', async () => {
@@ -273,7 +274,7 @@ describe('Depth and Filtering Options', () => {
       const allOnlyParsed = CLIAssertions.expectValidJson(allOnlyResult);
       const allOnlyCount = CLIAssertions.countNodes(allOnlyParsed[0].outline!);
 
-      expect(totalCount).toBe(allOnlyCount);
+      assert.strictEqual(totalCount, allOnlyCount);
     });
   });
 
@@ -298,10 +299,10 @@ describe('Depth and Filtering Options', () => {
 
       // Should have named nodes within depth limit
       const namedNodes = CLIAssertions.findNamedNodes(outline);
-      expect(namedNodes.length).toBeGreaterThan(0);
+      assert.ok((namedNodes.length) > (0));
 
       for (const node of namedNodes) {
-        expect(node.name).toBeTruthy();
+        assert.ok(node.name);
       }
     });
 
@@ -327,7 +328,7 @@ describe('Depth and Filtering Options', () => {
       const namedNodes = CLIAssertions.findNamedNodes(outline);
 
       // Should have unnamed nodes (total > named)
-      expect(totalNodes).toBeGreaterThan(namedNodes.length);
+      assert.ok((totalNodes) > (namedNodes.length));
     });
 
     it('should maintain consistency across different depth and filter combinations', async () => {
@@ -369,10 +370,10 @@ describe('Depth and Filtering Options', () => {
         const all = results[i + 1];
 
         // At same depth, --all should have >= nodes than --named-only
-        expect(all.nodeCount).toBeGreaterThanOrEqual(namedOnly.nodeCount);
+        assert.ok((all.nodeCount) >= (namedOnly.nodeCount));
 
         // Named count should be the same or similar
-        expect(all.namedCount).toBeGreaterThanOrEqual(namedOnly.namedCount);
+        assert.ok((all.namedCount) >= (namedOnly.namedCount));
       }
     });
   });
@@ -393,14 +394,14 @@ describe('Depth and Filtering Options', () => {
       const outline = parsed[0].outline!;
 
       // Should still produce valid output
-      expect(outline.type).toBe('program');
-      expect(outline.children).toBeTruthy();
-      expect(outline.children!.length).toBeGreaterThan(0);
+      assert.strictEqual(outline.type, 'program');
+      assert.ok(outline.children);
+      assert.ok((outline.children!.length) > (0));
 
       // All direct children should have no grandchildren
       for (const child of outline.children!) {
         if (child.children) {
-          expect(child.children.length).toBe(0);
+          assert.strictEqual(child.children.length, 0);
         }
       }
     });
@@ -422,10 +423,10 @@ describe('Depth and Filtering Options', () => {
       const outline = parsed[0].outline!;
 
       // Should still have the program node and any top-level named constructs
-      expect(outline.type).toBe('program');
+      assert.strictEqual(outline.type, 'program');
 
       const namedNodes = CLIAssertions.findNamedNodes(outline);
-      expect(namedNodes.length).toBeGreaterThan(0); // Our file has top-level named exports
+      assert.ok((namedNodes.length) > (0)); // Our file has top-level named exports
     });
 
     it('should maintain performance with extreme depth values', async () => {
@@ -445,10 +446,10 @@ describe('Depth and Filtering Options', () => {
       const parsed = CLIAssertions.expectValidJson(result);
 
       // Should complete in reasonable time even with high depth
-      expect(duration).toBeLessThan(10000); // 10 seconds max
+      assert.ok((duration) < (10000)); // 10 seconds max
 
       // Should produce valid output
-      expect(parsed[0].outline).toBeTruthy();
+      assert.ok(parsed[0].outline);
     });
   });
 
@@ -477,7 +478,7 @@ describe('Depth and Filtering Options', () => {
       const depth2Lines = depth2Result.stdout.split('\n').length;
       const depthInfLines = depthInfResult.stdout.split('\n').length;
 
-      expect(depthInfLines).toBeGreaterThan(depth2Lines);
+      assert.ok((depthInfLines) > (depth2Lines));
     });
 
     it('should show filtering effects in ASCII output', async () => {
@@ -502,11 +503,11 @@ describe('Depth and Filtering Options', () => {
       const namedOnlyLines = namedOnlyResult.stdout.split('\n').length;
       const allLines = allResult.stdout.split('\n').length;
 
-      expect(allLines).toBeGreaterThan(namedOnlyLines);
+      assert.ok((allLines) > (namedOnlyLines));
 
       // Both should contain named constructs
-      expect(namedOnlyResult.stdout).toContain('Level1');
-      expect(allResult.stdout).toContain('Level1');
+      assert.ok((namedOnlyResult.stdout).includes('Level1'));
+      assert.ok((allResult.stdout).includes('Level1'));
     });
   });
 });

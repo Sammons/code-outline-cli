@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 /**
  * Result of a CLI execution
@@ -63,8 +64,7 @@ export class CLIRunner {
       this.cliPath = cliPath;
     } else {
       // Find the first existing path
-      this.cliPath =
-        possiblePaths.find((p) => require('fs').existsSync(p)) || defaultPath;
+      this.cliPath = possiblePaths.find((p) => existsSync(p)) || defaultPath;
 
       // Log for debugging in CI (disabled for now - CLI is being found successfully)
       /*
@@ -255,7 +255,7 @@ export class CLIRunner {
   public async testAccess(): Promise<boolean> {
     try {
       // Check if CLI file exists first
-      if (!require('fs').existsSync(this.cliPath)) {
+      if (!existsSync(this.cliPath)) {
         // Silently fail - the path finding logic in constructor should have handled this
         return false;
       }
