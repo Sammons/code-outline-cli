@@ -57,14 +57,6 @@ jobs:
           TESTS_PASSED: ${{ env.TESTS_PASSED }}
           BUILD_STATUS: ${{ env.BUILD_STATUS }}
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
       - name: Commit and push badges (main branch only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |

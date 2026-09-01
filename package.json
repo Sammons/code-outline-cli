@@ -10,7 +10,7 @@
     "clean": "pnpm -r clean",
     "test": "node --test \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
     "test:run": "node --test \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
-    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
+    "test:coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-lines=70 --test-coverage-branches=70 --test-coverage-functions=70 --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test-reporter=spec --test-reporter-destination=stdout \"packages/*/src/*.test.ts\" \"src/test-scenarios/*/*.test.ts\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",

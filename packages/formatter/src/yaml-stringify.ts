@@ -2,10 +2,14 @@
 // Array<{file, absolutePath, outline: NodeInfo & {file?}}>. Not a general-purpose
 // YAML writer — see FROZEN-DESIGN.md Unit A for the quoting rules this must match.
 
-// Exact indicator set from FROZEN-DESIGN.md: "* & ! % @ ` { } [ ] > | ~" at
-// the start of a scalar forces quoting. `:` and `?` are handled separately
-// (only unsafe with a trailing space or at end-of-string), and `-`/`- ` has
-// its own dedicated check below.
+// Characters that force quoting when they START a scalar. YAML gives each of
+// these a special meaning in that position, so an unquoted value beginning with
+// one either changes meaning or fails to parse.
+//
+// `#` and `,` are load-bearing: a filename like "utils #2.ts" silently
+// truncates at the comment marker, and ",comma.ts" produces YAML that a real
+// parser rejects outright. Both are legal filenames on every supported
+// platform, so both reach this code from ordinary use.
 const INDICATOR_START_CHARS = new Set([
   '*',
   '&',
@@ -20,12 +24,31 @@ const INDICATOR_START_CHARS = new Set([
   '>',
   '|',
   '~',
+  '#',
+  ',',
+  '?',
+  ':',
+  "'",
+  '"',
 ]);
 
-const RESERVED_WORDS = new Set(['true', 'false', 'null']);
+// YAML 1.2 core schema resolves these to booleans or null regardless of case,
+// so a string that happens to match must be quoted to survive a round-trip.
+const RESERVED_WORDS = new Set([
+  'true',
+  'false',
+  'null',
+  '~',
+  '.inf',
+  '-.inf',
+  '+.inf',
+  '.nan',
+]);
 
+// Anything a YAML parser would resolve as a number rather than a string:
+// decimal, float, exponent, hex, octal, and binary.
 const NUMERIC_LOOKING =
-  /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^0x[0-9a-fA-F]+$/;
+  /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$|^[+-]?0x[0-9a-fA-F]+$|^[+-]?0o[0-7]+$|^[+-]?0b[01]+$/;
 
 const isNumericLooking = (value: string): boolean => {
   if (value === 'Infinity' || value === 'NaN' || value === '-Infinity') {
@@ -38,16 +61,42 @@ const needsQuoting = (value: string): boolean => {
   if (value === '') {
     return true;
   }
-  if (RESERVED_WORDS.has(value)) {
+  if (RESERVED_WORDS.has(value.toLowerCase())) {
     return true;
   }
   if (isNumericLooking(value)) {
     return true;
   }
+  // Leading or trailing whitespace is stripped by a plain scalar.
   if (value !== value.trim()) {
     return true;
   }
-  if (value.includes(': ') || value.endsWith(':')) {
+  // A colon followed by ANY whitespace opens a mapping, and a trailing colon
+  // makes the value look like a key. Tab counts as whitespace here, not just
+  // space -- "X:\tX" parses as a nested mapping.
+  if (/:\s/.test(value) || value.endsWith(':')) {
+    return true;
+  }
+  // A "#" preceded by ANY whitespace starts a comment, discarding the rest of
+  // the line. Again tab counts: "X\t#" truncates just like "X #".
+  if (/\s#/.test(value)) {
+    return true;
+  }
+  // Any control character (tab included) is safer double-quoted than plain.
+  // Checked by code point rather than a regex class: a literal control-char
+  // range in a pattern is exactly what `no-control-regex` exists to catch.
+  const hasControlChar = [...value].some((char) => {
+    if (char === '\n') {
+      return false;
+    }
+    const code = char.codePointAt(0)!;
+    return code < 0x20 || code === 0x7f;
+  });
+  if (hasControlChar) {
+    return true;
+  }
+  // A carriage return would corrupt the line structure.
+  if (value.includes('\r')) {
     return true;
   }
   if (value.includes('\n')) {
@@ -58,10 +107,15 @@ const needsQuoting = (value: string): boolean => {
   if (INDICATOR_START_CHARS.has(first)) {
     return true;
   }
-  if (first === '-' && value[1] === ' ') {
+  // "- " (or "-" plus any whitespace) reads as a nested sequence entry.
+  if (first === '-' && /\s/.test(value[1] ?? '')) {
     return true;
   }
   if (value === '-') {
+    return true;
+  }
+  // A document marker at the start of a line ends the current document.
+  if (value === '---' || value === '...') {
     return true;
   }
   return false;
@@ -76,6 +130,10 @@ const escapeDoubleQuoted = (value: string): string => {
       out += '\\"';
     } else if (ch === '\t') {
       out += '\\t';
+    } else if (ch === '\n') {
+      out += '\\n';
+    } else if (ch === '\r') {
+      out += '\\r';
     } else {
       out += ch;
     }
@@ -90,10 +148,25 @@ const scalarToString = (
 ): string => {
   if (typeof value === 'string') {
     if (value.includes('\n')) {
+      // A block scalar can only carry lines that survive re-indentation. A
+      // carriage return, or a line with leading/trailing spaces, does not:
+      // the parser strips or rewrites it. Fall back to a double-quoted scalar
+      // with escapes, which represents any string exactly.
       const lines = value.split('\n');
-      const blockIndent = `${indent}  `;
-      const body = lines.map((line) => `${blockIndent}${line}`).join('\n');
-      return `|-\n${body}`;
+      const blockSafe =
+        !value.includes('\r') &&
+        lines.every((line) => line === line.trim() || line === '');
+      if (blockSafe) {
+        // `|-` strips every trailing newline, so a value ending in one needs
+        // `|+` to keep it. Without this, "a\n" round-trips back as "a".
+        const chomp = value.endsWith('\n') ? '+' : '-';
+        const body = (chomp === '+' ? value.slice(0, -1) : value)
+          .split('\n')
+          .map((line) => `${indent}  ${line}`)
+          .join('\n');
+        return `|${chomp}\n${body}`;
+      }
+      return escapeDoubleQuoted(value);
     }
     if (needsQuoting(value)) {
       return escapeDoubleQuoted(value);

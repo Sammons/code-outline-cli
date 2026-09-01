@@ -340,15 +340,42 @@ describe('FileProcessor', () => {
 });
 
 describe('CLIOutputHandler', () => {
-  it('should create formatter with correct format', () => {
-    // The Formatter instance is private; behavior is verified through
-    // formatAndOutput below. This test confirms construction does not throw
-    // for every supported format.
-    assert.doesNotThrow(() => new CLIOutputHandler('yaml'));
+  const sampleResults: ProcessedFile[] = [
+    {
+      file: '/path/file1.js',
+      outline: {
+        type: 'program',
+        start: { row: 0, column: 0 },
+        end: { row: 10, column: 0 },
+      },
+    },
+  ];
+
+  // Assert on what each format actually emits rather than merely that the
+  // constructor does not throw: a bug that swapped or dropped the format
+  // argument would still construct fine, and go undetected.
+  it('emits YAML when constructed with the yaml format', () => {
+    const logged: string[] = [];
+    new CLIOutputHandler('yaml', false, (message) => {
+      logged.push(message);
+    }).formatAndOutput(sampleResults);
+
+    assert.strictEqual(logged.length, 1);
+    assert.match(logged[0]!, /^- file: /);
+    assert.ok(!logged[0]!.startsWith('['), 'must not be JSON');
   });
 
-  it('should create formatter with llmtext flag', () => {
-    assert.doesNotThrow(() => new CLIOutputHandler('llmtext', true));
+  it('emits llmtext when constructed with the llmtext flag', () => {
+    const logged: string[] = [];
+    new CLIOutputHandler('llmtext', true, (message) => {
+      logged.push(message);
+    }).formatAndOutput(sampleResults);
+
+    assert.strictEqual(logged.length, 1);
+    assert.ok(
+      logged[0]!.includes('<Outline>'),
+      `expected llmtext output, got ${logged[0]!.slice(0, 60)}`
+    );
   });
 
   describe('formatAndOutput', () => {

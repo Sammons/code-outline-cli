@@ -85,4 +85,46 @@ describe('stringifyYaml', () => {
     const value = [{ file: 'a.ts' }, { file: 'b.ts' }];
     assert.strictEqual(stringifyYaml(value), '- file: a.ts\n- file: b.ts\n');
   });
+
+  // Regression tests. Each of these shipped BROKEN in an earlier revision:
+  // the writer left the value unquoted, so a real YAML parser silently
+  // truncated it, resolved it to the wrong type, or refused to parse at all.
+  // A filename containing "#" or "," is legal on every supported platform, so
+  // these reach the writer from ordinary use, not just fuzzing.
+  describe('values a real YAML parser would misread if left unquoted', () => {
+    const mustQuote: ReadonlyArray<readonly [string, string]> = [
+      ['#hash.ts', 'leading # starts a comment'],
+      ['utils #2.ts', 'space before # starts a comment'],
+      ['utils\t#2.ts', 'tab before # also starts a comment'],
+      [',comma.ts', 'leading , is a flow indicator and fails to parse'],
+      ['?query.ts', 'leading ? opens a complex mapping key'],
+      ['a: b', 'colon-space opens a mapping'],
+      ['a:\tb', 'colon-tab also opens a mapping'],
+      ['True', 'resolves to boolean true'],
+      ['FALSE', 'resolves to boolean false'],
+      ['Null', 'resolves to null'],
+      ['~', 'resolves to null'],
+      ['.inf', 'resolves to Infinity'],
+      ['.nan', 'resolves to NaN'],
+      ['0o17', 'resolves to octal 15'],
+      ['0b101', 'resolves to binary 5'],
+      ['0x1F', 'resolves to hex 31'],
+      ['---', 'starts a new document'],
+      ['...', 'ends the document'],
+      ["'quoted'", 'leading quote is a quoting indicator'],
+      ['"quoted"', 'leading quote is a quoting indicator'],
+    ];
+
+    for (const [value, why] of mustQuote) {
+      it(`quotes ${JSON.stringify(value)} because ${why}`, () => {
+        const emitted = stringifyYaml([{ file: value }]);
+        const scalar = emitted.slice('- file: '.length).trimEnd();
+        assert.ok(
+          scalar.startsWith('"'),
+          `expected a quoted scalar, got ${JSON.stringify(scalar)}`
+        );
+        assert.strictEqual(JSON.parse(scalar), value);
+      });
+    }
+  });
 });

@@ -79,9 +79,11 @@ const buildExpected = () =>
 
 describe('parseYamlOutput', () => {
   it('round-trips the golden YAML fixture into the exact object graph that produced it', () => {
-    // Ground truth: the real `yaml` library's output for the 47 adversarial
-    // names below, captured before that dependency was removed. Committed as a
-    // fixture so this round-trip stays checkable.
+    // Ground truth for 47 adversarial names. Originally captured from the real
+    // `yaml` library; two entries (a tab, a leading "?") are now quoted more
+    // conservatively than that library chose, because the library's plain form
+    // was unsafe. The library still agrees this file parses back to the same
+    // object graph -- verified when the fixture is regenerated.
     const goldenPath = resolve(
       import.meta.dirname,
       '../../../test/fixtures/yaml-golden.yaml'

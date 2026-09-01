@@ -59,6 +59,40 @@ const unescapeDoubleQuoted = (inner: string, lineNumber: number): string => {
   return out;
 };
 
+// Values a YAML 1.2 parser resolves to something other than a string.
+const RESOLVED_NON_STRINGS = new Set([
+  'true',
+  'false',
+  'null',
+  '~',
+  '.inf',
+  '-.inf',
+  '+.inf',
+  '.nan',
+]);
+
+// Characters that make a plain scalar illegal or ambiguous at position 0.
+const FLOW_INDICATORS = new Set([
+  '#',
+  ',',
+  '[',
+  ']',
+  '{',
+  '}',
+  '&',
+  '*',
+  '!',
+  '|',
+  '>',
+  '%',
+  '@',
+  '`',
+  '?',
+  ':',
+  '"',
+  "'",
+]);
+
 // Parses a scalar that appears after "key: " or "- key: " on a single line.
 const parseScalar = (raw: string, lineNumber: number): unknown => {
   if (raw.length === 0) {
@@ -84,6 +118,44 @@ const parseScalar = (raw: string, lineNumber: number): unknown => {
   }
   if (NUMERIC_LOOKING.test(raw)) {
     return Number(raw);
+  }
+  // Anything reaching here must be a plain scalar our writer chose NOT to
+  // quote. Reject the values a real YAML parser would resolve to something
+  // other than this exact string -- otherwise this parser silently "fixes"
+  // emitter bugs and the round-trip test can never fail.
+  //
+  // This is the check that was missing when the writer shipped unquoted "#",
+  // ",", and reserved words: the round-trip passed while real parsers lost or
+  // rejected the data.
+  if (/\s#/.test(raw)) {
+    throw new YamlParseError(
+      `Plain scalar contains a comment marker, so a real parser would truncate it: ${raw}`,
+      lineNumber
+    );
+  }
+  if (/:\s/.test(raw) || raw.endsWith(':')) {
+    throw new YamlParseError(
+      `Plain scalar contains a mapping indicator: ${raw}`,
+      lineNumber
+    );
+  }
+  if (RESOLVED_NON_STRINGS.has(raw.toLowerCase())) {
+    throw new YamlParseError(
+      `Plain scalar "${raw}" resolves to a boolean/null, not a string`,
+      lineNumber
+    );
+  }
+  if (FLOW_INDICATORS.has(raw[0]!)) {
+    throw new YamlParseError(
+      `Plain scalar starts with the indicator "${raw[0]}", which a real parser rejects: ${raw}`,
+      lineNumber
+    );
+  }
+  if (raw !== raw.trim()) {
+    throw new YamlParseError(
+      `Plain scalar has leading or trailing whitespace, which is stripped: ${raw}`,
+      lineNumber
+    );
   }
   return raw;
 };

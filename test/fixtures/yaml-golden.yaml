@@ -452,7 +452,7 @@
       column: 5
     children:
       - type: function_declaration
-        name: tab	here
+        name: "tab\there"
         start:
           row: 1
           column: 2
@@ -712,7 +712,7 @@
       column: 5
     children:
       - type: function_declaration
-        name: ?q
+        name: "?q"
         start:
           row: 1
           column: 2
