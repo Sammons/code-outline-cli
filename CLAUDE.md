@@ -160,10 +160,10 @@ pnpm test
 
 ## Current Status
 
-- Version: 2.0.3 (CLI), 2.0.1 (parser/formatter)
-- All tests passing (342/342)
+- Version: 2.1.0 (all three published packages, versioned together)
+- All tests passing
 - Published to npm under `@sammons` scope
-- Node 20+ required
+- Node 26+ required (native type stripping; no transform step)
 - Zero TODOs or technical debt
 
 ## Contact
