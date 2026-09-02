@@ -1,5 +1,3 @@
-#!/usr/bin/env tsx
-
 /**
  * Documentation Currency Check Script
  *
@@ -21,7 +19,7 @@
  * - File access errors (exit code 2)
  *
  * Usage:
- * - tsx scripts/check-docs-current.ts [--exit-code]
+ * - node scripts/check-docs-current.ts [--exit-code]
  * - The --exit-code flag enables exit code behavior for CI/CD
  * - Without flag, only prints status information
  */

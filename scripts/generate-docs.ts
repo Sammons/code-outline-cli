@@ -1,5 +1,3 @@
-#!/usr/bin/env tsx
-
 /**
  * Documentation Generation Script
  *

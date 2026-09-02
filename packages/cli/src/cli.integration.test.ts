@@ -272,10 +272,19 @@ export { greet, Person };
           '# Ultra-compressed code outline for LLM consumption'
         )
       );
-      // The CLI prints a path relative to cwd; derive it rather than hardcoding
-      // the fixture directory, which is now unique per test.
+      // Mirror the formatter's own rule (getRelativePath): it prints a path
+      // relative to the CLI's cwd, but falls back to the absolute path when the
+      // file sits outside that directory. Deriving only the relative form made
+      // this test pass from the repo root and fail from packages/cli, because
+      // the two processes resolved different cwds.
       const relativeTestFile = relative(process.cwd(), testFile);
-      assert.ok(result.stdout.includes(`${relativeTestFile} (15L)`));
+      const printedPath = relativeTestFile.startsWith('..')
+        ? testFile
+        : relativeTestFile;
+      assert.ok(
+        result.stdout.includes(`${printedPath} (15L)`),
+        `expected "${printedPath} (15L)" in output`
+      );
       assert.ok(result.stdout.includes('function_declaration_greet 1'));
       assert.ok(result.stdout.includes('class_declaration_Person 5'));
       // Should not contain decorative symbols
